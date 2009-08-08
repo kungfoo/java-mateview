@@ -14,11 +14,17 @@ public class PlistNode {
 		if (elementNameIs(element, "string")) {
 			return new PlistNode().new StringNode(element.getValue());
 		}
-
 		if (elementNameIs(element, "integer")) {
 			return new PlistNode().new IntegerNode(Integer.parseInt(element
 					.getValue()));
 		}
+		if (elementNameIs(element, "array")) {
+			return new PlistNode().new ArrayNode(element);
+		}
+		if (elementNameIs(element, "dict")) {
+			return new Dict(element);
+		}
+
 		return null;
 	}
 
@@ -40,9 +46,13 @@ public class PlistNode {
 
 	public class ArrayNode extends PlistNode {
 		public List<PlistNode> array = new ArrayList<PlistNode>();
-		
-		public ArrayNode(Element element){
+
+		@SuppressWarnings("unchecked")
+		public ArrayNode(Element element) {
 			List<Element> children = element.getChildren();
+			for (Element e : children) {
+				array.add(PlistNode.parseElement(e));
+			}
 		}
 	}
 

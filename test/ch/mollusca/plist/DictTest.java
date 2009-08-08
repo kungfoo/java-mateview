@@ -11,11 +11,12 @@ public class DictTest {
 
 	@Before
 	public void setup(){
-		dict = new Dict("input/Ruby.plist");
+		dict = Dict.parseFile("input/Ruby.plist");
 		assertNotNull(dict);
 	}
 	
 	@Test
 	public void testSimpleStringItem(){
+		
 	}
 }
