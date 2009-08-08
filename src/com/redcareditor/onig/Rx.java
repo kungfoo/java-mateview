@@ -3,7 +3,6 @@ package com.redcareditor.onig;
 import java.io.UnsupportedEncodingException;
 
 import org.jcodings.specific.ASCIIEncoding;
-import org.jcodings.specific.UTF8Encoding;
 import org.joni.Matcher;
 import org.joni.Option;
 import org.joni.Regex;
