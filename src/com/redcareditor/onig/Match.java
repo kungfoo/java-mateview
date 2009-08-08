@@ -7,7 +7,7 @@ import java.util.List;
 import org.joni.Regex;
 import org.joni.Region;
 
-public class Match implements Iterable<Range>{
+public class Match implements Iterable<Range> {
 	Regex regex;
 	Region region;
 	String text;
@@ -38,10 +38,10 @@ public class Match implements Iterable<Range>{
 			throw new IllegalArgumentException("Capture Index out of bounds!");
 		}
 	}
-	
-	public List<Range> ranges(){
+
+	public List<Range> ranges() {
 		List<Range> result = new ArrayList<Range>();
-		for(Range r : this){
+		for (Range r : this) {
 			result.add(r);
 		}
 		return result;

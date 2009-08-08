@@ -2,6 +2,7 @@ package com.redcareditor.onig;
 
 import java.io.UnsupportedEncodingException;
 
+import org.jcodings.specific.ASCIIEncoding;
 import org.jcodings.specific.UTF8Encoding;
 import org.joni.Matcher;
 import org.joni.Option;
@@ -27,15 +28,16 @@ public class Rx {
 		regex = compileRegex(pattern);
 		matchesStartOfLine = pattern.charAt(0) == '^';
 	}
-	
-	public Match search(String target, int start, int end){
+
+	public Match search(String target, int start, int end) {
 		byte[] bytes;
 		try {
-			bytes = target.getBytes("utf-8");
+			bytes = target.getBytes("iso-8859-2");
 			Matcher matcher = regex.matcher(bytes, 0, bytes.length);
-			matcher.search(0, bytes.length, Option.NONE);
-			Region r = matcher.getEagerRegion();
-			
+			int a = matcher.search(0, bytes.length, Option.NONE);
+			Region region = matcher.getEagerRegion();
+			return new Match(regex, region, target);
+
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -45,9 +47,9 @@ public class Rx {
 	public Regex compileRegex(String pattern) {
 		byte[] bytes;
 		try {
-			bytes = pattern.getBytes("utf-8");
-			return new Regex(bytes, 0, bytes.length, Option.MULTILINE,
-					UTF8Encoding.INSTANCE, Syntax.DEFAULT);
+			bytes = pattern.getBytes("iso-8859-2");
+			return new Regex(bytes, 0, bytes.length, Option.DEFAULT,
+					ASCIIEncoding.INSTANCE, Syntax.DEFAULT);
 
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
