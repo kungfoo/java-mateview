@@ -1,19 +1,17 @@
-package ch.mollusca.plist;
+package com.redcareditor.plist;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
-public class Dict extends PlistNode {
-	private Map<String, PlistNode<?>> map = new HashMap<String, PlistNode<?>>();
+public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 
 	public static Dict parseFile(String filename) {
 		SAXBuilder builder;
@@ -34,22 +32,40 @@ public class Dict extends PlistNode {
 
 	@SuppressWarnings("unchecked")
 	protected Dict(Element element) {
+		value = new HashMap<String, PlistNode<?>>();
+		
 		List<Element> children = element.getChildren();
 		String key = null;
 		for (Element c : children) {
 			if (c.getName().equals("key")) {
 				key = c.getValue();
 			} else {
-				map.put(key, PlistNode.parseElement(c));
+				value.put(key, PlistNode.parseElement(c));
 			}
 		}
 	}
-
-	public PlistNode get(String key) {
-		return map.get(key);
+	
+	public String getString(String key){
+		return (String) value.get(key).value;
 	}
-
-	public Set<String> keys() {
-		return map.keySet();
+	
+	public int getInt(String key){
+		return (Integer) value.get(key).value;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public String[] getStrings(String key){
+		List<PlistNode<String>> strings = (List<PlistNode<String>>) value.get(key).value;
+		String[] result = new String[strings.size()];
+		int i = 0;
+		for(PlistNode<String> str : strings){
+			result[i++] = str.value;
+		}
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<PlistNode<?>> getArray(String key){
+		return (List<PlistNode<?>>) value.get(key).value;
 	}
 }

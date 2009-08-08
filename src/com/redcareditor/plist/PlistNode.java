@@ -1,4 +1,4 @@
-package ch.mollusca.plist;
+package com.redcareditor.plist;
 
 import java.util.ArrayList;
 import java.util.List;
