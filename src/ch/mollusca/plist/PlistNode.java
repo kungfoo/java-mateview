@@ -5,55 +5,37 @@ import java.util.List;
 
 import org.jdom.Element;
 
-public class PlistNode {
+public class PlistNode<T> {
+	public T value;
+
+	public PlistNode(T value) {
+		this.value = value;
+	}
 
 	public PlistNode() {
 	}
 
-	public static PlistNode parseElement(Element element) {
+	@SuppressWarnings("unchecked")
+	public static PlistNode<?> parseElement(Element element) {
 		if (elementNameIs(element, "string")) {
-			return new PlistNode().new StringNode(element.getValue());
+			return new PlistNode<String>(element.getValue());
 		}
 		if (elementNameIs(element, "integer")) {
-			return new PlistNode().new IntegerNode(Integer.parseInt(element
-					.getValue()));
+			return new PlistNode<Integer>(Integer.parseInt(element.getValue()));
 		}
 		if (elementNameIs(element, "array")) {
-			return new PlistNode().new ArrayNode(element);
+			List<PlistNode<?>> array = new ArrayList<PlistNode<?>>();
+			List<Element> children = element.getChildren();
+			for (Element e : children) {
+				array.add(PlistNode.parseElement(e));
+			}
+			return new PlistNode<List<PlistNode<?>>>(array);
 		}
 		if (elementNameIs(element, "dict")) {
 			return new Dict(element);
 		}
 
 		return null;
-	}
-
-	public class IntegerNode extends PlistNode {
-		public int value;
-
-		public IntegerNode(int value) {
-			this.value = value;
-		}
-	}
-
-	public class StringNode extends PlistNode {
-		public String value;
-
-		public StringNode(String value) {
-			this.value = value;
-		}
-	}
-
-	public class ArrayNode extends PlistNode {
-		public List<PlistNode> array = new ArrayList<PlistNode>();
-
-		@SuppressWarnings("unchecked")
-		public ArrayNode(Element element) {
-			List<Element> children = element.getChildren();
-			for (Element e : children) {
-				array.add(PlistNode.parseElement(e));
-			}
-		}
 	}
 
 	private static boolean elementNameIs(Element element, String name) {
