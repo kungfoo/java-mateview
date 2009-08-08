@@ -1,11 +1,13 @@
 package com.redcareditor.onig;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.joni.Regex;
 import org.joni.Region;
 
-public class Match {
+public class Match implements Iterable<Range>{
 	Regex regex;
 	Region region;
 	String text;
@@ -36,8 +38,16 @@ public class Match {
 			throw new IllegalArgumentException("Capture Index out of bounds!");
 		}
 	}
+	
+	public List<Range> ranges(){
+		List<Range> result = new ArrayList<Range>();
+		for(Range r : this){
+			result.add(r);
+		}
+		return result;
+	}
 
-	public Iterator<Range> ranges() {
+	public Iterator<Range> iterator() {
 		return new Iterator<Range>() {
 			int i = 0;
 
