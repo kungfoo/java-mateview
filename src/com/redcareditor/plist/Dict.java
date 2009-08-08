@@ -13,8 +13,9 @@ import org.jdom.input.SAXBuilder;
 
 /**
  * class to load plist files.
+ * 
  * @author kungfoo
- *
+ * 
  */
 public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 
@@ -38,7 +39,7 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 	@SuppressWarnings("unchecked")
 	protected Dict(Element element) {
 		value = new HashMap<String, PlistNode<?>>();
-		
+
 		List<Element> children = element.getChildren();
 		String key = null;
 		for (Element c : children) {
@@ -49,28 +50,29 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 			}
 		}
 	}
-	
-	public String getString(String key){
+
+	public String getString(String key) {
 		return (String) value.get(key).value;
 	}
-	
-	public int getInt(String key){
+
+	public int getInt(String key) {
 		return (Integer) value.get(key).value;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public String[] getStrings(String key){
-		List<PlistNode<String>> strings = (List<PlistNode<String>>) value.get(key).value;
+	public String[] getStrings(String key) {
+		List<PlistNode<String>> strings = (List<PlistNode<String>>) value
+				.get(key).value;
 		String[] result = new String[strings.size()];
 		int i = 0;
-		for(PlistNode<String> str : strings){
+		for (PlistNode<String> str : strings) {
 			result[i++] = str.value;
 		}
 		return result;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public List<PlistNode<?>> getArray(String key){
+	public List<PlistNode<?>> getArray(String key) {
 		return (List<PlistNode<?>>) value.get(key).value;
 	}
 }

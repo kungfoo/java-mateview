@@ -14,12 +14,12 @@ public class Grammar {
 	// patterns
 	private String filename;
 	private String comment;
-	
-	public Grammar(Dict plist){
+
+	public Grammar(Dict plist) {
 		this.plist = plist;
 	}
-	
-	public void initForReference(){
+
+	public void initForReference() {
 		name = plist.getString("name");
 		firstLineMatch = new Rx(plist.getString("firstLineMatch"));
 		keyEquivalent = plist.getString("keyEquivalent");
@@ -27,9 +27,7 @@ public class Grammar {
 		comment = plist.getString("comment");
 		
 	}
-	
-	
-	
+
 	public String getName() {
 		return name;
 	}
