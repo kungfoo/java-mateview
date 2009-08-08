@@ -1,6 +1,6 @@
 package com.redcareditor.mate;
 
-import com.redcareditor.onig.Regex;
+import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
 
 public class Grammar {
@@ -8,7 +8,7 @@ public class Grammar {
 	private Dict plist;
 	private String[] fileTypes;
 	// TODO: add regexen here
-	Regex firstLineMatch;
+	Rx firstLineMatch;
 	private String keyEquivalent;
 	private String scopeName;
 	// patterns
@@ -21,7 +21,7 @@ public class Grammar {
 	
 	public void initForReference(){
 		name = plist.getString("name");
-		firstLineMatch = new Regex(plist.getString("firstLineMatch"));
+		firstLineMatch = new Rx(plist.getString("firstLineMatch"));
 		keyEquivalent = plist.getString("keyEquivalent");
 		scopeName = plist.getString("scopeName");
 		comment = plist.getString("comment");
@@ -42,7 +42,7 @@ public class Grammar {
 		return fileTypes;
 	}
 
-	public Regex getFirstLineMatch() {
+	public Rx getFirstLineMatch() {
 		return firstLineMatch;
 	}
 

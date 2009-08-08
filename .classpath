@@ -9,5 +9,7 @@
 			<attribute name="javadoc_location" value="file:/home/kungfoo/downloads/jdom/build/apidocs/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/jcodings.jar"/>
+	<classpathentry kind="lib" path="lib/joni.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
