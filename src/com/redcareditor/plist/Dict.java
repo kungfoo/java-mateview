@@ -11,6 +11,11 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
+/**
+ * class to load plist files.
+ * @author kungfoo
+ *
+ */
 public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 
 	public static Dict parseFile(String filename) {

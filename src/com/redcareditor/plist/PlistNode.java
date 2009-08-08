@@ -5,6 +5,14 @@ import java.util.List;
 
 import org.jdom.Element;
 
+/**
+ * generic class that holds the various elements of the property tree in a plist
+ * file.
+ * 
+ * @author kungfoo
+ * 
+ * @param <T>
+ */
 public class PlistNode<T> {
 	public T value;
 
