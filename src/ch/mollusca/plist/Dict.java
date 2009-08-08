@@ -1,34 +1,33 @@
 package ch.mollusca.plist;
 
 import java.io.File;
+import java.io.IOException;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.configuration.XMLPropertiesConfiguration;
-import org.apache.commons.configuration.plist.PropertyListConfiguration;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 
-public class Dict {
-	private Configuration configuration;
 
-	public Dict(String filename) {
-		tryParsingFile(filename);
-	}
-
-	private void tryParsingFile(String filename) {
+public class Dict extends PlistNode {
+	private SAXBuilder builder;
+	private Document document;
+	private Element plist;
+	
+	public Dict(String filename){
+		builder = new SAXBuilder();
 		try {
-			configuration = new XMLConfiguration(new File(filename));
-			
-		} catch (ConfigurationException e) {
+			document = builder.build(new File(filename));
+			parseDocument();
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("The file " + filename + " was not found!");
 			e.printStackTrace();
 		}
 	}
-	
-	public String getString(String key){
-		return configuration.getString(key);
-	}
-	
-	public int getInt(String key){
-		return configuration.getInt(key);
+
+	private void parseDocument() {
+		plist = document.getRootElement();
 	}
 }
