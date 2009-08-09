@@ -7,11 +7,10 @@ public class Grammar {
 	private String name;
 	private Dict plist;
 	private String[] fileTypes;
-	// TODO: add regexen here
 	Rx firstLineMatch;
 	private String keyEquivalent;
 	private String scopeName;
-	// patterns
+	// TODO: load the patterns
 	private String filename;
 	private String comment;
 

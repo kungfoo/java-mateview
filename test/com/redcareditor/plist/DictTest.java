@@ -1,15 +1,11 @@
 package com.redcareditor.plist;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import com.redcareditor.plist.Dict;
-import com.redcareditor.plist.PlistNode;
 
 public class DictTest {
 	private Dict dict;
