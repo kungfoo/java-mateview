@@ -1,6 +1,7 @@
 package com.redcareditor.mate;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +19,8 @@ public class Grammar {
 	public List<Pattern> allPatterns;
 	public Map<String, List<Pattern>> repository;
 	public Rx firstLineMatch;
-	public Rx foldingStartMarkers;
-	public Rx foldingStopMarkers;
+	public Rx foldingStartMarker;
+	public Rx foldingStopMarker;
 
 	public Grammar(Dict plist) {
 		this.plist = plist;
@@ -47,7 +48,13 @@ public class Grammar {
 	}
 
 	private void loadPatterns() {
-
+		allPatterns = new ArrayList<Pattern>();
+		Dict[] patterns = plist.getDictionaries("patterns");
+		for(Dict p : patterns){
+			Pattern pattern = new Pattern(p);
+			pattern.grammar = this;
+			allPatterns.add(pattern);
+		}
 	}
 
 	private void loadRepository() {

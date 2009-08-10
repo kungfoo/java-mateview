@@ -1,5 +1,11 @@
 package com.redcareditor.mate;
 
-public class Pattern {
+import com.redcareditor.plist.Dict;
 
+public class Pattern {
+	public Grammar grammar;
+	
+	public Pattern(Dict dict){
+		
+	}
 }
