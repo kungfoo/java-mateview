@@ -18,8 +18,8 @@ public class RxTest {
 		}
 		Rx regex = new Rx(pattern);
 		Match m = regex.search(target, 0, target.length());
-		
-		for(Range r : m){
+
+		for (Range r : m) {
 			System.out.println(r);
 		}
 	}

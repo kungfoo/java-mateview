@@ -1,61 +1,87 @@
 package com.redcareditor.mate;
 
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
+
 import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
 
 public class Grammar {
-	private String name;
-	private Dict plist;
-	private String[] fileTypes;
-	Rx firstLineMatch;
-	private String keyEquivalent;
-	private String scopeName;
-	// TODO: load the patterns
-	private String filename;
-	private String comment;
+	public String name;
+	public Dict plist;
+	public String[] fileTypes;
+	public String keyEquivalent;
+	public String scopeName;
+	public String comment;
+
+	public List<Pattern> allPatterns;
+	public Map<String, List<Pattern>> repository;
+	public Rx firstLineMatch;
+	public Rx foldingStartMarkers;
+	public Rx foldingStopMarkers;
 
 	public Grammar(Dict plist) {
 		this.plist = plist;
 	}
 
 	public void initForReference() {
-		name = plist.getString("name");
-		firstLineMatch = new Rx(plist.getString("firstLineMatch"));
-		keyEquivalent = plist.getString("keyEquivalent");
-		scopeName = plist.getString("scopeName");
-		comment = plist.getString("comment");
-		
+		String[] properties = new String[] { "name", "keyEquivalent", "scopeName", "comment" };
+		for (String property : properties) {
+			loadStringProperty(property);
+		}
+		loadRegexProperty("firstLineMatch");
+		fileTypes = plist.getStrings("fileTypes");
 	}
 
-	public String getName() {
-		return name;
+	public void initForUse() {
+		if (loaded()) {
+			return;
+		}
+
+		loadRegexProperty("foldingStartMarker");
+		loadRegexProperty("foldingStopMarker");
+
+		loadPatterns();
+		loadRepository();
 	}
 
-	public Dict getPlist() {
-		return plist;
+	private void loadPatterns() {
+
 	}
 
-	public String[] getFileTypes() {
-		return fileTypes;
+	private void loadRepository() {
+
 	}
 
-	public Rx getFirstLineMatch() {
-		return firstLineMatch;
+	private void loadStringProperty(String propertyName) {
+		String value = plist.getString(propertyName);
+		try {
+			Field prop = this.getClass().getDeclaredField(propertyName);
+			if (value != null) {
+				prop.set(this, value);
+			}
+		} catch (Exception e) {
+			System.out.println(String.format("Can't set %s = %s", propertyName, value));
+			e.printStackTrace();
+		}
 	}
 
-	public String getKeyEquivalent() {
-		return keyEquivalent;
+	private void loadRegexProperty(String propertyName) {
+		String value = plist.getString(propertyName);
+		try {
+			Field prop = this.getClass().getDeclaredField(propertyName);
+			if (value != null) {
+				Rx regex = new Rx(value);
+				prop.set(this, regex);
+			}
+		} catch (Exception e) {
+			System.out.println(String.format("Can't set %s = %s", propertyName, value));
+			e.printStackTrace();
+		}
 	}
 
-	public String getScopeName() {
-		return scopeName;
-	}
-
-	public String getFilename() {
-		return filename;
-	}
-
-	public String getComment() {
-		return comment;
+	private boolean loaded() {
+		return allPatterns != null && repository != null;
 	}
 }

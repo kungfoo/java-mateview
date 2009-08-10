@@ -14,6 +14,6 @@ public class GrammarTest {
 		Grammar g = new Grammar(ruby);
 		g.initForReference();
 		
-		assertEquals("Ruby", g.getName());
+		assertEquals("Ruby", g.name);
 	}
 }
