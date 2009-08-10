@@ -51,7 +51,7 @@ public class Grammar {
 		allPatterns = new ArrayList<Pattern>();
 		Dict[] patterns = plist.getDictionaries("patterns");
 		for(Dict p : patterns){
-			Pattern pattern = new Pattern(p);
+			Pattern pattern = Pattern.createPattern(p);
 			pattern.grammar = this;
 			allPatterns.add(pattern);
 		}
