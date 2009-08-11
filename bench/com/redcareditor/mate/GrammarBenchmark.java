@@ -7,15 +7,13 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.mollusca.benchmarking.BeforeClass;
+import ch.mollusca.benchmarking.Benchmark;
+
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
 import com.redcareditor.util.FileUtility;
-
-import ch.mollusca.benchmarking.AfterClass;
-import ch.mollusca.benchmarking.Before;
-import ch.mollusca.benchmarking.BeforeClass;
-import ch.mollusca.benchmarking.Benchmark;
 
 public class GrammarBenchmark {
 
