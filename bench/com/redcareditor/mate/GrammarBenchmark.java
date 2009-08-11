@@ -1,32 +1,84 @@
 package com.redcareditor.mate;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.redcareditor.onig.Match;
+import com.redcareditor.onig.Rx;
+import com.redcareditor.plist.Dict;
 import com.redcareditor.util.FileUtility;
 
+import ch.mollusca.benchmarking.AfterClass;
 import ch.mollusca.benchmarking.Before;
+import ch.mollusca.benchmarking.BeforeClass;
 import ch.mollusca.benchmarking.Benchmark;
 
 public class GrammarBenchmark {
 
 	private String autocompleter;
+	private List<String> lines;
 
-	@Before
-	public void setup(){
+	private Grammar grammar;
+	private List<SinglePattern> singlePatterns;
+
+	@BeforeClass
+	public void setupForAll() {
+		singlePatterns = new ArrayList<SinglePattern>();
+		readFile();
+		
+		Dict d = Dict.parseFile("input/Ruby.plist");
+		grammar = new Grammar(d);
+		grammar.initForUse();
+
+		for (Pattern p : grammar.allPatterns) {
+			if (p instanceof SinglePattern) {
+				singlePatterns.add((SinglePattern) p);
+			}
+		}
+
+		System.out.println("Number of patterns: " + singlePatterns.size());
+	}
+
+	private void readFile() {
 		try {
-			autocompleter = new String(FileUtility.readFully("input/autocompleter.rb"));
+			autocompleter = new String(FileUtility
+					.readFully("input/autocompleter.rb"));
+			BufferedReader reader = new BufferedReader(new StringReader(
+					autocompleter));
+			lines = new ArrayList<String>();
+
+			String str = "";
+			while ((str = reader.readLine()) != null) {
+				lines.add(str);
+			}
+
 		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	@Benchmark
-	public void benchmarkAllPatternsOnSingleLine(){
-		
+
+	@Benchmark(times = 200)
+	public void benchmarkAllPatternsOnSingleLine() {
+		String line = lines.get(8); // this line has a class definition on it
+		for (SinglePattern p : singlePatterns) {
+			Rx regex = p.regex;
+			Match m = regex.search(line);
+		}
 	}
-	
-	@Benchmark
-	public void benchmarkAllPatternsOnFile(){
-		
+
+	@Benchmark(times = 200)
+	public void benchmarkAllPatternsOnFile() {
+		for(String line : lines){
+			for (SinglePattern p : singlePatterns) {
+				Rx regex = p.regex;
+				Match m = regex.search(line);
+			}
+		}
 	}
 }

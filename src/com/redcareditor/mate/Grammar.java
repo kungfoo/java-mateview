@@ -17,6 +17,7 @@ public class Grammar {
 	public String comment;
 
 	public List<Pattern> allPatterns;
+	public List<Pattern> singlePatterns;
 	public Map<String, List<Pattern>> repository;
 	public Rx firstLineMatch;
 	public Rx foldingStartMarker;
@@ -39,7 +40,8 @@ public class Grammar {
 		if (loaded()) {
 			return;
 		}
-
+		
+		initForReference();
 		loadRegexProperty("foldingStartMarker");
 		loadRegexProperty("foldingStopMarker");
 

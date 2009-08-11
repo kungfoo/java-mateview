@@ -47,6 +47,10 @@ public class Rx {
 		}
 		return null;
 	}
+	
+	public Match search(String line) {
+		return search(line, 0, line.length());
+	}
 
 	public Regex compileRegex(String pattern) {
 		byte[] bytes;
