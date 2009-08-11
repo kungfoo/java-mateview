@@ -46,6 +46,14 @@ public class Match implements Iterable<Range> {
 		}
 		return result;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder bui = new StringBuilder();
+		bui.append(text);
+		bui.append(region);
+		return bui.toString();
+	}
 
 	public Iterator<Range> iterator() {
 		return new Iterator<Range>() {

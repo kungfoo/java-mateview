@@ -61,12 +61,16 @@ public class GrammarBenchmark {
 		}
 	}
 
-	@Benchmark(times = 200)
+	@Benchmark(times = 10)
 	public void benchmarkAllPatternsOnSingleLine() {
 		String line = lines.get(8); // this line has a class definition on it
 		for (SinglePattern p : singlePatterns) {
 			Rx regex = p.regex;
 			Match m = regex.search(line);
+			if(m != null){
+				System.out.println(p.name);
+				System.out.println(m);
+			}
 		}
 	}
 
