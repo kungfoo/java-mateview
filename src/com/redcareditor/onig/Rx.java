@@ -60,4 +60,9 @@ public class Rx {
 		}
 		return null;
 	}
+	
+	@Override
+	public String toString() {
+		return pattern;
+	}
 }

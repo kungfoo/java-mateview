@@ -3,7 +3,6 @@ package com.redcareditor.mate;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
 
 public class Pattern {
@@ -11,12 +10,10 @@ public class Pattern {
 	public String name;
 	public Map<Integer, String> captures;
 
-	protected Pattern(){
-	}
 	
 	public static Pattern createPattern(Dict dict) {
 		if (dict.containsElement("match")) {
-			return new Pattern().new SinglePattern(dict);
+			return new SinglePattern(dict);
 		}
 
 		if (dict.containsElement("include")) {
@@ -29,28 +26,18 @@ public class Pattern {
 		return null;
 	}
 	
-	private void loadCaptures(Dict dict){
+	protected void loadCaptures(Dict dict){
+		captures = new HashMap<Integer, String>();
 		if (dict == null) {
-			captures = new HashMap<Integer, String>();
 			return;
 		} else {
-			
+			for(String captureNumber : dict.value.keySet()){
+				Dict captureDict = dict.getDictionary(captureNumber);
+				int captureInt = Integer.parseInt(captureNumber);
+				String captureName = captureDict.getString("name");
+				captures.put(captureInt, captureName);
+				System.out.println(captureInt + "->" + captureName);
+			}
 		}
-	}
-
-	public class SinglePattern extends Pattern{
-		public Rx regex;
-		public SinglePattern(Dict dict) {
-			String name = dict.getString("name");
-			// can't be null, otherwise we would never end up here.
-			regex = new Rx(dict.getString("match"));
-			loadCaptures(dict);
-		}
-	}
-
-	public class DoublePattern {
-	}
-
-	public class IncludePattern {
 	}
 }

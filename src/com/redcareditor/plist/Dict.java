@@ -85,6 +85,10 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 	public List<PlistNode<?>> getArray(String key) {
 		return (List<PlistNode<?>>) value.get(key).value;
 	}
+	
+	public Dict getDictionary(String key) {
+		return (Dict) value.get(key);
+	}
 
 	public boolean containsElement(String string) {
 		return value.get(string) != null;
