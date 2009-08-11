@@ -17,7 +17,7 @@ public class Pattern {
 		}
 
 		if (dict.containsElement("include")) {
-
+			
 		}
 
 		if (dict.containsElement("begin")) {
