@@ -4,6 +4,11 @@ import java.lang.reflect.Field;
 
 import com.redcareditor.onig.Rx;
 
+/**
+ * This class will load properties from the given {@link Dict} into the object.
+ * It uses reflection, so beware of them typos. :D
+ * @author kungfoo
+ */
 public class PlistPropertyLoader {
 	private Dict dict;
 	private Object object;
