@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.joni.Matcher;
 
+import com.redcareditor.plist.Dict;
+
 public class ThemeSetting {
 	public String name;
 	public String selector;
@@ -12,7 +14,7 @@ public class ThemeSetting {
 	public List<Matcher	> matchers;
 	
 	
-	public ThemeSetting(){
+	public ThemeSetting(Dict dict){
 		
 	}
 }

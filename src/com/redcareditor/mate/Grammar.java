@@ -1,16 +1,17 @@
 package com.redcareditor.mate;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
+import com.redcareditor.plist.PlistPropertyLoader;
 
 public class Grammar {
 	public String name;
 	public Dict plist;
+	private PlistPropertyLoader propertyLoader;
 	public String[] fileTypes;
 	public String keyEquivalent;
 	public String scopeName;
@@ -24,15 +25,16 @@ public class Grammar {
 	public Rx foldingStopMarker;
 
 	public Grammar(Dict plist) {
+		propertyLoader = new PlistPropertyLoader(plist, this);
 		this.plist = plist;
 	}
 
 	public void initForReference() {
 		String[] properties = new String[] { "name", "keyEquivalent", "scopeName", "comment" };
 		for (String property : properties) {
-			loadStringProperty(property);
+			propertyLoader.loadStringProperty(property);
 		}
-		loadRegexProperty("firstLineMatch");
+		propertyLoader.loadRegexProperty("firstLineMatch");
 		fileTypes = plist.getStrings("fileTypes");
 	}
 
@@ -42,8 +44,8 @@ public class Grammar {
 		}
 		
 		initForReference();
-		loadRegexProperty("foldingStartMarker");
-		loadRegexProperty("foldingStopMarker");
+		propertyLoader.loadRegexProperty("foldingStartMarker");
+		propertyLoader.loadRegexProperty("foldingStopMarker");
 
 		loadPatterns();
 		loadRepository();
@@ -63,33 +65,6 @@ public class Grammar {
 
 	private void loadRepository() {
 
-	}
-
-	private void loadStringProperty(String propertyName) {
-		String value = plist.getString(propertyName);
-		try {
-			Field prop = this.getClass().getDeclaredField(propertyName);
-			if (value != null) {
-				prop.set(this, value);
-			}
-		} catch (Exception e) {
-			System.out.println(String.format("Can't set %s = %s", propertyName, value));
-			e.printStackTrace();
-		}
-	}
-
-	private void loadRegexProperty(String propertyName) {
-		String value = plist.getString(propertyName);
-		try {
-			Field prop = this.getClass().getDeclaredField(propertyName);
-			if (value != null) {
-				Rx regex = new Rx(value);
-				prop.set(this, regex);
-			}
-		} catch (Exception e) {
-			System.out.println(String.format("Can't set %s = %s", propertyName, value));
-			e.printStackTrace();
-		}
 	}
 
 	private boolean loaded() {
