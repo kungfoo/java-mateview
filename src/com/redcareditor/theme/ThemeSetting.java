@@ -27,5 +27,11 @@ public class ThemeSetting {
 		for(String key : settingsDict.value.keySet()){
 			settings.put(key, (String) settingsDict.value.get(key).value);
 		}
+		
+		compileScopeMatchers();
+	}
+
+	private void compileScopeMatchers() {
+		
 	}
 }

@@ -45,7 +45,7 @@ public class ThemeManager {
 	}
 
 	private static void loadThemes() {
-
+		// TODO: implement loading all themes from the appropriate directory.
 	}
 
 	private static boolean initialized() {
