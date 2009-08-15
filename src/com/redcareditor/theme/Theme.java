@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.redcareditor.plist.Dict;
+import com.redcareditor.plist.PlistNode;
 import com.redcareditor.plist.PlistPropertyLoader;
 
 
@@ -26,8 +27,19 @@ public class Theme {
 		propertyLoader.loadStringProperty("name");
 		propertyLoader.loadStringProperty("author");
 		
-		
-		
-		
+		List<PlistNode<?>> dictSettings = dict.getArray("settings");
+		for(PlistNode<?> node : dictSettings){
+			Dict nodeDict = (Dict) node;
+			if(nodeDict.getString("scope") == null){
+				Dict settingsDict = nodeDict.getDictionary("settings");
+				for(String key : settingsDict.value.keySet()){
+					globalSettings.put(key, settingsDict.getString(key));
+				}
+			} else{
+				settings.add(new ThemeSetting(nodeDict));
+			}
+		}
 	}
+	
+	
 }

@@ -52,13 +52,13 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 	}
 
 	public String getString(String key) {
-		return (String) value.get(key).value;
+		return tryGettingValue(this, key);
 	}
 
 	public int getInt(String key) {
-		return (Integer) value.get(key).value;
+		return tryGettingValue(this, key);
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public String[] getStrings(String key) {
 		List<PlistNode<String>> strings = (List<PlistNode<String>>) value.get(key).value;
@@ -81,16 +81,24 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<PlistNode<?>> getArray(String key) {
-		return (List<PlistNode<?>>) value.get(key).value;
+		return tryGettingValue(this, key);
 	}
 	
 	public Dict getDictionary(String key) {
 		return (Dict) value.get(key);
 	}
 
-	public boolean containsElement(String string) {
-		return value.get(string) != null;
+	public boolean containsElement(String key) {
+		return value.containsKey(key);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T tryGettingValue(Dict dict, String key){
+		if(dict.value.containsKey(key)){
+			return (T) dict.value.get(key).value;
+		} else {
+			return null;
+		}
 	}
 }

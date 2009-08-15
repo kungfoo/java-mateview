@@ -17,7 +17,6 @@ public class ThemeSetting {
 	
 	private PlistPropertyLoader propertyLoader;
 	
-	
 	public ThemeSetting(Dict dict){
 		propertyLoader = new PlistPropertyLoader(dict, this);
 		propertyLoader.loadStringProperty("name");
