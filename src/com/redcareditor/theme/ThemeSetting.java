@@ -11,7 +11,7 @@ public class ThemeSetting {
 	public String name;
 	public String scope;
 	public Map<String, String> settings;
-	public List<ThemeSelector> matchers;
+	public List<ScopeSelector> matchers;
 	
 	private PlistPropertyLoader propertyLoader;
 	
