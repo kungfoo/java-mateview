@@ -36,7 +36,7 @@ public class Pattern {
 				int captureInt = Integer.parseInt(captureNumber);
 				String captureName = captureDict.getString("name");
 				captures.put(captureInt, captureName);
-				System.out.println(captureInt + "->" + captureName);
+                // System.out.println(captureInt + "->" + captureName);
 			}
 		}
 	}
