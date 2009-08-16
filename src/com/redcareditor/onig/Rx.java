@@ -17,8 +17,8 @@ import org.joni.Syntax;
  * 
  */
 public class Rx {
-	String pattern;
-	Regex regex;
+	public String pattern;
+	public Regex regex;
 	public boolean matchesStartOfLine = false;
 
 	public Rx(String pattern) {

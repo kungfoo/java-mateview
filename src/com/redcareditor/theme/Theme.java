@@ -16,8 +16,6 @@ public class Theme {
 	public List<ThemeSetting> settings = new ArrayList<ThemeSetting>();
 	public Map<String, ThemeSetting> cachedSettingsForScopes = new HashMap<String, ThemeSetting>();
 
-	// stuff only needed in this class
-	private boolean initialized = false;
 	private PlistPropertyLoader propertyLoader;
 
 	public Theme(Dict dict) {

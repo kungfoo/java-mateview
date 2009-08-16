@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.joni.Matcher;
-
 import com.redcareditor.plist.Dict;
 import com.redcareditor.plist.PlistPropertyLoader;
 
@@ -13,7 +11,7 @@ public class ThemeSetting {
 	public String name;
 	public String scope;
 	public Map<String, String> settings;
-	public List<Matcher	> matchers;
+	public List<ThemeSelector> matchers;
 	
 	private PlistPropertyLoader propertyLoader;
 	
