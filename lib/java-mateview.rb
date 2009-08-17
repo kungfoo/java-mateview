@@ -8,6 +8,7 @@ unless defined?(JavaMateView)
   class JavaMateView
     import com.redcareditor.mate.Grammar
     import com.redcareditor.mate.TextLocation
+    import com.redcareditor.theme.Theme
   end
 
   class Plist
