@@ -10,7 +10,7 @@ namespace :java do
   end
   
   desc "Run jUnit tests against freshly compiled java classes"
-  task :test => [:compile] do
+  task :test do
     puts "Running JUnit Tets"
     sh %+ant test+
   end
