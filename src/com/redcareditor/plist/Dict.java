@@ -55,7 +55,7 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 		return tryGettingValue(this, key);
 	}
 
-	public int getInt(String key) {
+	public Integer getInt(String key) {
 		return tryGettingValue(this, key);
 	}
 	
