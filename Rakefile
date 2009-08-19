@@ -14,6 +14,18 @@ namespace :java do
     puts "Running JUnit Tets"
     sh %+ant test+
   end
+  
+  desc "Run Benchmarks"
+  task :benchmark do
+    puts "Compiling java files to *.class files"
+    sh %+ant compile-bench+
+    runner = 'ch.mollusca.benchmarking.BenchmarkRunner'
+    classes = ['com.redcareditor.mate.GrammarBenchmark']
+    classpath = '.:bench/:bin/:lib/joni.jar:lib/jdom.jar:lib/jcodings.jar'
+    classes.each do |clazz|
+      sh "java -cp #{classpath} #{runner} #{clazz}"
+    end
+  end
 end
 
 namespace :jruby do
