@@ -26,6 +26,10 @@ public class BenchmarkRunner {
 			clazz = args[0];
 		}
 
+		runBenchmarks(clazz);
+	}
+
+	private static void runBenchmarks(String clazz) {
 		try {
 			Class<?> task = Class.forName(clazz);
 			Constructor<?> ctor = task.getConstructor();
