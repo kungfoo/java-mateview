@@ -20,13 +20,16 @@ public class ThemeSetting {
 		propertyLoader.loadStringProperty("name");
 		propertyLoader.loadStringProperty("scope");
 		
+		loadSettings(dict);
+		compileScopeMatchers();
+	}
+
+	private void loadSettings(Dict dict) {
 		settings = new HashMap<String, String>();
 		Dict settingsDict = dict.getDictionary("settings");
 		for(String key : settingsDict.value.keySet()){
 			settings.put(key, (String) settingsDict.value.get(key).value);
 		}
-		
-		compileScopeMatchers();
 	}
 
 	private void compileScopeMatchers() {
