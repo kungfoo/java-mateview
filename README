@@ -2,7 +2,7 @@
 Requirements
 ============
 
-* jruby-1.3.1 installed and set up on path
+* jruby-1.3.1 installed and set up on your path
 * rspec gem installed via jgem install rspec
 
 Running the ant-based unit-tests
@@ -14,3 +14,4 @@ Running the rspec based tests
 =============================
 
     rake jruby:test
+

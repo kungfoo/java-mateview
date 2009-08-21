@@ -11,7 +11,7 @@ describe JavaMateView::Grammar do
   
   describe "initForReference" do 
     before(:each) do
-      @grammar.initForReference
+      @grammar.init_for_reference
     end
     
     it "sets the name" do
