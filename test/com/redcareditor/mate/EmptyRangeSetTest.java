@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
-public class RangeSetTest {
+public class EmptyRangeSetTest {
 	private RangeSet rs;
 
 	@Before
@@ -24,3 +24,4 @@ public class RangeSetTest {
 		assertEquals(3, rs.size());
 	}
 }
+
