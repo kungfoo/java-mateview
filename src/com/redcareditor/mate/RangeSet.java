@@ -33,7 +33,7 @@ public class RangeSet {
 			Range x = ranges.get(ix-1);
 			if (n.a <= x.b+1) {
 				ranges.remove(ix);
-				x.b = max(x.b, n.b);
+				x.b = Math.max(x.b, n.b);
 				ranges.set(ix-1, x);
 				ix--;
 				n = ranges.get(ix);
@@ -42,7 +42,7 @@ public class RangeSet {
 		if (ix < ranges.size()-1) {
 			Range y = ranges.get(ix+1);
 			while (ix < ranges.size()-1 && n.b >= y.a-1) {
-				y.a = min(n.a, y.a);
+				y.a = Math.min(n.a, y.a);
 				if (n.b > y.b)
 					y.b = n.b;
 				ranges.set(ix+1, y);
@@ -64,32 +64,18 @@ public class RangeSet {
 		}
 		return sizec;
 	}
-
-	public int max(int a, int b) {
-		if (a > b)
-			return a;
-		else
-			return b;
-	}
-
-	public int min(int a, int b) {
-		if (a < b)
-			return a;
-		else
-			return b;
-	}
 	
 	public String present() {
 		StringBuilder sb = new StringBuilder("");
 		for (Range p : ranges) {
 			if (p.b - p.a == 0) {
-				sb.append(Integer.toString(p.a));
+				sb.append(p.a);
 				sb.append(", ");
 			}
 			else {
-				sb.append(Integer.toString(p.a));
+				sb.append(p.a);
 				sb.append("..");
-				sb.append(Integer.toString(p.b));
+				sb.append(p.b);
 				sb.append(", ");
 			}
 		}
