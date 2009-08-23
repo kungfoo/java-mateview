@@ -49,6 +49,7 @@ public class Grammar {
 
 		loadPatterns();
 		loadRepository();
+		replaceIncludePatterns();
 	}
 
 	private void loadPatterns() {
@@ -68,7 +69,6 @@ public class Grammar {
 		Dict plistRepo = plist.getDictionary("repository");
 		Dict plistRepoEntry;
 		for (String key : plistRepo.keys()) {
-			System.out.printf("%s\n", key);
 			List<Pattern> repoArray = new ArrayList<Pattern>();
 			plistRepoEntry = plistRepo.getDictionary(key);
 			if (plistRepoEntry.getString("begin") != null || plistRepoEntry.getString("match") != null) {
@@ -91,6 +91,14 @@ public class Grammar {
 		}
 	}
 
+	private void replaceIncludePatterns() {
+		for (Pattern p : allPatterns) {
+			if (p instanceof DoublePattern) {
+//				Pattern.replace_include_patterns(p.patterns, this);
+			}
+		}
+	}
+	
 	private boolean loaded() {
 		return allPatterns != null && repository != null;
 	}
