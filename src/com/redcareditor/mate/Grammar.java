@@ -1,9 +1,7 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
@@ -66,7 +64,25 @@ public class Grammar {
 
 	private void loadRepository() {
 		repository = new HashMap<String, List<Pattern>>();
-
+		Dict plistRepo = plist.getDictionary("repository");
+		Dict plistRepoEntry;
+		for (String key : plistRepo.keys()) {
+			System.out.printf("%s\n", key);
+			List<Pattern> repo_array = new ArrayList<Pattern>();
+			plistRepoEntry = plistRepo.getDictionary(key);
+			if (plistRepoEntry.getString("begin") != null || plistRepoEntry.getString("match") != null) {
+				Pattern pattern = Pattern.createPattern(plistRepoEntry);
+				if (pattern != null) {
+					pattern.grammar = this;
+					allPatterns.add(pattern);
+				}
+			}
+			if (plist.getDictionary("patterns") != null) {
+				for (PListNode plistPattern : plist.getArray("patterns")) {
+					
+				}
+			}
+		}
 	}
 
 	private boolean loaded() {

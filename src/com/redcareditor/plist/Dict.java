@@ -2,9 +2,7 @@ package com.redcareditor.plist;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -92,7 +90,11 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 	public boolean containsElement(String key) {
 		return value.containsKey(key);
 	}
-
+	
+	public Set<String> keys() {
+		return value.keySet();
+	}
+	              
 	@SuppressWarnings("unchecked")
 	private static <T> T tryGettingValue(Dict dict, String key){
 		if(dict.value.containsKey(key)){
