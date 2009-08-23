@@ -1,6 +1,7 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,9 +55,9 @@ public class Grammar {
 	private void loadPatterns() {
 		allPatterns = new ArrayList<Pattern>();
 		Dict[] patterns = plist.getDictionaries("patterns");
-		for(Dict p : patterns){
+		for (Dict p : patterns) {
 			Pattern pattern = Pattern.createPattern(p);
-			if(pattern != null){
+			if (pattern != null) {
 				pattern.grammar = this;
 				allPatterns.add(pattern);
 			}
@@ -64,6 +65,7 @@ public class Grammar {
 	}
 
 	private void loadRepository() {
+		repository = new HashMap<String, List<Pattern>>();
 
 	}
 
