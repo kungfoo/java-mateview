@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
+import com.redcareditor.plist.PlistNode;
 import com.redcareditor.plist.PlistPropertyLoader;
 
 public class Grammar {
@@ -68,20 +69,25 @@ public class Grammar {
 		Dict plistRepoEntry;
 		for (String key : plistRepo.keys()) {
 			System.out.printf("%s\n", key);
-			List<Pattern> repo_array = new ArrayList<Pattern>();
+			List<Pattern> repoArray = new ArrayList<Pattern>();
 			plistRepoEntry = plistRepo.getDictionary(key);
 			if (plistRepoEntry.getString("begin") != null || plistRepoEntry.getString("match") != null) {
 				Pattern pattern = Pattern.createPattern(plistRepoEntry);
 				if (pattern != null) {
 					pattern.grammar = this;
-					allPatterns.add(pattern);
+					repoArray.add(pattern);
 				}
 			}
-			if (plist.getDictionary("patterns") != null) {
-				for (PListNode plistPattern : plist.getArray("patterns")) {
-					
+			if (plistRepoEntry.getArray("patterns") != null) {
+				for (PlistNode<?> plistPattern : plistRepoEntry.getArray("patterns")) {
+					Pattern pattern = Pattern.createPattern((Dict) plistPattern);
+					if (pattern != null) {
+						pattern.grammar = this;
+						repoArray.add(pattern);
+					}
 				}
 			}
+			repository.put(key, repoArray);
 		}
 	}
 
