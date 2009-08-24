@@ -71,14 +71,14 @@ public class Grammar {
 		for (String key : plistRepo.keys()) {
 			List<Pattern> repoArray = new ArrayList<Pattern>();
 			plistRepoEntry = plistRepo.getDictionary(key);
-			if (plistRepoEntry.getString("begin") != null || plistRepoEntry.getString("match") != null) {
+			if (plistRepoEntry.containsElement("begin") || plistRepo.containsElement("match")) {
 				Pattern pattern = Pattern.createPattern(plistRepoEntry);
 				if (pattern != null) {
 					pattern.grammar = this;
 					repoArray.add(pattern);
 				}
 			}
-			if (plistRepoEntry.getArray("patterns") != null) {
+			if (plistRepo.containsElement("patterns")) {
 				for (PlistNode<?> plistPattern : plistRepoEntry.getArray("patterns")) {
 					Pattern pattern = Pattern.createPattern((Dict) plistPattern);
 					if (pattern != null) {
