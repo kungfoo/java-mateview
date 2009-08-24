@@ -1,13 +1,29 @@
 package com.redcareditor.onig;
 
 public class NullRx extends Rx{
+	private static NullRx instance;
 	
-	public NullRx() {
-		
+	public static NullRx instance(){
+		if(instance == null){
+			instance = new NullRx();
+		}
+		return instance;
 	}
+	
+	private NullRx(){}
 	
 	@Override
 	public String toString() {
 		return "NullRx";
+	}
+	
+	@Override
+	public Match search(String line) {
+		return new NullMatch();
+	}
+	
+	@Override
+	public Match search(String target, int start, int end) {
+		return search(target);
 	}
 }

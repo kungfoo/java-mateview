@@ -42,5 +42,10 @@ public class RxTest {
 		Rx rx = Rx.createRx(pattern);
 		assertTrue(rx instanceof Rx);
 		assertTrue(rx instanceof NullRx);
+		
+		Match match = rx.search("baz");
+		assertTrue(match instanceof NullMatch);
+		// now check that the object behaves in a reasonable way.
+		
 	}
 }

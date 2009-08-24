@@ -23,7 +23,7 @@ public class Rx {
 	
 	public static Rx createRx(String pattern){
 		if(pattern == null){
-			return new NullRx();
+			return NullRx.instance();
 		} else {
 			return new Rx(pattern);
 		}
