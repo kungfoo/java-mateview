@@ -7,39 +7,40 @@ import com.redcareditor.plist.Dict;
 public class Pattern {
 	public Grammar grammar;
 	public String name;
-	public Map<Integer, String> captures;
-
+	public boolean disabled;
 	
-	public static Pattern createPattern(Dict dict) {
+	public static Pattern createPattern(ArrayList<Pattern> allPatterns, Dict dict) {
 		if (dict.containsElement("match")) {
-			return new SinglePattern(dict);
+			return new SinglePattern(allPatterns, dict);
 		}
 
 		if (dict.containsElement("include")) {
-			
+			return new IncludePattern(dict);
 		}
 
 		if (dict.containsElement("begin")) {
-
+			return new DoublePattern(allPatterns, dict);
 		}
+		
 		return null;
 	}
 	
-	protected void loadCaptures(Dict dict){
-		captures = new HashMap<Integer, String>();
-		if (dict == null) {
-			return;
-		} else {
-			for(String captureNumber : dict.value.keySet()){
-				Dict captureDict = dict.getDictionary(captureNumber);
-				int captureInt = Integer.parseInt(captureNumber);
-				String captureName = captureDict.getString("name");
-				captures.put(captureInt, captureName);
-                // System.out.println(captureInt + "->" + captureName);
-			}
+	public static HashMap<Integer, String> makeCapturesFromPlist(Dict pd) {
+		if (pd == null)
+			return new HashMap<Integer, String>();
+		Dict pcd;
+		String ns;
+		HashMap<Integer, String> captures = new HashMap<Integer, String>();
+		for (String sCapnum : pd.value.keySet()) {
+			int capnum = Integer.parseInt(sCapnum);
+			pcd = pd.getDictionary(sCapnum);
+			ns = pcd.getString("name");
+			System.out.printf("capture: %d, %s\n", capnum, ns);
+			captures.put((Integer) capnum, ns);
 		}
+		return captures;
 	}
-	
+
 	public static void replaceIncludePatterns(ArrayList<Pattern> patterns, Grammar grammar) {
 		replaceRepositoryIncludes(patterns, grammar);
 		replaceBaseAndSelfIncludes(patterns, grammar);
@@ -115,5 +116,17 @@ public class Pattern {
 		for (Pattern p : ps) {
 			patlist.add(p);
 		}
+	}
+	
+	public void setDisabled(Dict dict) {
+		String strN = dict.getString("disabled");
+		Integer intN = dict.getInt("disabled");
+		if (intN != null && intN == 1)
+			disabled = true;
+		else if (strN != null && strN == "1")
+			disabled = true;
+		else 
+			disabled = false;
+		
 	}
 }
