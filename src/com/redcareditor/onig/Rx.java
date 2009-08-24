@@ -23,13 +23,18 @@ public class Rx {
 	
 	public static Rx createRx(String pattern){
 		if(pattern == null){
-			return new NullRx(pattern);
+			return new NullRx();
 		} else {
 			return new Rx(pattern);
 		}
 	}
 
-	protected Rx(String pattern) {
+	/**
+	 * this is used implicitly by the null object class.
+	 */
+	protected Rx(){}
+	
+	private Rx(String pattern) {
 		this.pattern = pattern;
 		regex = compileRegex(pattern);
 		matchesStartOfLine = pattern.charAt(0) == '^';

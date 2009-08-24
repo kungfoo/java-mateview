@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.StringReader;
 
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import com.redcareditor.util.FileUtility;
 
@@ -22,7 +23,7 @@ public class RxTest {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				Match m = regex.search(line, 0, line.length());
-				
+
 				if (m != null) {
 					System.out.println(line);
 					for (Range r : m) {
@@ -34,9 +35,12 @@ public class RxTest {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Test
-	public void testNullObject(){
-		
+	public void testNullObject() {
+		String pattern = null;
+		Rx rx = Rx.createRx(pattern);
+		assertTrue(rx instanceof Rx);
+		assertTrue(rx instanceof NullRx);
 	}
 }
