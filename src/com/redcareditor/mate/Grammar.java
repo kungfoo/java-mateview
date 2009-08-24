@@ -1,11 +1,11 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
+import com.redcareditor.plist.PlistNode;
 import com.redcareditor.plist.PlistPropertyLoader;
 
 public class Grammar {
@@ -49,14 +49,15 @@ public class Grammar {
 
 		loadPatterns();
 		loadRepository();
+		replaceIncludePatterns();
 	}
 
 	private void loadPatterns() {
 		allPatterns = new ArrayList<Pattern>();
 		Dict[] patterns = plist.getDictionaries("patterns");
-		for(Dict p : patterns){
+		for (Dict p : patterns) {
 			Pattern pattern = Pattern.createPattern(p);
-			if(pattern != null){
+			if (pattern != null) {
 				pattern.grammar = this;
 				allPatterns.add(pattern);
 			}
@@ -64,9 +65,40 @@ public class Grammar {
 	}
 
 	private void loadRepository() {
-
+		repository = new HashMap<String, List<Pattern>>();
+		Dict plistRepo = plist.getDictionary("repository");
+		Dict plistRepoEntry;
+		for (String key : plistRepo.keys()) {
+			List<Pattern> repoArray = new ArrayList<Pattern>();
+			plistRepoEntry = plistRepo.getDictionary(key);
+			if (plistRepoEntry.containsElement("begin") || plistRepo.containsElement("match")) {
+				Pattern pattern = Pattern.createPattern(plistRepoEntry);
+				if (pattern != null) {
+					pattern.grammar = this;
+					repoArray.add(pattern);
+				}
+			}
+			if (plistRepo.containsElement("patterns")) {
+				for (PlistNode<?> plistPattern : plistRepoEntry.getArray("patterns")) {
+					Pattern pattern = Pattern.createPattern((Dict) plistPattern);
+					if (pattern != null) {
+						pattern.grammar = this;
+						repoArray.add(pattern);
+					}
+				}
+			}
+			repository.put(key, repoArray);
+		}
 	}
 
+	private void replaceIncludePatterns() {
+		for (Pattern p : allPatterns) {
+			if (p instanceof DoublePattern) {
+//				Pattern.replace_include_patterns(p.patterns, this);
+			}
+		}
+	}
+	
 	private boolean loaded() {
 		return allPatterns != null && repository != null;
 	}
