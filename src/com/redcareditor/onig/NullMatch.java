@@ -1,10 +1,62 @@
 package com.redcareditor.onig;
 
-public class NullMatch extends Match{
-	public NullMatch() {
-		super(null,null,null);
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+public class NullMatch extends Match {
+	private static NullMatch instance;
+	private List<Range> emptyList = new LinkedList<Range>();
+
+	public static NullMatch instance() {
+		if (instance == null) {
+			instance = new NullMatch();
+		}
+		return instance;
+	}
+
+	private NullMatch() {
+		super(null, null, null);
+	}
+
+	@Override
+	public int begin(int capture) {
+		return 0;
+	}
+
+	@Override
+	public int end(int capture) {
+		return 0;
+	}
+
+	@Override
+	public List<Range> ranges() {
+		return emptyList;
 	}
 	
-	//TODO: overwrite methods to make this class behave where Match will be used.
+	@Override
+	public int numCaptures() {
+		return 0;
+	}
 	
+	@Override
+	public String toString() {
+		return "NullMatch";
+	}
+
+	@Override
+	public Iterator<Range> iterator() {
+		return new Iterator<Range>() {
+			public boolean hasNext() {
+				return false;
+			}
+
+			public Range next() {
+				return null;
+			}
+
+			public void remove() {
+			}
+		};
+	}
 }

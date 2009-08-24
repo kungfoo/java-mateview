@@ -19,7 +19,7 @@ public class NullRx extends Rx{
 	
 	@Override
 	public Match search(String line) {
-		return new NullMatch();
+		return NullMatch.instance();
 	}
 	
 	@Override

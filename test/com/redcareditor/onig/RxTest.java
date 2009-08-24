@@ -47,5 +47,8 @@ public class RxTest {
 		assertTrue(match instanceof NullMatch);
 		// now check that the object behaves in a reasonable way.
 		
+		assertEquals(0, match.numCaptures());
+		assertFalse(match.iterator().hasNext());
+		assertEquals(0, match.ranges().size());
 	}
 }
