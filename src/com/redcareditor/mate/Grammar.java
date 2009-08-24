@@ -94,11 +94,23 @@ public class Grammar {
 	private void replaceIncludePatterns() {
 		for (Pattern p : allPatterns) {
 			if (p instanceof DoublePattern) {
-//				Pattern.replace_include_patterns(p.patterns, this);
+				Pattern.replaceIncludePatterns((ArrayList<Pattern>) ((DoublePattern) p).patterns, this);
 			}
 		}
+		Pattern.replaceIncludePatterns((ArrayList<Pattern>) this.allPatterns, this);
 	}
 	
+	public static Grammar findByScopeName(String scope) {
+//		for (var bundle in Buffer.bundles) {
+//			foreach (var gr in bundle.grammars) {
+//				if (gr.scope_name == scope) {
+//					return gr;
+//				}
+//			}
+//		}				
+		return null;
+	}
+
 	private boolean loaded() {
 		return allPatterns != null && repository != null;
 	}
