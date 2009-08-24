@@ -8,8 +8,7 @@ public class SinglePattern extends Pattern {
 	
 	public SinglePattern(Dict dict) {
 		name = dict.getString("name");
-		// can't be null, otherwise we would never end up here.
-		regex = new Rx(dict.getString("match"));
+		regex = Rx.createRx(dict.getString("match"));
 		loadCaptures(dict.getDictionary("captures"));
 	}
 }

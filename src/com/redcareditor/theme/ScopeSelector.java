@@ -24,11 +24,11 @@ public class ScopeSelector {
 			if (positiveRegex == null) {
 				String s1 = backSlashDots(subSelector);
 				String s2 = s1.replace(" ", ").* .*(");
-				positiveRegex = new Rx("(" + s2 + ")");
+				positiveRegex = Rx.createRx("(" + s2 + ")");
 			} else {
 				String s1 = backSlashDots(subSelector);
 				String s2 = s1.replace(" ", ".* .*");
-				negativeRegexes.add(new Rx(s2));
+				negativeRegexes.add(Rx.createRx(s2));
 			}
 		}
 	}

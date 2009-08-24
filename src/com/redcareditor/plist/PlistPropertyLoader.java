@@ -27,7 +27,7 @@ public class PlistPropertyLoader {
 	public void loadRegexProperty(String propertyName) {
 		String value = dict.getString(propertyName);
 		if (value != null) {
-			Rx regex = new Rx(value);
+			Rx regex = Rx.createRx(value);
 			trySettingProperty(propertyName, regex);
 		}
 	}

@@ -20,9 +20,16 @@ public class Rx {
 	public String pattern;
 	public Regex regex;
 	public boolean matchesStartOfLine = false;
+	
+	public static Rx createRx(String pattern){
+		if(pattern == null){
+			return new NullRx(pattern);
+		} else {
+			return new Rx(pattern);
+		}
+	}
 
-	public Rx(String pattern) {
-		// TODO: really make this a regex then...
+	protected Rx(String pattern) {
 		this.pattern = pattern;
 		regex = compileRegex(pattern);
 		matchesStartOfLine = pattern.charAt(0) == '^';
@@ -52,7 +59,7 @@ public class Rx {
 		return search(line, 0, line.length());
 	}
 
-	public Regex compileRegex(String pattern) {
+	private Regex compileRegex(String pattern) {
 		byte[] bytes;
 		try {
 			bytes = pattern.getBytes("UTF-8");

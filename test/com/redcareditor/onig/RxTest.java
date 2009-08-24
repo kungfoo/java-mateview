@@ -1,10 +1,7 @@
 package com.redcareditor.onig;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.StringReader;
-import java.util.Iterator;
 
 import org.junit.Test;
 
@@ -20,7 +17,7 @@ public class RxTest {
 
 			BufferedReader reader = new BufferedReader(new StringReader(fileContents));
 
-			Rx regex = new Rx(pattern);
+			Rx regex = Rx.createRx(pattern);
 
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -36,5 +33,10 @@ public class RxTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Test
+	public void testNullObject(){
+		
 	}
 }
