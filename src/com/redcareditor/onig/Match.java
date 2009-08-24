@@ -12,6 +12,8 @@ public class Match implements Iterable<Range> {
 	Region region;
 	String text;
 
+	public Match() {}
+	
 	public Match(Regex regex, Region region, String text) {
 		super();
 		this.regex = regex;
@@ -34,7 +36,7 @@ public class Match implements Iterable<Range> {
 	}
 
 	private void checkBounds(int capture) {
-		if (capture >= regex.numberOfCaptures() || capture < 0) {
+		if (capture > regex.numberOfCaptures() || capture < 0) {
 			throw new IllegalArgumentException("Capture Index out of bounds!");
 		}
 	}

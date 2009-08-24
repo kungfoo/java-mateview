@@ -29,7 +29,7 @@ public class ScopeMatcherMatching {
 
 	@Test
 	public void shouldMatchWithSelectorOrs() {
-		assertFalse(testMatch("string, comment", "ruby.string"));
+		assertTrue(testMatch("string, comment", "ruby.string"));
 		assertTrue(testMatch("string, comment", "ruby.comment"));
 	}
 
