@@ -2,7 +2,7 @@ require File.join(File.dirname(__FILE__), "..", "spec_helper.rb")
 
 describe Onig::Match do
   before(:each) do
-    rx = Onig::Rx.new("(f)(.)(o)")
+    rx = Onig::Rx.createRx("(f)(.)(o)")
     @match = rx.search(" foo ")
   end
   
