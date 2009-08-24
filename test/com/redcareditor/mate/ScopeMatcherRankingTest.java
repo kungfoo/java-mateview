@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class ScopeMatcherRanking {
+public class ScopeMatcherRankingTest {
 	public String testRank(String a, String b, String scope) {
 		return ScopeMatcher.testRank(a, b, scope);
 	}

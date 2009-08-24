@@ -4,7 +4,7 @@ package com.redcareditor.mate;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-public class ScopeMatcherMatching {
+public class ScopeMatcherMatchingTest {
 	public boolean testMatch(String a, String b) {
 		return ScopeMatcher.testMatch(a, b);
 	}
