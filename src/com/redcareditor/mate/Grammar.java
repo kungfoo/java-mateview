@@ -1,7 +1,9 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
