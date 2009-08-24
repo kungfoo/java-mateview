@@ -26,10 +26,8 @@ public class PlistPropertyLoader {
 
 	public void loadRegexProperty(String propertyName) {
 		String value = dict.getString(propertyName);
-		if (value != null) {
-			Rx regex = Rx.createRx(value);
-			trySettingProperty(propertyName, regex);
-		}
+		Rx regex = Rx.createRx(value);
+		trySettingProperty(propertyName, regex);
 	}
 
 	private void trySettingProperty(String propertyName, Object value) {
@@ -39,8 +37,7 @@ public class PlistPropertyLoader {
 				prop.set(object, value);
 			}
 		} catch (Exception e) {
-			System.out.println(String.format("Can't set %s = %s on object %s", propertyName,
-					value, object.toString()));
+			System.out.println(String.format("Can't set %s = %s on object %s", propertyName, value, object.toString()));
 			e.printStackTrace();
 		}
 	}
