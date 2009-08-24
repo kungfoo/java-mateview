@@ -55,7 +55,7 @@ public class Pattern {
 			for (Pattern p : patterns) {
 				if (p instanceof IncludePattern && p.name.startsWith("#")) {
 					includePatterns.add(p);
-					String reponame = p.name.substring(1, p.name.length() - 1);
+					String reponame = p.name.substring(1, p.name.length());
 					ArrayList<Pattern> repositoryEntryPatterns = (ArrayList<Pattern>) grammar.repository.get(reponame);
 					if (repositoryEntryPatterns != null) {
 						for (Pattern p2 : repositoryEntryPatterns) {
