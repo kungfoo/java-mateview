@@ -34,11 +34,9 @@ public class DoublePattern extends Pattern {
 
 	private void loadPatterns(List<Pattern> grammarPatterns, Dict dict) {
 		patterns = new ArrayList<Pattern>();
-		List<PlistNode<?>> plistPatterns = dict.getArray("patterns");
-		Pattern subPattern;
-		if (plistPatterns != null) {
-			for (PlistNode<?> plistPattern : plistPatterns) {
-				subPattern = Pattern.createPattern(grammarPatterns, (Dict) plistPattern);
+		if (dict.containsElement("patterns")) {
+			for (PlistNode<?> plistPattern : dict.getArray("patterns")) {
+				Pattern subPattern = Pattern.createPattern(grammarPatterns, (Dict) plistPattern);
 				if (subPattern != null) {
 					patterns.add(subPattern);
 				}
