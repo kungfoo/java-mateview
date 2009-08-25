@@ -1,6 +1,6 @@
 package com.redcareditor.onig;
 
-public class Range {
+public class Range implements Comparable<Range>{
 	public int start;
 	public int end;
 
@@ -13,5 +13,30 @@ public class Range {
 	@Override
 	public String toString() {
 		return String.format("[%d,%d]", start, end);
+	}
+	
+	public boolean touch(Range other){
+		if(start < other.start){
+			return other.start <= end +1;
+		}else{
+			return start <= other.end +1;
+		}
+	}
+
+	public int compareTo(Range o) {
+		int compareStart = start - o.start;
+		if(compareStart == 0){
+			return end - o.end;
+		}else{
+			return compareStart;
+		}
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Range){
+			return 0 == compareTo((Range) obj);
+		}
+		return false;
 	}
 }
