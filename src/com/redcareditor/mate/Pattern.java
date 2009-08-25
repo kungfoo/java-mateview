@@ -113,6 +113,7 @@ public class Pattern {
 	}
 
 	public void setDisabled(Dict dict) {
+		// TODO: this can be done using simple string conversion.
 		String strN = dict.getString("disabled");
 		Integer intN = dict.getInt("disabled");
 		if (intN != null && intN == 1)

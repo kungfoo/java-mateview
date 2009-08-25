@@ -18,25 +18,21 @@ public class DoublePattern extends Pattern {
 	public Map<Integer, String> endCaptures;
 	public Map<Integer, String> bothCaptures;
 	public List<Pattern> patterns;
-	
+
 	public DoublePattern(List<Pattern> grammarPatterns, Dict dict) {
 		name = dict.getString("name");
 		begin = Rx.createRx(dict.getString("begin"));
 		endString = dict.getString("end");
 		contentName = dict.getString("contentName");
-		
-		if(dict.containsElement("beginCaptures")){
-			beginCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("beginCaptures"));
-		}
-		
-		if(dict.containsElement("captures")){
-			bothCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("captures"));
-		}
-		
-		if(dict.containsElement("endCaptures")){
-			endCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("endCaptures"));
-		}
-		
+
+		loadCaptures(dict);
+		loadPatterns(grammarPatterns, dict);
+
+		setDisabled(dict);
+		grammarPatterns.add(this);
+	}
+
+	private void loadPatterns(List<Pattern> grammarPatterns, Dict dict) {
 		patterns = new ArrayList<Pattern>();
 		List<PlistNode<?>> plistPatterns = dict.getArray("patterns");
 		Pattern subPattern;
@@ -48,7 +44,17 @@ public class DoublePattern extends Pattern {
 				}
 			}
 		}
-		setDisabled(dict);
-		grammarPatterns.add(this);
+	}
+
+	private void loadCaptures(Dict dict) {
+		if (dict.containsElement("beginCaptures")) {
+			beginCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("beginCaptures"));
+		}
+		if (dict.containsElement("captures")) {
+			bothCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("captures"));
+		}
+		if (dict.containsElement("endCaptures")) {
+			endCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("endCaptures"));
+		}
 	}
 }
