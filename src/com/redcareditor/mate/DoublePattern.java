@@ -25,15 +25,17 @@ public class DoublePattern extends Pattern {
 		endString = dict.getString("end");
 		contentName = dict.getString("contentName");
 		
-		Dict captureDict = dict.getDictionary("beginCaptures");
-		if (captureDict != null)
-			beginCaptures = Pattern.makeCapturesFromPlist(captureDict);
-		captureDict = dict.getDictionary("captures");
-		if (captureDict != null)
-			bothCaptures = Pattern.makeCapturesFromPlist(captureDict);
-		captureDict = dict.getDictionary("endCaptures");
-		if (captureDict != null)
-			endCaptures = Pattern.makeCapturesFromPlist(captureDict);
+		if(dict.containsElement("beginCaptures")){
+			beginCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("beginCaptures"));
+		}
+		
+		if(dict.containsElement("captures")){
+			bothCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("captures"));
+		}
+		
+		if(dict.containsElement("endCaptures")){
+			endCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("endCaptures"));
+		}
 		
 		patterns = new ArrayList<Pattern>();
 		List<PlistNode<?>> plistPatterns = dict.getArray("patterns");
