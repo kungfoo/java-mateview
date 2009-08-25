@@ -63,7 +63,7 @@ public class Bundle {
 
 	private static void loadSyntax(Bundle bundle, File syntaxDir) {
 		for (String syntaxFileName : syntaxDir.list()) {
-			if (isNoSvnDir(syntaxFileName) && isTmBundlefile(syntaxFileName)) {
+			if (isTmBundlefile(syntaxFileName)) {
 				Dict plist = Dict.parseFile(syntaxDir.getPath() + "/" + syntaxFileName);
 				if (plist != null) {
 					Grammar grammar = new Grammar(plist);
@@ -76,9 +76,5 @@ public class Bundle {
 
 	private static boolean isTmBundlefile(String syntaxFileName) {
 		return (syntaxFileName.endsWith(".tmLanguage") || syntaxFileName.endsWith(".plist"));
-	}
-
-	private static boolean isNoSvnDir(String syntaxFileName) {
-		return syntaxFileName != ".svn";
 	}
 }
