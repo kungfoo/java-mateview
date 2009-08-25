@@ -1,10 +1,11 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import com.redcareditor.onig.Range;
 
-public class RangeSet extends ArrayList<Range>{
+public class RangeSet extends ArrayList<Range> implements Set<Range>{
 	
 	public RangeSet(){
 		super();
