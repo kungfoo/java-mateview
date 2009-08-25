@@ -42,9 +42,8 @@ public class Grammar {
 	}
 
 	public void initForUse() {
-		if (loaded()) {
+		if (loaded())
 			return;
-		}
 		
 		initForReference();
 		propertyLoader.loadRegexProperty("foldingStartMarker");
@@ -102,15 +101,12 @@ public class Grammar {
 		}
 		Pattern.replaceIncludePatterns(allPatterns, this);
 	}
-	
+
 	public static Grammar findByScopeName(String scope) {
-//		for (var bundle in Buffer.bundles) {
-//			foreach (var gr in bundle.grammars) {
-//				if (gr.scope_name == scope) {
-//					return gr;
-//				}
-//			}
-//		}				
+		for (Bundle b : Bundle.bundles)
+			for (Grammar g : b.grammars)
+				if (g.scopeName.equals(scope))
+					return g;
 		return null;
 	}
 
