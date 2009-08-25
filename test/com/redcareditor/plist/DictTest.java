@@ -12,7 +12,7 @@ public class DictTest {
 
 	@Before
 	public void setup() {
-		dict = Dict.parseFile("input/Ruby.plist");
+		dict = Dict.parseFile("input/Bundles/Ruby.tmbundle/Syntaxes/Ruby.plist");
 		assertNotNull(dict);
 	}
 
