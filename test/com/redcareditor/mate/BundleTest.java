@@ -17,6 +17,7 @@ public class BundleTest {
 		assertTrue(Bundle.getBundleByName("Apache") != null);
 		assertTrue(Bundle.getBundleByName("Ruby") != null);
 		assertTrue(Bundle.getBundleByName("HTML") == null);
+		assertEquals(2, Bundle.bundles.size());
 	}
 	
 	@Test
