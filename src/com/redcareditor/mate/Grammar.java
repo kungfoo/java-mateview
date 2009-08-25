@@ -12,6 +12,7 @@ import com.redcareditor.plist.PlistPropertyLoader;
 
 public class Grammar {
 	public String name;
+	public String fileName;
 	public Dict plist;
 	private PlistPropertyLoader propertyLoader;
 	public String[] fileTypes;
