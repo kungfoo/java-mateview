@@ -2,53 +2,52 @@ package com.redcareditor.mate;
 
 import java.util.ArrayList;
 
+import com.redcareditor.onig.Range;
+
 public class RangeSet {
-	public class Range {
-		public int a;
-		public int b;
+	private ArrayList<Range> ranges;
+	
+	public RangeSet(){
+		ranges = new ArrayList<Range>();
 	}
 	
-	private ArrayList<Range> ranges = new ArrayList<Range>();
-	
 	public boolean isEmpty() {
-		return (ranges.size() == 0);
+		return ranges.isEmpty();
 	}
 	
 	public void add(int a, int b) {
-		int insert_ix = 0;
-		Range n = new Range();
-		n.a = a;
-		n.b = b;
-		for (Range p : ranges) {
-			if (p.a < n.a)
-				insert_ix++;
+		int insertAt = 0;
+		Range range = new Range(a,b);
+
+		while(insertAt < ranges.size() && ranges.get(insertAt).start < range.start){
+			insertAt++;
 		}
-		ranges.add(insert_ix, n);
-		merge(insert_ix);
+		
+		merge(insertAt, range);
 	}
 	
-	public void merge(int ix) {
-		Range n = ranges.get(ix);
-		if (ix > 0) {
-			Range x = ranges.get(ix-1);
-			if (n.a <= x.b+1) {
-				ranges.remove(ix);
-				x.b = Math.max(x.b, n.b);
-				ranges.set(ix-1, x);
-				ix--;
-				n = ranges.get(ix);
+	private void merge(int mergeAt, Range range) {
+		ranges.add(mergeAt, range);
+		
+		if (mergeAt > 0) {
+			Range beforeMerge = ranges.get(mergeAt-1);
+			if (range.touch(beforeMerge)) {
+				ranges.remove(mergeAt);
+				beforeMerge.end = Math.max(beforeMerge.end, range.end);
+				mergeAt--;
+				range = ranges.get(mergeAt);
 			}
 		}
-		if (ix < ranges.size()-1) {
-			Range y = ranges.get(ix+1);
-			while (ix < ranges.size()-1 && n.b >= y.a-1) {
-				y.a = Math.min(n.a, y.a);
-				if (n.b > y.b)
-					y.b = n.b;
-				ranges.set(ix+1, y);
-				ranges.remove(ix);
-				if (ix < ranges.size()-1)
-					y = ranges.get(ix+1);
+		
+		if (mergeAt+1 < ranges.size()) {
+			Range afterMerge = ranges.get(mergeAt+1);
+			while (mergeAt < ranges.size()-1 && range.touch(afterMerge)) {
+				range.start = Math.min(range.start, afterMerge.start);
+				range.end = Math.max(range.end, afterMerge.end);
+				ranges.remove(mergeAt+1);
+				
+				if (mergeAt+1 < ranges.size())
+					afterMerge = ranges.get(mergeAt+1);
 			}
 		}
 	}
@@ -60,7 +59,7 @@ public class RangeSet {
 	public int size() {
 		int sizec = 0;
 		for (Range p : this.ranges) {
-			sizec += p.b - p.a + 1;
+			sizec += p.end - p.start + 1;
 		}
 		return sizec;
 	}
@@ -68,14 +67,14 @@ public class RangeSet {
 	public String present() {
 		StringBuilder sb = new StringBuilder("");
 		for (Range p : ranges) {
-			if (p.b - p.a == 0) {
-				sb.append(p.a);
+			if (p.end - p.start == 0) {
+				sb.append(p.start);
 				sb.append(", ");
 			}
 			else {
-				sb.append(p.a);
+				sb.append(p.start);
 				sb.append("..");
-				sb.append(p.b);
+				sb.append(p.end);
 				sb.append(", ");
 			}
 		}
