@@ -58,7 +58,7 @@ public class Grammar {
 		allPatterns = new ArrayList<Pattern>();
 		Dict[] patterns = plist.getDictionaries("patterns");
 		for (Dict p : patterns) {
-			Pattern pattern = Pattern.createPattern((ArrayList<Pattern>) allPatterns, p);
+			Pattern pattern = Pattern.createPattern(allPatterns, p);
 			if (pattern != null) {
 				pattern.grammar = this;
 				allPatterns.add(pattern);
@@ -74,7 +74,7 @@ public class Grammar {
 			List<Pattern> repoArray = new ArrayList<Pattern>();
 			plistRepoEntry = plistRepo.getDictionary(key);
 			if (plistRepoEntry.containsElement("begin") || plistRepo.containsElement("match")) {
-				Pattern pattern = Pattern.createPattern((ArrayList<Pattern>) allPatterns, plistRepoEntry);
+				Pattern pattern = Pattern.createPattern(allPatterns, plistRepoEntry);
 				if (pattern != null) {
 					pattern.grammar = this;
 					repoArray.add(pattern);
@@ -82,7 +82,7 @@ public class Grammar {
 			}
 			if (plistRepo.containsElement("patterns")) {
 				for (PlistNode<?> plistPattern : plistRepoEntry.getArray("patterns")) {
-					Pattern pattern = Pattern.createPattern((ArrayList<Pattern>) allPatterns, (Dict) plistPattern);
+					Pattern pattern = Pattern.createPattern(allPatterns, (Dict) plistPattern);
 					if (pattern != null) {
 						pattern.grammar = this;
 						repoArray.add(pattern);
@@ -96,10 +96,10 @@ public class Grammar {
 	private void replaceIncludePatterns() {
 		for (Pattern p : allPatterns) {
 			if (p instanceof DoublePattern) {
-				Pattern.replaceIncludePatterns((ArrayList<Pattern>) ((DoublePattern) p).patterns, this);
+				Pattern.replaceIncludePatterns(((DoublePattern) p).patterns, this);
 			}
 		}
-		Pattern.replaceIncludePatterns((ArrayList<Pattern>) this.allPatterns, this);
+		Pattern.replaceIncludePatterns(allPatterns, this);
 	}
 	
 	public static Grammar findByScopeName(String scope) {
