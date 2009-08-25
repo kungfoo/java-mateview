@@ -1,7 +1,8 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
@@ -13,12 +14,12 @@ public class DoublePattern extends Pattern {
 	public Rx end;
 	public String endString;
 	public String beginString;
-	public HashMap<Integer, String> beginCaptures;
-	public HashMap<Integer, String> endCaptures;
-	public HashMap<Integer, String> bothCaptures;
-	public ArrayList<Pattern> patterns;
+	public Map<Integer, String> beginCaptures;
+	public Map<Integer, String> endCaptures;
+	public Map<Integer, String> bothCaptures;
+	public List<Pattern> patterns;
 	
-	public DoublePattern(ArrayList<Pattern> grammarPatterns, Dict dict) {
+	public DoublePattern(List<Pattern> grammarPatterns, Dict dict) {
 		name = dict.getString("name");
 		begin = Rx.createRx(dict.getString("begin"));
 		endString = dict.getString("end");
@@ -35,7 +36,7 @@ public class DoublePattern extends Pattern {
 			endCaptures = Pattern.makeCapturesFromPlist(captureDict);
 		
 		patterns = new ArrayList<Pattern>();
-		ArrayList<PlistNode<?>> plistPatterns = (ArrayList<PlistNode<?>>) dict.getArray("patterns");
+		List<PlistNode<?>> plistPatterns = dict.getArray("patterns");
 		Pattern subPattern;
 		if (plistPatterns != null) {
 			for (PlistNode<?> plistPattern : plistPatterns) {

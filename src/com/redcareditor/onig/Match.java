@@ -8,9 +8,9 @@ import org.joni.Regex;
 import org.joni.Region;
 
 public class Match implements Iterable<Range> {
-	Regex regex;
-	Region region;
-	String text;
+	private Regex regex;
+	private Region region;
+	private String text;
 
 	public Match() {}
 	

@@ -1,6 +1,7 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RangeSet {
 	public class Range {
@@ -8,7 +9,7 @@ public class RangeSet {
 		public int b;
 	}
 	
-	private ArrayList<Range> ranges = new ArrayList<Range>();
+	private List<Range> ranges = new ArrayList<Range>();
 	
 	public boolean isEmpty() {
 		return (ranges.size() == 0);

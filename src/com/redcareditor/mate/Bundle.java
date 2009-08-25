@@ -5,7 +5,7 @@ import java.util.*;
 
 public class Bundle {
 	public String name;
-	public ArrayList<Grammar> grammars;
+	public List<Grammar> grammars;
 	
 	public Bundle(String name) {
 		this.name = name;

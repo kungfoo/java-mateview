@@ -8,8 +8,8 @@ public class Pattern {
 	public Grammar grammar;
 	public String name;
 	public boolean disabled;
-	
-	public static Pattern createPattern(ArrayList<Pattern> allPatterns, Dict dict) {
+
+	public static Pattern createPattern(List<Pattern> allPatterns, Dict dict) {
 		if (dict.containsElement("match")) {
 			return new SinglePattern(allPatterns, dict);
 		}
@@ -21,16 +21,16 @@ public class Pattern {
 		if (dict.containsElement("begin")) {
 			return new DoublePattern(allPatterns, dict);
 		}
-		
+
 		return null;
 	}
-	
-	public static HashMap<Integer, String> makeCapturesFromPlist(Dict pd) {
+
+	public static Map<Integer, String> makeCapturesFromPlist(Dict pd) {
 		if (pd == null)
 			return new HashMap<Integer, String>();
 		Dict pcd;
 		String ns;
-		HashMap<Integer, String> captures = new HashMap<Integer, String>();
+		Map<Integer, String> captures = new HashMap<Integer, String>();
 		for (String sCapnum : pd.value.keySet()) {
 			int capnum = Integer.parseInt(sCapnum);
 			pcd = pd.getDictionary(sCapnum);
@@ -41,14 +41,14 @@ public class Pattern {
 		return captures;
 	}
 
-	public static void replaceIncludePatterns(ArrayList<Pattern> patterns, Grammar grammar) {
+	public static void replaceIncludePatterns(List<Pattern> patterns, Grammar grammar) {
 		replaceRepositoryIncludes(patterns, grammar);
 		replaceBaseAndSelfIncludes(patterns, grammar);
 	}
-	
-	public static void replaceRepositoryIncludes(ArrayList<Pattern> patterns, Grammar grammar) {
-		ArrayList<Pattern> includePatterns = new ArrayList<Pattern>();
-		ArrayList<Pattern> patternsToInclude = new ArrayList<Pattern>();
+
+	public static void replaceRepositoryIncludes(List<Pattern> patterns, Grammar grammar) {
+		List<Pattern> includePatterns = new ArrayList<Pattern>();
+		List<Pattern> patternsToInclude = new ArrayList<Pattern>();
 		boolean anyIncluded = true;
 		while (anyIncluded) {
 			anyIncluded = false;
@@ -56,14 +56,14 @@ public class Pattern {
 				if (p instanceof IncludePattern && p.name.startsWith("#")) {
 					includePatterns.add(p);
 					String reponame = p.name.substring(1, p.name.length());
-					ArrayList<Pattern> repositoryEntryPatterns = (ArrayList<Pattern>) grammar.repository.get(reponame);
+					List<Pattern> repositoryEntryPatterns = (ArrayList<Pattern>) grammar.repository.get(reponame);
 					if (repositoryEntryPatterns != null) {
 						for (Pattern p2 : repositoryEntryPatterns) {
 							patternsToInclude.add(p2);
 						}
-					}
-					else {
-						System.out.printf("warning: couldn't find repository key '%s' in grammar '%s'\n", reponame, grammar.name);
+					} else {
+						System.out.printf("warning: couldn't find repository key '%s' in grammar '%s'\n", reponame,
+								grammar.name);
 					}
 				}
 			}
@@ -73,10 +73,10 @@ public class Pattern {
 			patternsToInclude.clear();
 		}
 	}
-	
-	public static void replaceBaseAndSelfIncludes(ArrayList<Pattern> patterns, Grammar grammar) {
-		ArrayList<Pattern> includePatterns = new ArrayList<Pattern>();
-		ArrayList<Pattern> patternsToInclude = new ArrayList<Pattern>();
+
+	public static void replaceBaseAndSelfIncludes(List<Pattern> patterns, Grammar grammar) {
+		List<Pattern> includePatterns = new ArrayList<Pattern>();
+		List<Pattern> patternsToInclude = new ArrayList<Pattern>();
 		boolean alreadySelf = false; // some patterns have $self twice
 		Grammar ng;
 		for (Pattern p : patterns) {
@@ -85,39 +85,33 @@ public class Pattern {
 					includePatterns.add(p);
 					if ((p.name == "$self" || p.name == "$base") && !alreadySelf) {
 						alreadySelf = true;
-						for (Pattern pat : grammar.allPatterns) {
-							patternsToInclude.add(pat);
-						}
+						patternsToInclude.addAll(grammar.allPatterns);
 					}
-				}
-				else if ((ng = Grammar.findByScopeName(p.name)) != null) {
+				} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
 					ng.initForUse();
 					includePatterns.add(p);
-					for (Pattern pat : ng.allPatterns) {
-						patternsToInclude.add(pat);
-					}
-				}
-				else {
+					patternsToInclude.addAll(ng.allPatterns);
+				} else {
 					System.out.printf("unknown include pattern: %s\n", p.name);
 				}
 			}
 		}
-		removePatterns(patterns, includePatterns);
-		addPatterns(patterns, patternsToInclude);
+		patterns.removeAll(includePatterns);
+		patterns.addAll(patternsToInclude);
 	}
-	
-	private static void removePatterns(ArrayList<Pattern> patlist, ArrayList<Pattern> ps) {
+
+	private static void removePatterns(List<Pattern> patlist, List<Pattern> ps) {
 		for (Pattern p : ps) {
 			patlist.remove(p);
 		}
 	}
 
-	private static void addPatterns(ArrayList<Pattern> patlist, ArrayList<Pattern> ps) {
+	private static void addPatterns(List<Pattern> patlist, List<Pattern> ps) {
 		for (Pattern p : ps) {
 			patlist.add(p);
 		}
 	}
-	
+
 	public void setDisabled(Dict dict) {
 		String strN = dict.getString("disabled");
 		Integer intN = dict.getInt("disabled");
@@ -125,8 +119,8 @@ public class Pattern {
 			disabled = true;
 		else if (strN != null && strN == "1")
 			disabled = true;
-		else 
+		else
 			disabled = false;
-		
+
 	}
 }
