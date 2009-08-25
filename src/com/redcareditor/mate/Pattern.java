@@ -113,15 +113,18 @@ public class Pattern {
 	}
 
 	public void setDisabled(Dict dict) {
-		// TODO: this can be done using simple string conversion.
-		String strN = dict.getString("disabled");
-		Integer intN = dict.getInt("disabled");
-		if (intN != null && intN == 1)
-			disabled = true;
-		else if (strN != null && strN == "1")
-			disabled = true;
-		else
+		if (dict.containsElement("disabled")) {
+			int intn = dict.getInt("disabled");
+			switch (intn) {
+			case 1:
+				disabled = true;
+				break;
+			default:
+				disabled = false;
+				break;
+			}
+		} else {
 			disabled = false;
-
+		}
 	}
 }
