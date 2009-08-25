@@ -21,7 +21,7 @@ public class EmptyRangeSetTest {
 	public void testShouldAddARange() {
 		rs.add(1, 3);
 		assertEquals(1, rs.length());
-		assertEquals(3, rs.size());
+		assertEquals(3, rs.rangeSize());
 	}
 }
 
