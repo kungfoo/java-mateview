@@ -69,9 +69,16 @@ class MateExample
   end
   
   def build_styled_text
+		@styled_text = JavaMateView::MateText.new(@shell, Swt::SWT::FULL_SELECTION | Swt::SWT::VERTICAL | Swt::SWT::HORIZONTAL)
+		font = Swt::Graphics::Font.new(@shell.get_display, "Monaco", 16, Swt::SWT::NORMAL)
+		@styled_text.set_font(font)
+		@styled_text.set_size(400, 300)
   end
   
   def setup_listeners
+    @styled_text.add_verify_listener do |args|
+      p [:modified, args, args.start, args.end, args.text]
+    end
   end
   
   def build_edit_menu
