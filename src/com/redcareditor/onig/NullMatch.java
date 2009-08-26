@@ -20,15 +20,10 @@ public class NullMatch extends Match {
 	}
 
 	@Override
-	public int begin(int capture) {
-		return 0;
+	public Range getCapture(int capture) {
+		return new Range(0,0);
 	}
-
-	@Override
-	public int end(int capture) {
-		return 0;
-	}
-
+	
 	@Override
 	public List<Range> ranges() {
 		return emptyList;
