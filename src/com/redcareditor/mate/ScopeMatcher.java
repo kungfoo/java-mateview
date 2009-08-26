@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.redcareditor.onig.Match;
+import com.redcareditor.onig.Range;
 import com.redcareditor.onig.Rx;
 
 public class ScopeMatcher {
@@ -31,8 +32,11 @@ public class ScopeMatcher {
 		int cap2_ix, cap2_el_ix, len2;
 		for (int i = 0; i < Math.min(max_cap1, max_cap2); i++) {
 			// first try element depth:
-			cap1_ix = m1.begin(max_cap1 - 1 - i);
-			cap2_ix = m2.begin(max_cap2 - 1 - i);
+			Range capture1 = m1.getCapture(max_cap1 - 1 - i);
+			Range capture2 = m2.getCapture(max_cap2 - 1 - i);
+			
+			cap1_ix = capture1.start;
+			cap2_ix = capture2.start;
 			cap1_el_ix = ScopeMatcher.sorted_ix(spaceIxs, cap1_ix);
 			cap2_el_ix = ScopeMatcher.sorted_ix(spaceIxs, cap2_ix);
 			if (cap1_el_ix > cap2_el_ix) {
@@ -42,8 +46,8 @@ public class ScopeMatcher {
 			}
 
 			// next try length of match
-			len1 = m1.end(max_cap1 - 1 - i) - cap1_ix;
-			len2 = m2.end(max_cap2 - 1 - i) - cap2_ix;
+			len1 = capture1.end - cap1_ix;
+			len2 = capture2.end - cap2_ix;
 			if (len1 > len2) {
 				return 1;
 			} else if (len1 < len2) {
@@ -95,7 +99,8 @@ public class ScopeMatcher {
 		Match m = match(selectorString, scopeString);
 		if (m != null) {
 			System.out.printf("%d\n", m.numCaptures());
-			System.out.printf("test_match('%s', '%s') == %d\n", selectorString, scopeString, m.begin(0));
+			Range firstCapture = m.getCapture(0);
+			System.out.printf("test_match('%s', '%s') == %d\n", selectorString, scopeString, firstCapture.start);
 		} else {
 			System.out.printf("test_match('%s', '%s') == null\n", selectorString, scopeString);
 		}
