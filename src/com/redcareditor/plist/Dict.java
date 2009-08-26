@@ -9,6 +9,8 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
+import com.redcareditor.onig.Rx;
+
 /**
  * class to load plist files.
  * 
@@ -85,6 +87,10 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 	
 	public Dict getDictionary(String key) {
 		return (Dict) value.get(key);
+	}
+	
+	public Rx getRegExp(String key){
+		return Rx.createRx(getString(key));
 	}
 
 	public boolean containsElement(String key) {

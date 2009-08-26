@@ -25,14 +25,13 @@ public class Match implements Iterable<Range> {
 		return region.numRegs;
 	}
 
-	public int begin(int capture) {
+	
+	public Range getCapture(int capture){
 		checkBounds(capture);
-		return region.beg[capture];
-	}
-
-	public int end(int capture) {
-		checkBounds(capture);
-		return region.end[capture];
+		return new Range(
+				region.beg[capture],
+				region.end[capture]
+			);
 	}
 
 	private void checkBounds(int capture) {
