@@ -68,7 +68,7 @@ public class RangeSet implements Iterable<Range> {
 
 		if (mergeAt > 0) {
 			Range beforeMerge = ranges.get(mergeAt - 1);
-			if (range.touch(beforeMerge)) {
+			if (range.isTouching(beforeMerge)) {
 				ranges.remove(mergeAt);
 				beforeMerge.end = Math.max(beforeMerge.end, range.end);
 				mergeAt--;
@@ -78,7 +78,7 @@ public class RangeSet implements Iterable<Range> {
 
 		if (mergeAt + 1 < length()) {
 			Range afterMerge = ranges.get(mergeAt + 1);
-			while (mergeAt < length() - 1 && range.touch(afterMerge)) {
+			while (mergeAt < length() - 1 && range.isTouching(afterMerge)) {
 				range.start = Math.min(range.start, afterMerge.start);
 				range.end = Math.max(range.end, afterMerge.end);
 				ranges.remove(mergeAt + 1);
