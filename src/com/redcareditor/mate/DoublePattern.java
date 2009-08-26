@@ -19,6 +19,8 @@ public class DoublePattern extends Pattern {
 	public Map<Integer, String> bothCaptures;
 	public List<Pattern> patterns;
 
+	public DoublePattern() {}
+	
 	public DoublePattern(List<Pattern> grammarPatterns, Dict dict) {
 		name = dict.getString("name");
 		begin = Rx.createRx(dict.getString("begin"));

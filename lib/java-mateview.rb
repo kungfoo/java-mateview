@@ -87,6 +87,6 @@ class MateExample
 end
 
 
-# MateExample.new
+MateExample.new
 
 
