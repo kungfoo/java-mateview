@@ -20,32 +20,6 @@ public class RangeSet implements Iterable<Range>{
 		merge(insertAt, range);
 	}
 	
-	private void merge(int mergeAt, Range range) {
-		ranges.add(mergeAt, range);
-		
-		if (mergeAt > 0) {
-			Range beforeMerge = ranges.get(mergeAt-1);
-			if (range.touch(beforeMerge)) {
-				ranges.remove(mergeAt);
-				beforeMerge.end = Math.max(beforeMerge.end, range.end);
-				mergeAt--;
-				range = ranges.get(mergeAt);
-			}
-		}
-		
-		if (mergeAt+1 < length()) {
-			Range afterMerge = ranges.get(mergeAt+1);
-			while (mergeAt < length()-1 && range.touch(afterMerge)) {
-				range.start = Math.min(range.start, afterMerge.start);
-				range.end = Math.max(range.end, afterMerge.end);
-				ranges.remove(mergeAt+1);
-				
-				if (mergeAt+1 < length())
-					afterMerge = ranges.get(mergeAt+1);
-			}
-		}
-	}
-	
 	public Range get(int i){
 		return ranges.get(i);
 	}
@@ -65,14 +39,8 @@ public class RangeSet implements Iterable<Range>{
 	public String present() {
 		StringBuilder sb = new StringBuilder("");
 		for (int i=0;i<length();i++){
-			if (ranges.get(i).end - ranges.get(i).start == 0) {
-				sb.append(ranges.get(i).start);
-				sb.append(", ");
-			}
-			else {
-				sb.append(ranges.get(i).start);
-				sb.append("..");
-				sb.append(ranges.get(i).end);
+			sb.append(get(i).toString());
+			if(i != length()-1){
 				sb.append(", ");
 			}
 		}
@@ -89,6 +57,31 @@ public class RangeSet implements Iterable<Range>{
 	
 	public int size(){
 		return ranges.size();
+	}
+	
+	private void merge(int mergeAt, Range range) {
+		ranges.add(mergeAt, range);
+		
+		if (mergeAt > 0) {
+			Range beforeMerge = ranges.get(mergeAt-1);
+			if (range.touch(beforeMerge)) {
+				ranges.remove(mergeAt);
+				beforeMerge.end = Math.max(beforeMerge.end, range.end);
+				mergeAt--;
+				range = ranges.get(mergeAt);
+			}
+		}
+		
+		if (mergeAt+1 < length()) {
+			Range afterMerge = ranges.get(mergeAt+1);
+			while (mergeAt < length()-1 && range.touch(afterMerge)) {
+				range.start = Math.min(range.start, afterMerge.start);
+				range.end = Math.max(range.end, afterMerge.end);
+				ranges.remove(mergeAt+1);
+				if (mergeAt+1 < length())
+					afterMerge = ranges.get(mergeAt+1);
+			}
+		}
 	}
 
 }

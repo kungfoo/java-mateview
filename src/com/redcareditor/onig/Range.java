@@ -12,7 +12,10 @@ public class Range implements Comparable<Range>{
 
 	@Override
 	public String toString() {
-		return String.format("[%d,%d]", start, end);
+		if(start == end){
+			return Integer.toString(start);
+		}
+		return String.format("%d..%d", start, end);
 	}
 	
 	public boolean touch(Range other){
