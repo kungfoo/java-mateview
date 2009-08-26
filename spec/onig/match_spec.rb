@@ -15,12 +15,12 @@ describe Onig::Match do
   end
   
   it "reports the beginning and end of the match" do
-    @match.begin(0).should == 1
-    @match.end(0).should == 4
+    @match.getCapture(0).start.should == 1
+    @match.getCapture(0).end.should == 4
   end
   
   it "reports the beginning and end of the captures" do
-    @match.begin(1).should == 1
-    @match.end(1).should == 2
+    @match.getCapture(1).start.should == 1
+    @match.getCapture(1).end.should == 2
   end
 end
