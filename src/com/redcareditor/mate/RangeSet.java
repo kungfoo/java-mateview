@@ -6,41 +6,49 @@ import java.util.List;
 
 import com.redcareditor.onig.Range;
 
-public class RangeSet implements Iterable<Range>{
+public class RangeSet implements Iterable<Range> {
 	List<Range> ranges = new ArrayList<Range>();
-	
+
 	public void add(int a, int b) {
 		int insertAt = 0;
-		Range range = new Range(a,b);
+		Range range = new Range(a, b);
 
-		while(insertAt < length() && ranges.get(insertAt).start < range.start){
+		while (insertAt < length() && ranges.get(insertAt).start < range.start) {
 			insertAt++;
 		}
-		
+
 		merge(insertAt, range);
 	}
-	
-	public Range get(int i){
+
+	public Range get(int i) {
 		return ranges.get(i);
 	}
-	
+
 	public int length() {
-		return ranges.size();
+		return size();
 	}
 	
+	public int size() {
+		return ranges.size();
+	}
+
 	public int rangeSize() {
 		int sizec = 0;
-		for (int i=0;i<length();i++){
+		for (int i = 0; i < length(); i++) {
 			sizec += ranges.get(i).end - ranges.get(i).start + 1;
 		}
 		return sizec;
 	}
-	
+
 	public String present() {
+		return toString();
+	}
+
+	public String toString() {
 		StringBuilder sb = new StringBuilder("");
-		for (int i=0;i<length();i++){
+		for (int i = 0; i < length(); i++) {
 			sb.append(get(i).toString());
-			if(i != length()-1){
+			if (i != length() - 1) {
 				sb.append(", ");
 			}
 		}
@@ -54,16 +62,12 @@ public class RangeSet implements Iterable<Range>{
 	public Iterator<Range> iterator() {
 		return ranges.iterator();
 	}
-	
-	public int size(){
-		return ranges.size();
-	}
-	
+
 	private void merge(int mergeAt, Range range) {
 		ranges.add(mergeAt, range);
-		
+
 		if (mergeAt > 0) {
-			Range beforeMerge = ranges.get(mergeAt-1);
+			Range beforeMerge = ranges.get(mergeAt - 1);
 			if (range.touch(beforeMerge)) {
 				ranges.remove(mergeAt);
 				beforeMerge.end = Math.max(beforeMerge.end, range.end);
@@ -71,15 +75,15 @@ public class RangeSet implements Iterable<Range>{
 				range = ranges.get(mergeAt);
 			}
 		}
-		
-		if (mergeAt+1 < length()) {
-			Range afterMerge = ranges.get(mergeAt+1);
-			while (mergeAt < length()-1 && range.touch(afterMerge)) {
+
+		if (mergeAt + 1 < length()) {
+			Range afterMerge = ranges.get(mergeAt + 1);
+			while (mergeAt < length() - 1 && range.touch(afterMerge)) {
 				range.start = Math.min(range.start, afterMerge.start);
 				range.end = Math.max(range.end, afterMerge.end);
-				ranges.remove(mergeAt+1);
-				if (mergeAt+1 < length())
-					afterMerge = ranges.get(mergeAt+1);
+				ranges.remove(mergeAt + 1);
+				if (mergeAt + 1 < length())
+					afterMerge = ranges.get(mergeAt + 1);
 			}
 		}
 	}
