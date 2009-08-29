@@ -38,8 +38,10 @@ class MateExample
     build_application_menu
     build_styled_text
     setup_listeners
-
-    @shell.pack
+    
+    @shell.layout = Swt::Layout::FillLayout.new
+    @shell.size = Swt::Graphics::Point.new(600, 400)
+    
     @shell.open
     until @shell.disposed?
       unless display.read_and_dispatch
@@ -77,7 +79,6 @@ class MateExample
 		@styled_text = JavaMateView::MateText.new(@shell, Swt::SWT::FULL_SELECTION | Swt::SWT::VERTICAL | Swt::SWT::HORIZONTAL)
 		font = Swt::Graphics::Font.new(@shell.display, "Inconsolata", 13, Swt::SWT::NORMAL)
 		@styled_text.font = font
-		@styled_text.size = Swt::Graphics::Point.new(400, 300)
 		@styled_text.block_selection = true
   end
   
