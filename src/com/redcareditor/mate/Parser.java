@@ -55,13 +55,13 @@ public class Parser {
 	}
 	
 	public void attachListeners() {
-		mateText.addVerifyListener(new VerifyListener() {
+		mateText.getTextWidget().addVerifyListener(new VerifyListener() {
 			public void verifyText(VerifyEvent e) {
 				verifyEventCallback(e.start, e.end, e.text);
 			}
 		});
 		
-		mateText.addModifyListener(new ModifyListener() {
+		mateText.getTextWidget().addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				modifyEventCallback();
 			}
@@ -75,8 +75,9 @@ public class Parser {
 	}
 	
 	public void modifyEventCallback() {
-		changes.add(mateText.getLineAtOffset(modifyStart), mateText.getLineAtOffset(modifyEnd));
-		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, mateText.getLineAtOffset(modifyStart), modifyText);
+		changes.add(mateText.getTextWidget().getLineAtOffset(modifyStart), 
+					mateText.getTextWidget().getLineAtOffset(modifyEnd));
+		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, mateText.getTextWidget().getLineAtOffset(modifyStart), modifyText);
 		processChanges();
 	}
 
@@ -102,7 +103,7 @@ public class Parser {
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
 		boolean scopeEverChanged = false;
-		int endLine = Math.min(lastVisibleLine + 100, mateText.getLineCount() - 1);
+		int endLine = Math.min(lastVisibleLine + 100, mateText.getTextWidget().getLineCount() - 1);
 		while (lineIx <= toLine || scopeEverChanged && lineIx <= endLine) {
 			scopeChanged = parseLine(lineIx++);
 			if (scopeChanged) {

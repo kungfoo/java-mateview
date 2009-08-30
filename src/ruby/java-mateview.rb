@@ -14,6 +14,14 @@ else
 end
 
 require 'swt_wrapper'
+require 'org.eclipse.core.commands'
+require 'org.eclipse.core.runtime_3.5.0.v20090525'
+require 'org.eclipse.equinox.common'
+require 'org.eclipse.jface.databinding_1.3.0.I20090525-2000'
+require 'org.eclipse.jface'
+require 'org.eclipse.jface.text_3.5.0'
+require 'org.eclipse.osgi'
+require 'org.eclipse.text_3.5.0.v20090513-2000'
 
 unless defined?(JavaMateView)
 

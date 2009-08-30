@@ -51,14 +51,18 @@ class MateExample
   end
   
   def build_styled_text
-		@mate_text = JavaMateView::MateText.new(@shell, Swt::SWT::FULL_SELECTION | Swt::SWT::VERTICAL | Swt::SWT::HORIZONTAL)
-		font = Swt::Graphics::Font.new(@shell.display, "Inconsolata", 13, Swt::SWT::NORMAL)
-		@mate_text.font = font
+		@mate_text = JavaMateView::MateText.new(
+		  JavaMateView::MateText.constructContents(@shell), 
+		  ruler = JavaMateView::MateText.constructRuler,
+		  Swt::SWT::FULL_SELECTION | Swt::SWT::VERTICAL | Swt::SWT::HORIZONTAL)
+    font = Swt::Graphics::Font.new(@shell.display, "Courier", 15, Swt::SWT::NORMAL)
+    @mate_text.get_text_widget.font = font
+    ruler.font = font
     # @styled_text.block_selection = true
   end
   
   def setup_listeners
-    @mate_text.add_line_style_listener do |args|
+    @mate_text.get_text_widget.add_line_style_listener do |args|
       p [:line_style, args.lineOffset, args.lineText]
     end
   end
