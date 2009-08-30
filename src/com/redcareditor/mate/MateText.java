@@ -26,15 +26,11 @@ import com.redcareditor.theme.Theme;
 
 public class MateText extends SourceViewer {
 	public Parser parser;
-	private Composite contents;
-	private SourceViewer sourceViewer;
 	
 	public MateText(Composite parent, CompositeRuler ruler, int style) {
 		super(parent, ruler, SWT.FULL_SELECTION | SWT.VERTICAL | SWT.HORIZONTAL);
 		
 		IDocument document = new Document();
-		document.set("Foo is great!\nflkdasjfjkd");
-		
 		setDocument(document);
 	}
 	

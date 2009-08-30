@@ -30,7 +30,7 @@ public class GrammarTest {
 		ArrayList<String> result = new ArrayList<String>();
 		for (Pattern p : g.allPatterns) {
 			result.add(p.name);
-			System.out.printf("test name: %s\n", p.name);
+//			System.out.printf("test name: %s\n", p.name);
 		}
 		return result;
 	}
