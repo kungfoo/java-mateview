@@ -7,7 +7,7 @@ require 'jdom'
 # TODO: write a method t do this os dependent
 require 'rbconfig'
 if Config::CONFIG["host_os"] =~ /darwin/
-  require 'swt-linux'
+  require 'swt-osx'
 else
   require 'swt-linux'
 end
@@ -84,7 +84,7 @@ class MateExample
 		@styled_text = JavaMateView::MateText.new(@shell, Swt::SWT::FULL_SELECTION | Swt::SWT::VERTICAL | Swt::SWT::HORIZONTAL)
 		font = Swt::Graphics::Font.new(@shell.display, "Inconsolata", 13, Swt::SWT::NORMAL)
 		@styled_text.font = font
-		@styled_text.block_selection = true
+    # @styled_text.block_selection = true
   end
   
   def setup_listeners
