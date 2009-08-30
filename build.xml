@@ -13,6 +13,7 @@
 		<pathelement location="${build.test.dir}" />
 		<fileset dir="${lib.dir}">
 			<include name="*.jar" />
+			<exclude name="*linux*" />
 		</fileset>
 	</path>
 
