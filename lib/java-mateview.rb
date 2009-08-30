@@ -21,6 +21,7 @@ unless defined?(JavaMateView)
     import com.redcareditor.mate.Bundle
     import com.redcareditor.mate.TextLocation
     import com.redcareditor.theme.Theme
+    import com.redcareditor.theme.ThemeManager
   end
 
   class Plist
@@ -36,9 +37,11 @@ unless defined?(JavaMateView)
 end
 
 class MateExample
+  attr_reader :mate_text
+  
   def initialize
-    display = Swt::Widgets::Display.new
-    @shell = Swt::Widgets::Shell.new(display)
+    @display = Swt::Widgets::Display.new
+    @shell = Swt::Widgets::Shell.new(@display)
 
     build_application_menu
     build_styled_text
@@ -46,14 +49,16 @@ class MateExample
     
     @shell.layout = Swt::Layout::FillLayout.new
     @shell.size = Swt::Graphics::Point.new(600, 400)
-    
+  end
+  
+  def run!
     @shell.open
     until @shell.disposed?
-      unless display.read_and_dispatch
-        display.sleep
+      unless @display.read_and_dispatch
+        @display.sleep
       end
     end
-    display.dispose
+    @display.dispose
   end
   
   def build_application_menu
@@ -81,23 +86,25 @@ class MateExample
   end
   
   def build_styled_text
-		@styled_text = JavaMateView::MateText.new(@shell, Swt::SWT::FULL_SELECTION | Swt::SWT::VERTICAL | Swt::SWT::HORIZONTAL)
+		@mate_text = JavaMateView::MateText.new(@shell, Swt::SWT::FULL_SELECTION | Swt::SWT::VERTICAL | Swt::SWT::HORIZONTAL)
 		font = Swt::Graphics::Font.new(@shell.display, "Inconsolata", 13, Swt::SWT::NORMAL)
-		@styled_text.font = font
+		@mate_text.font = font
     # @styled_text.block_selection = true
   end
   
   def setup_listeners
-    @styled_text.add_verify_listener do |args|
-      p [:modified, args, args.start, args.end, args.text]
-    end
-    
-    @styled_text.add_line_style_listener do |args|
+    @mate_text.add_line_style_listener do |args|
       p [:line_style, args.lineOffset, args.lineText]
     end
   end
 end
 
-MateExample.new
+JavaMateView::Bundle.load_bundles("input/")
+p JavaMateView::Bundle.bundles.to_a.map {|b| b.name }
+JavaMateView::ThemeManager.load_themes("input/")
+p JavaMateView::ThemeManager.themes.to_a.map {|t| t.name }
 
+mate_example = MateExample.new
+mate_example.mate_text.set_grammar_by_name("Ruby")
+mate_example.run!
 

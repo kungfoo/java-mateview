@@ -35,7 +35,7 @@ public class Pattern {
 			int capnum = Integer.parseInt(sCapnum);
 			pcd = pd.getDictionary(sCapnum);
 			ns = pcd.getString("name");
-			System.out.printf("capture: %d, %s\n", capnum, ns);
+//			System.out.printf("capture: %d, %s\n", capnum, ns);
 			captures.put((Integer) capnum, ns);
 		}
 		return captures;

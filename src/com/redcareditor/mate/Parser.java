@@ -1,5 +1,10 @@
 package com.redcareditor.mate;
 
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
+
 public class Parser {
 	public Grammar grammar;
 	public Colourer colourer;
@@ -14,6 +19,10 @@ public class Parser {
 	
 	public RangeSet changes;
 	public Scope root;
+
+	// temporary stores for the modifications to the mateText
+	private int modifyStart, modifyEnd;
+	private String modifyText;
 	
 	public Parser(Grammar g, MateText m) {
 		g.initForUse();
@@ -44,6 +53,28 @@ public class Parser {
 	}
 	
 	public void attachListeners() {
+		mateText.addVerifyListener(new VerifyListener() {
+			public void verifyText(VerifyEvent e) {
+				verifyEventCallback(e.start, e.end, e.text);
+			}
+		});
 		
+		mateText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				modifyEventCallback();
+			}
+		});
 	}
+	
+
+	public void verifyEventCallback(int start, int end, String text) {
+		modifyStart = start;
+		modifyEnd   = end;
+		modifyText  = text;
+	}
+	
+	public void modifyEventCallback() {
+		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, mateText.getLineAtOffset(modifyStart), modifyText);
+	}
+	
 }
