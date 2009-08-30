@@ -12,4 +12,12 @@ public class Scope {
 		mateText = mt;
 		name = n;
 	}
+	
+	public void clearAfter(int lineIx, int something) {
+		
+	}
+	
+	public String pretty(int indent) {
+		return "";
+	}
 }

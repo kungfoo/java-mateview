@@ -5,6 +5,8 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 
+import com.redcareditor.onig.Range;
+
 public class Parser {
 	public Grammar grammar;
 	public Colourer colourer;
@@ -19,7 +21,7 @@ public class Parser {
 	
 	public RangeSet changes;
 	public Scope root;
-
+	
 	// temporary stores for the modifications to the mateText
 	private int modifyStart, modifyEnd;
 	private String modifyText;
@@ -65,7 +67,6 @@ public class Parser {
 			}
 		});
 	}
-	
 
 	public void verifyEventCallback(int start, int end, String text) {
 		modifyStart = start;
@@ -74,7 +75,58 @@ public class Parser {
 	}
 	
 	public void modifyEventCallback() {
+		changes.add(mateText.getLineAtOffset(modifyStart), mateText.getLineAtOffset(modifyEnd));
 		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, mateText.getLineAtOffset(modifyStart), modifyText);
+		processChanges();
+	}
+
+	// Process all change ranges.
+	public void processChanges() {
+		int thisParsedUpto = -1;
+		System.out.printf("process_changes (lastVisibleLine: %d)\n", lastVisibleLine);
+		for (Range range : changes) {
+			if (range.end > thisParsedUpto && range.start <= lastVisibleLine + lookAhead) {
+				int rangeEnd = Math.min(lastVisibleLine + lookAhead, range.end);
+				thisParsedUpto = parseRange(range.start, rangeEnd);
+			}
+		}
+		System.out.printf("%s\n", root.pretty(0));
+		changes.ranges.clear();
+	}
+
+	// Parse from from_line to *at least* to_line. Will parse
+	// more if necessary. Returns the index of the last line
+	// parsed.
+	private int parseRange(int fromLine, int toLine) {
+		System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
+		int lineIx = fromLine;
+		boolean scopeChanged = false;
+		boolean scopeEverChanged = false;
+		int endLine = Math.min(lastVisibleLine + 100, mateText.getLineCount() - 1);
+		while (lineIx <= toLine || scopeEverChanged && lineIx <= endLine) {
+			scopeChanged = parseLine(lineIx++);
+			if (scopeChanged) {
+				scopeEverChanged = true;
+				// In the old scheme this wasn't necessary because 
+				// the scope_at used a simple scan from the front. The GSequences
+				// on the other hand can get confused if the later scopes
+				// are inconsistent with earler ones. So we have to clear everything.
+				// TODO: figure out a way to OPTIMIZE this again.
+				root.clearAfter(lineIx, -1);
+				removeColourAfter(lineIx, 0);
+				this.parsedUpto = lineIx;
+			}
+			// stdout.printf("parse_line returned: %s\n", scope_changed ? "true" : "false");
+			//stdout.printf("pretty:\n%s\n", root.pretty(2));
+		}
+		return toLine;
 	}
 	
+	private boolean parseLine(int lineIx) {
+		return true;
+	}
+
+	private void removeColourAfter(int lineIx, int something) {
+		
+	}
 }
