@@ -7,7 +7,7 @@ require 'jdom'
 # TODO: write a method t do this os dependent
 require 'rbconfig'
 if Config::CONFIG["host_os"] =~ /darwin/
-  require 'swt-osx'
+  require 'swt-linux'
 else
   require 'swt-linux'
 end
