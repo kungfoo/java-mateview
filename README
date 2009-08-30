@@ -9,9 +9,3 @@ Running the ant-based unit-tests
 ================================
 
     rake java:test
-
-Running the rspec based tests
-=============================
-
-    rake jruby:test
-
