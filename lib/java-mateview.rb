@@ -4,7 +4,13 @@ $CLASSPATH << File.expand_path(File.join(File.dirname(__FILE__), "..", "bin"))
 $:.push(File.expand_path(File.join(File.dirname(__FILE__), "..", "lib")))
 
 require 'jdom'
-require 'swt'
+# TODO: write a method t do this os dependent
+require 'rbconfig'
+if Config::CONFIG["host_os"] =~ /darwin/
+  require 'swt-osx'
+else
+  require 'swt-linux'
+end
 require 'swt_wrapper'
 
 unless defined?(JavaMateView)
@@ -37,11 +43,13 @@ class MateExample
     build_application_menu
     build_styled_text
     setup_listeners
-
-    @shell.pack
+    
+    @shell.layout = Swt::Layout::FillLayout.new
+    @shell.size = Swt::Graphics::Point.new(600, 400)
+    
     @shell.open
     until @shell.disposed?
-      unless display.readAndDispatch
+      unless display.read_and_dispatch
         display.sleep
       end
     end
@@ -52,40 +60,43 @@ class MateExample
     @menu = Swt::Widgets::Menu.new(@shell, Swt::SWT::BAR)
 		build_file_menu
 		build_edit_menu
-		@shell.set_menu_bar(@menu)
+		@shell.menu_bar = @menu
   end
   
   def build_file_menu
   	file_header = Swt::Widgets::MenuItem.new(@menu, Swt::SWT::CASCADE)
-  	file_header.set_text("&File")
+  	file_header.text = "&File"
 	
   	file = Swt::Widgets::Menu.new(@shell, Swt::SWT::DROP_DOWN)
-  	file_header.set_menu(file)
+  	file_header.menu = file
 	
   	open = Swt::Widgets::MenuItem.new(file, Swt::SWT::PUSH)
-  	open.set_text("Open")
+  	open.text = "Open"
 	
   	close = Swt::Widgets::MenuItem.new(file, Swt::SWT::PUSH)
-  	close.set_text("Close")
+  	close.text = "Close"
+  end
+  
+  def build_edit_menu
   end
   
   def build_styled_text
 		@styled_text = JavaMateView::MateText.new(@shell, Swt::SWT::FULL_SELECTION | Swt::SWT::VERTICAL | Swt::SWT::HORIZONTAL)
-		font = Swt::Graphics::Font.new(@shell.get_display, "Monaco", 16, Swt::SWT::NORMAL)
-		@styled_text.set_font(font)
-		@styled_text.set_size(400, 300)
+		font = Swt::Graphics::Font.new(@shell.display, "Inconsolata", 13, Swt::SWT::NORMAL)
+		@styled_text.font = font
+		@styled_text.block_selection = true
   end
   
   def setup_listeners
     @styled_text.add_verify_listener do |args|
       p [:modified, args, args.start, args.end, args.text]
     end
-  end
-  
-  def build_edit_menu
+    
+    @styled_text.add_line_style_listener do |args|
+      p [:line_style, args.lineOffset, args.lineText]
+    end
   end
 end
-
 
 MateExample.new
 
