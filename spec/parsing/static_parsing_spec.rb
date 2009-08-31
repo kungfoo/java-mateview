@@ -74,4 +74,14 @@ END
 END
   end
     
+  it "closes DoublePatterns" do
+    @st.text = "\"asdf\""
+    @mt.parser.root.pretty(0).should == (t=<<END)
++ source.ruby (0,0)-(0,6) open
+  + string.quoted.double.ruby (0,0)-(0,6) closed
+    c punctuation.definition.string.begin.ruby (0,0)-(0,1) closed
+    c punctuation.definition.string.end.ruby (0,5)-(0,6) closed
+END
+  end
+
 end

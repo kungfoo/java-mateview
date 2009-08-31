@@ -161,6 +161,10 @@ public class Scope {
 		this.innerStartPos = makePosition(line, lineOffset);
 	}
 
+	public void setInnerEndPos(int line, int lineOffset, boolean c) {
+		this.innerEndPos = makePosition(line, lineOffset);
+	}
+
 	public void setEndPos(int line, int lineOffset, boolean c) {
 		this.endPos = makePosition(line, lineOffset);
 	}
@@ -169,6 +173,10 @@ public class Scope {
 		return new TextLocation(startLine(), startLineOffset());
 	}
 
+	public TextLocation innerEndLoc() {
+		return new TextLocation(endLine(), innerEndLineOffset());
+	}
+	
 	public TextLocation endLoc() {
 		return new TextLocation(endLine(), endLineOffset());
 	}
@@ -194,6 +202,13 @@ public class Scope {
 			return startPos.offset - styledText.getOffsetAtLine(startLine());
 	}
 
+	public int innerEndLineOffset() {
+		if (innerEndPos == null)
+			return styledText.getCharCount();
+		else
+			return innerEndPos.offset - styledText.getOffsetAtLine(endLine());
+	}
+	
 	public int endLineOffset() {
 		if (endPos == null)
 			return styledText.getCharCount();

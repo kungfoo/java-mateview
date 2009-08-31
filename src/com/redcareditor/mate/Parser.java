@@ -234,12 +234,61 @@ public class Parser {
 	private void removeColourAfter(int lineIx, int something) {
 		// TODO: port this function
 	}
-	
-	private void closeScope(Scanner scanner, Scope expectedScope, int lineIx, String line, 
-							int length, Marker m, ArrayList<Scope> allScopes, 
-							ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes) {
-		// TODO: port this function
+
+	public void closeScope(Scanner scanner, Scope expectedScope, int lineIx, String line, 
+			int length, Marker m, ArrayList<Scope> allScopes, 
+			ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes) {
+		String endMatchString = line.substring(m.from, m.match.getCapture(0).end);
+		// stdout.printf("checking for already closed: %s, (%d,%d)-(%d,%d) (%d,%d)-(%d,%d) '%s' '%s'\n",
+//     scanner.current_scope.name,
+//			  scanner.current_scope.end_line(), scanner.current_scope.end_line_offset(),
+//			  line_ix, m.match.end(0), 
+//			  scanner.current_scope.inner_end_line(), scanner.current_scope.inner_end_line_offset(),
+//				line_ix, m.from,
+//				scanner.current_scope.end_match_string, end_match_string);
+//		  
+		if (scanner.getCurrentScope().endPos != null &&
+				scanner.getCurrentScope().endLoc().equals(new TextLocation(lineIx, m.match.getCapture(0).end)) &&
+				scanner.getCurrentScope().innerEndLoc().equals(new TextLocation(lineIx, m.from)) &&
+				scanner.getCurrentScope().endMatchString == endMatchString) {
+				// we have already parsed this line and this scope ends here
+
+			// Re-add the captures from the end of the current scope to the 
+			// tracking arrays
+			for (Scope child : scanner.getCurrentScope().children) {
+				if (child.isCapture && 
+						child.startLine() == lineIx) {
+					if (!closedScopes.contains(child))
+						closedScopes.add(child);
+					if (!allScopes.contains(child))
+						allScopes.add(child);
+				}
+			}
+			// stdout.printf("closing scope matches expected\n");
+		}
+		else {
+			// stdout.printf("closing scope at %d\n", m.from);
+			if (colourer != null) {
+				colourer.uncolourScope(scanner.getCurrentScope(), false);
+			}
+			setInnerEndPosSafely(scanner.getCurrentScope(), m, lineIx, length, 0);
+			setEndPosSafely(scanner.getCurrentScope(), m, lineIx, length, 0);
+			scanner.getCurrentScope().isOpen = false;
+			scanner.getCurrentScope().endMatchString = endMatchString;
+			//stdout.printf("end_match_string: '%s'\n", scanner.current_scope.end_match_string);
+			handleCaptures(lineIx, length, line, scanner.getCurrentScope(), m, allScopes, closedScopes);
+			if (expectedScope != null) {
+				scanner.getCurrentScope().removeChild(expectedScope);
+				removedScopes.add(expectedScope);
+				// @removed_scopes << expected_scope
+			}
+		}
+		removedScopes.add(scanner.getCurrentScope()); // so it gets uncoloured
+		closedScopes.add(scanner.getCurrentScope());
+		scanner.setCurrentScope(scanner.getCurrentScope().parent);
+		allScopes.add(scanner.getCurrentScope());
 	}
+
 
 	public void openScope(Scanner scanner, Scope expectedScope, int lineIx, 
 			String line, int length, Marker m,
@@ -312,6 +361,16 @@ public class Parser {
 			scope.setInnerStartPos(lineIx, Math.min(to, length), false);
 	}
 
+	public void setInnerEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
+		int to = m.match.getCapture(cap).end;
+		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {
+			scope.setInnerEndPos(lineIx, length-1, true);
+		}
+		else {
+			scope.setInnerEndPos(lineIx, Math.min(to, length), true);
+		}
+	}
+	
 	public void setEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).end;
 		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {

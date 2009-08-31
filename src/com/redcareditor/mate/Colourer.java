@@ -1,6 +1,6 @@
 package com.redcareditor.mate;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import com.redcareditor.theme.Theme;
 
@@ -12,11 +12,15 @@ public class Colourer {
 		mateText = mt;
 	}
 	
-	public void uncolourScopes(ArrayList<Scope> scopes) {
+	public void uncolourScopes(List<Scope> scopes) {
+		
+	}
+
+	public void uncolourScope(Scope scope, boolean something) {
 		
 	}
 	
-	public void colourLineWithScopes(ArrayList<Scope> scopes) {
+	public void colourLineWithScopes(List<Scope> scopes) {
 		
 	}
 }
