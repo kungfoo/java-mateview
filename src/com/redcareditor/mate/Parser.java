@@ -1,6 +1,8 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
@@ -8,7 +10,9 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 
+import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Range;
+import com.redcareditor.onig.Rx;
 
 public class Parser {
 	public Grammar grammar;
@@ -54,6 +58,7 @@ public class Parser {
 //		int lineIx = styledText.getLineCount()-1;
 //		this.root.setEndPos(lineIx, 
 //							styledText.getCharCount() - styledText.getOffsetAtLine(lineIx), false);
+		System.out.printf("making root: %s\n", this.grammar.scopeName);
 		DoublePattern dp = new DoublePattern();
 		dp.name = this.grammar.name;
 		dp.patterns = this.grammar.allPatterns;
@@ -155,9 +160,10 @@ public class Parser {
 		}
 		System.out.printf("startScope is: %s\n", startScope.name);
 		Scope endScope1 = this.root.scopeAt(lineIx, Integer.MAX_VALUE);
+		System.out.printf("endScope1: %s\n", endScope1.name);
 		if (endScope1 != null)
 			endScope1 = endScope1.containingDoubleScope(lineIx);
-		 System.out.printf("endScope1: %s\n", endScope1.name);
+		System.out.printf("endScope1: %s\n", endScope1.name);
 		Scanner scanner = new Scanner(startScope, line);
 		ArrayList<Scope> allScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
@@ -165,7 +171,7 @@ public class Parser {
 		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
 		for (Marker m : scanner) {
-			sleep(500);
+//			sleep(500);
 			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, scanner.position);
 			if (expectedScope != null)
 				System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.startLoc().line, 
@@ -309,10 +315,118 @@ public class Parser {
 	// captures if necessary.
 	public void handleCaptures(int lineIx, int length, String line, 
 			Scope scope, Marker m, ArrayList<Scope> allScopes, ArrayList<Scope> closedScopes) {
-//		make_closing_regex(line, scope, m);
-//		collect_child_captures(line_ix, length, scope, m, all_scopes, closed_scopes);
+		makeClosingRegex(line, scope, m);
+		collectChildCaptures(lineIx, length, scope, m, allScopes, closedScopes);
 	}
-	
+
+	public Rx makeClosingRegex(String line, Scope scope, Marker m) {
+		// System.out.printf("make_closing_regex\n");
+		// new_end = pattern.end.gsub(/\\([0-9]+)/) do
+		// 	md.captures.send(:[], $1.to_i-1)
+		// end
+		if (m.pattern instanceof DoublePattern && !m.isCloseScope) {
+			DoublePattern dp = (DoublePattern) m.pattern;
+			//stdout.printf("making closing regex: %s (%d)\n", dp.end_string, (int) dp.end_string.length);
+			Rx rx = Rx.createRx("\\\\(\\d+)");
+			Match match;
+			int pos = 0;
+			StringBuilder src = new StringBuilder("");
+			boolean found = false;
+			while ((match = rx.search(dp.endString, pos, (int) dp.endString.length())) != null) {
+				found = true;
+				src.append(dp.endString.substring(pos, match.getCapture(0).start));
+				String numstr = dp.endString.substring(match.getCapture(1).start, match.getCapture(1).end);
+				int num = Integer.parseInt(numstr);
+				// System.out.printf("capture found: %d\n", num);
+				String capstr = line.substring(m.match.getCapture(num).start, m.match.getCapture(num).end);
+				src.append(capstr);
+				pos = match.getCapture(1).end;
+			}
+			if (found)
+				src.append(dp.endString.substring(pos, dp.endString.length()));
+			else
+				src.append(dp.endString);
+//			stdout.printf("src: '%s'\n", src.str);
+			scope.closingRegex = Rx.createRx(src.toString());
+		}
+		return null;
+	}
+
+	public void collectChildCaptures(int lineIx, int length, Scope scope, 
+			Marker m, ArrayList<Scope> allScopes, ArrayList<Scope> closedScopes) {
+		Scope s;
+		Map<Integer, String> captures;
+		if (m.pattern instanceof SinglePattern) {
+			captures = ((SinglePattern) m.pattern).captures;
+		}
+		else {
+			if (m.isCloseScope) {
+				captures = ((DoublePattern) m.pattern).endCaptures;
+			}
+			else {
+				captures = ((DoublePattern) m.pattern).beginCaptures;
+			}
+			if (((DoublePattern) m.pattern).bothCaptures != null) {
+				captures = ((DoublePattern) m.pattern).bothCaptures;
+			}
+		}
+		List<Scope> captureScopes = new ArrayList<Scope>();
+		// create capture scopes
+		if (captures != null) {
+			for (Integer cap : captures.keySet()) {
+				if (m.match.getCapture(cap).start != -1) {
+					s = new Scope(this.mateText, captures.get(cap));
+					s.pattern = scope.pattern;
+					s.setStartPos(lineIx, Math.min(m.match.getCapture(cap).start, length-1), false);
+					setEndPosSafely(s, m, lineIx, length, cap);
+					s.isOpen = false;
+					s.isCapture = true;
+					s.parent = scope;
+					captureScopes.add(s);
+					allScopes.add(s);
+					closedScopes.add(s);
+				}
+			}
+		}
+		// Now we arrange the capture scopes into a tree under the matched
+		// scope. We do this by processing the captures in order of offset and 
+		// length. For each capture, we check to see if it is a child of an already 
+		// placed capture, and if so we add it as a child (we know that the latest 
+		// such capture is the one to add it to by the ordering). If not we
+		// add it as a child of the matched scope.
+		int bestLength = 0;
+		int newLength;
+		List<Scope> placedScopes = new ArrayList<Scope>();
+		Scope parentScope;
+		while (captureScopes.size() > 0) {
+			s = null;
+			// find first and longest remaining scope (put it in 's')
+			for (Scope cs : captureScopes) {
+				newLength = cs.endOffset() - cs.startOffset();
+				if (s == null || (cs.startOffset() < s.startOffset() && newLength >= bestLength)) {
+					s = cs;
+					bestLength = newLength;
+				}
+			}
+			// look for somewhere to put it from placed_scopes
+			parentScope = null;
+			for (Scope ps : placedScopes) {
+				if (s.startOffset() >= ps.startOffset() && s.endOffset() <= ps.endOffset()) {
+					parentScope = ps;
+				}
+			}
+			if (parentScope != null) {
+				parentScope.addChild(s);
+				s.parent = parentScope;
+			}
+			else {
+				scope.addChild(s);
+			}
+			placedScopes.add(s);
+			captureScopes.remove(s);
+		}
+	}
+
 	private void clearLine(int lineIx, Scope startScope, ArrayList<Scope> allScopes, 
 							ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes) {
 		// TODO: port this function

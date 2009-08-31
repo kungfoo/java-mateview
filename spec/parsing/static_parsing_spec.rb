@@ -25,14 +25,14 @@ describe JavaMateView, "when parsing Ruby from scratch" do
   
   it "should have a blank Ruby scope tree" do
     @mt.parser.root.pretty(0).should == (t=<<END)
-+ source.ruby (inf)-(inf) open
++ source.ruby (0,0)-(0,0) open
 END
   end
   
   it "parses flat SinglePatterns" do
     @st.text = "1 + 2 + Redcar"
     @mt.parser.root.pretty(0).should == (t=<<END)
-+ source.ruby (inf)-(inf) open
++ source.ruby (0,0)-(0,14) open
   + constant.numeric.ruby (0,0)-(0,1) closed
   + keyword.operator.arithmetic.ruby (0,2)-(0,3) closed
   + constant.numeric.ruby (0,4)-(0,5) closed
@@ -44,12 +44,24 @@ END
   it "parses flat SinglePatterns on multiple lines" do
     @st.text = "1 + \n3 + Redcar"
     @mt.parser.root.pretty(0).should == (t=<<END)
-+ source.ruby (inf)-(inf) open
++ source.ruby (0,0)-(1,15) open
   + constant.numeric.ruby (0,0)-(0,1) closed
   + keyword.operator.arithmetic.ruby (0,2)-(0,3) closed
   + constant.numeric.ruby (1,0)-(1,1) closed
   + keyword.operator.arithmetic.ruby (1,2)-(1,3) closed
   + variable.other.constant.ruby (1,4)-(1,10) closed
+END
+  end
+  
+  it "arranges SinglePattern captures into trees" do
+    @st.text = "class Red < Car"
+    @mt.parser.root.pretty(0).should == (t=<<END)
++ source.ruby (0,0)-(0,15) open
+  + meta.class.ruby (0,0)-(0,15) closed
+    c keyword.control.class.ruby (0,0)-(0,5) closed
+    c entity.name.type.class.ruby (0,6)-(0,15) closed
+      c entity.other.inherited-class.ruby (0,9)-(0,15) closed
+        c punctuation.separator.inheritance.ruby (0,10)-(0,11) closed
 END
   end
   
