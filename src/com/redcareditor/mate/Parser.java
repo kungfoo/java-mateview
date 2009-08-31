@@ -148,7 +148,7 @@ public class Parser {
 	}
 	
 	private boolean parseLine(int lineIx) {
-		String line = styledText.getLine(lineIx);
+		String line = styledText.getLine(lineIx) + "\n";
 		int length = line.length();
 		System.out.printf("p%d, ", lineIx);
 		if (lineIx > this.parsedUpto)
@@ -490,7 +490,8 @@ public class Parser {
 		// create capture scopes
 		if (captures != null) {
 			for (Integer cap : captures.keySet()) {
-				if (m.match.getCapture(cap).start != -1) {
+				System.out.printf("%s\n", m.match.numCaptures() >= cap);
+				if (m.match.numCaptures() - 1 >= cap && m.match.getCapture(cap).start != -1) {
 					s = new Scope(this.mateText, captures.get(cap));
 					s.pattern = scope.pattern;
 					s.setStartPos(lineIx, Math.min(m.match.getCapture(cap).start, length-1), false);

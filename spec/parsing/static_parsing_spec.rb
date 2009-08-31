@@ -189,6 +189,40 @@ END
 END
   end
 
+
+  it "embeds CSS in HTML in Ruby" do
+    @st.text = <<END
+foo=<<-HTML
+<style>
+  .foo {
+
+  }
+</style>
+HTML
+END
+    @mt.parser.root.pretty(0).should == (t=<<END)
++ source.ruby (0,0)-(7,0) open
+  + keyword.operator.assignment.ruby (0,3)-(0,4) closed
+  + string.unquoted.embedded.html.ruby text.html.embedded.ruby (0,4)-(6,4) closed
+    c punctuation.definition.string.begin.ruby (0,4)-(0,11) closed
+    + source.css.embedded.html (1,0)-(6,0) closed
+      c punctuation.definition.tag.html (1,0)-(1,1) closed
+      c entity.name.tag.style.html (1,1)-(1,6) closed
+      + [noname] (1,6)-(5,0) closed
+        c punctuation.definition.tag.html (1,6)-(1,7) closed
+        + meta.selector.css (2,0)-(2,7) closed
+          + entity.other.attribute-name.class.css (2,2)-(2,6) closed
+            c punctuation.definition.entity.css (2,2)-(2,3) closed
+        + meta.property-list.css (2,7)-(4,3) closed
+          c punctuation.section.property-list.css (2,7)-(2,8) closed
+          c punctuation.section.property-list.css (4,2)-(4,3) closed
+      c punctuation.definition.tag.html (5,0)-(5,2) closed
+      c entity.name.tag.style.html (5,2)-(5,7) closed
+      c punctuation.definition.tag.html (5,7)-(5,8) closed
+    c punctuation.definition.string.end.ruby (6,0)-(6,4) closed
+END
+  end
+
 end
 
 
