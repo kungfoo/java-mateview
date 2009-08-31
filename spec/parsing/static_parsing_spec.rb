@@ -80,5 +80,18 @@ END
     c punctuation.definition.string.end.ruby (0,5)-(0,6) closed
 END
   end
+  
+  it "knows content_names of DoublePatterns" do
+    @st.text = "def foo(a, b)"
+    @mt.parser.root.pretty(0).should == (t=<<END)
++ source.ruby (0,0)-(0,13) open
+  + meta.function.method.with-arguments.ruby variable.parameter.function.ruby (0,0)-(0,13) closed
+    c keyword.control.def.ruby (0,0)-(0,3) closed
+    c entity.name.function.ruby (0,4)-(0,7) closed
+    c punctuation.definition.parameters.ruby (0,7)-(0,8) closed
+    + punctuation.separator.object.ruby (0,9)-(0,10) closed
+    c punctuation.definition.parameters.ruby (0,12)-(0,13) closed
+END
+  end
 
 end

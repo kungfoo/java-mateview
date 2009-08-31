@@ -344,43 +344,6 @@ public class Parser {
 		allScopes.add(newScope);
 	}
 
-
-	public void setStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
-		int to = m.match.getCapture(cap).start;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) 
-			scope.setStartPos(lineIx+1, 0, false);
-		else
-			scope.setStartPos(lineIx, Math.min(to, length), false);
-	}
-
-	public void setInnerStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
-		int to = m.match.getCapture(cap).start;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) 
-			scope.setInnerStartPos(lineIx+1, 0, false);
-		else
-			scope.setInnerStartPos(lineIx, Math.min(to, length), false);
-	}
-
-	public void setInnerEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
-		int to = m.match.getCapture(cap).end;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {
-			scope.setInnerEndPos(lineIx, length-1, true);
-		}
-		else {
-			scope.setInnerEndPos(lineIx, Math.min(to, length), true);
-		}
-	}
-	
-	public void setEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
-		int to = m.match.getCapture(cap).end;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {
-			scope.setEndPos(lineIx, length-1, true);
-		}
-		else {
-			scope.setEndPos(lineIx, Math.min(to, length), true);
-		}
-	}
-	
 	private void singleScope(Scanner scanner, Scope expectedScope, int lineIx, 
 							String line, int length, Marker m, 
 							ArrayList<Scope> allScopes, ArrayList<Scope> closedScopes, 
@@ -427,6 +390,43 @@ public class Parser {
 		closedScopes.add(newScope);
 	}
 
+
+	public void setStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
+		int to = m.match.getCapture(cap).start;
+		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) 
+			scope.setStartPos(lineIx+1, 0, false);
+		else
+			scope.setStartPos(lineIx, Math.min(to, length), false);
+	}
+
+	public void setInnerStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
+		int to = m.match.getCapture(cap).start;
+		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) 
+			scope.setInnerStartPos(lineIx+1, 0, false);
+		else
+			scope.setInnerStartPos(lineIx, Math.min(to, length), false);
+	}
+
+	public void setInnerEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
+		int to = m.match.getCapture(cap).end;
+		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {
+			scope.setInnerEndPos(lineIx, length-1, true);
+		}
+		else {
+			scope.setInnerEndPos(lineIx, Math.min(to, length), true);
+		}
+	}
+	
+	public void setEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
+		int to = m.match.getCapture(cap).end;
+		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {
+			scope.setEndPos(lineIx, length-1, true);
+		}
+		else {
+			scope.setEndPos(lineIx, Math.min(to, length), true);
+		}
+	}
+	
 	// Opens scopes for captures AND creates closing regexp from
 	// captures if necessary.
 	public void handleCaptures(int lineIx, int length, String line, 

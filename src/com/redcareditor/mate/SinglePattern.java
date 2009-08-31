@@ -15,6 +15,6 @@ public class SinglePattern extends Pattern {
 		match = Rx.createRx(dict.getString("match"));
 		captures = makeCapturesFromPlist(dict.getDictionary("captures"));
 		setDisabled(dict);
-		grammarPatterns.add(this);
+//		grammarPatterns.add(this);
 	}
 }

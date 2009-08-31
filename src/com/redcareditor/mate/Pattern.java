@@ -83,7 +83,7 @@ public class Pattern {
 			if (p instanceof IncludePattern) {
 				if (p.name.startsWith("$")) {
 					includePatterns.add(p);
-					if ((p.name == "$self" || p.name == "$base") && !alreadySelf) {
+					if ((p.name.equals("$self") || p.name.equals("$base")) && !alreadySelf) {
 						alreadySelf = true;
 						patternsToInclude.addAll(grammar.allPatterns);
 					}

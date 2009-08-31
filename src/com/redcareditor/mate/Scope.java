@@ -51,7 +51,7 @@ public class Scope {
 	}
 
 	public Scope scopeAt(int line, int lineOffset) {
-		System.out.printf("scopeAt(%d, %d) isOpen:%s\n", line, lineOffset, isOpen);
+//		System.out.printf("scopeAt(%d, %d) isOpen:%s\n", line, lineOffset, isOpen);
 		TextLocation loc = new TextLocation(line, lineOffset);
 		TextLocation start = startLoc();
 		if (TextLocation.lte(start, loc) || parent == null) {
@@ -132,15 +132,20 @@ public class Scope {
 	private int comparePositions(Position a, Position b) {
 		return 0;
 	}
-	
-	public Scope firstChildAfter(TextLocation textLoc) {
-		// TODO: implement me
-		if (children.size() > 0) 
-			return children.get(children.size()-1);
-		else
+
+	public Scope firstChildAfter(TextLocation loc) {
+//		stdout.printf("\"%s\".first_child_after(%d, %d)\n", name, loc.line, loc.line_offset);
+		if (children.size() == 0)
 			return null;
+		
+		for (Scope child : children) {
+			if (TextLocation.gte(child.startLoc(), loc)) {
+				return child;
+			}
+		}
+		return null;
 	}
-	
+
 	private Position makePosition(int line, int lineOffset) {
 		Position pos = new Position(styledText.getOffsetAtLine(line) + lineOffset, 0);
 		try {
