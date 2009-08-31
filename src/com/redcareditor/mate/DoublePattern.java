@@ -23,6 +23,7 @@ public class DoublePattern extends Pattern {
 	
 	public DoublePattern(List<Pattern> grammarPatterns, Dict dict) {
 		name = dict.getString("name");
+//		System.out.printf("new DoublePattern name: %s\n", name);
 		begin = Rx.createRx(dict.getString("begin"));
 		endString = dict.getString("end");
 		contentName = dict.getString("contentName");

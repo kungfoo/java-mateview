@@ -222,6 +222,13 @@ END
     c punctuation.definition.string.end.ruby (6,0)-(6,4) closed
 END
   end
+  
+  it "should do YAML" do
+    @mt.set_grammar_by_name("YAML")
+    @st.text = <<YAML
+--- !ruby/object:Free
+YAML
+  end
 
 end
 

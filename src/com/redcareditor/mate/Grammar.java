@@ -43,6 +43,7 @@ public class Grammar {
 	}
 
 	public void initForUse() {
+		System.out.printf("initForUse: %s\n", this.name);
 		if (loaded())
 			return;
 		

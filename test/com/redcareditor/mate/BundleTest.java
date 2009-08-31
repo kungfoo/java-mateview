@@ -19,7 +19,7 @@ public class BundleTest {
 		assertTrue(Bundle.getBundleByName("HTML") != null);
 		assertTrue(Bundle.getBundleByName("CSS") != null);
 		assertTrue(Bundle.getBundleByName("Perl") == null);
-		assertEquals(4, Bundle.bundles.size());
+		assertEquals(7, Bundle.bundles.size());
 	}
 	
 	@Test

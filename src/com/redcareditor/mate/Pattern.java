@@ -1,8 +1,12 @@
 package com.redcareditor.mate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.redcareditor.plist.Dict;
+import com.redcareditor.plist.PlistNode;
 
 public class Pattern {
 	public Grammar grammar;
@@ -117,8 +121,16 @@ public class Pattern {
 	}
 
 	public void setDisabled(Dict dict) {
-		if (dict.containsElement("disabled")) {
-			int intn = dict.getInt("disabled");
+		PlistNode<?> plistNode = dict.value.get("disabled");
+		int intn;
+		if (plistNode != null) {
+			if (plistNode.value instanceof String) {
+				String strn = dict.getString("disabled");
+				intn = Integer.parseInt(strn);
+			}
+			else {
+				intn = dict.getInt("disabled");
+			}
 			switch (intn) {
 			case 1:
 				disabled = true;
