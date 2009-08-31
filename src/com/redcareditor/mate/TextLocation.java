@@ -25,6 +25,22 @@ public class TextLocation implements Comparable<TextLocation> {
 		}
 	}
 
+	public static boolean gt(TextLocation t1, TextLocation t2) {
+		return ((t1.line > t2.line) || (t1.line >= t2.line && t1.lineOffset > t2.lineOffset));
+	}
+
+	public static boolean lt(TextLocation t1, TextLocation t2) {
+		return (!t1.equals(t2) && !TextLocation.gt(t1, t2));
+	}
+	
+	public static boolean gte(TextLocation t1, TextLocation t2) {
+		return (!TextLocation.lt(t1, t2));
+	}
+	
+	public static boolean lte(TextLocation t1, TextLocation t2) {
+		return (!TextLocation.gt(t1, t2));
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TextLocation) {

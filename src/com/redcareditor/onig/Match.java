@@ -8,10 +8,12 @@ import org.joni.Regex;
 import org.joni.Region;
 
 public class Match implements Iterable<Range> {
-	Regex regex;
-	Region region;
-	String text;
+	private Regex regex;
+	private Region region;
+	private String text;
 
+	public Match() {}
+	
 	public Match(Regex regex, Region region, String text) {
 		super();
 		this.regex = regex;
@@ -23,18 +25,17 @@ public class Match implements Iterable<Range> {
 		return region.numRegs;
 	}
 
-	public int begin(int capture) {
+	public Range getCapture(int capture){
 		checkBounds(capture);
-		return region.beg[capture];
-	}
-
-	public int end(int capture) {
-		checkBounds(capture);
-		return region.end[capture];
+		return new Range(
+				region.beg[capture],
+				region.end[capture]
+			);
 	}
 
 	private void checkBounds(int capture) {
-		if (capture >= regex.numberOfCaptures() || capture < 0) {
+//		System.out.printf("checkBounds(%d) (out of %d)\n", capture, numCaptures()-1);
+		if (capture > numCaptures()-1 || capture < 0) {
 			throw new IllegalArgumentException("Capture Index out of bounds!");
 		}
 	}

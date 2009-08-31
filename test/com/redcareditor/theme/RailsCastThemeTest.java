@@ -12,7 +12,7 @@ public class RailsCastThemeTest {
 
 	@Before
 	public void setup(){
-		Dict themeDict = Dict.parseFile("input/Railscasts.tmTheme");
+		Dict themeDict = Dict.parseFile("input/Themes/Railscasts.tmTheme");
 		theme = new Theme(themeDict);
 	}
 	

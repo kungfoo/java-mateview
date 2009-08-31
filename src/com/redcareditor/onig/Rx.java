@@ -22,6 +22,7 @@ public class Rx {
 	public boolean matchesStartOfLine = false;
 	
 	public static Rx createRx(String pattern){
+//		System.out.printf("createRx(%s)\n", pattern);
 		if(pattern == null){
 			return NullRx.instance();
 		} else {
@@ -37,7 +38,9 @@ public class Rx {
 	private Rx(String pattern) {
 		this.pattern = pattern;
 		regex = compileRegex(pattern);
-		matchesStartOfLine = pattern.charAt(0) == '^';
+		if (!pattern.equals("")) {
+			matchesStartOfLine = pattern.charAt(0) == '^';
+		}
 	}
 
 	public Match search(String target, int start, int end) {
@@ -45,7 +48,7 @@ public class Rx {
 		try {
 			bytes = target.getBytes("UTF-8");
 			Matcher matcher = regex.matcher(bytes, 0, bytes.length);
-			int a = matcher.search(0, bytes.length, Option.NONE);
+			int a = matcher.search(start, end, Option.NONE);
 			
 			if(a == -1){
 				return null;

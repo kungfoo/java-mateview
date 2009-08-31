@@ -1,68 +1,73 @@
 package com.redcareditor.mate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.redcareditor.plist.Dict;
+import com.redcareditor.plist.PlistNode;
 
 public class Pattern {
 	public Grammar grammar;
 	public String name;
-	public Map<Integer, String> captures;
+	public boolean disabled;
 
-	
-	public static Pattern createPattern(Dict dict) {
+	public static Pattern createPattern(List<Pattern> allPatterns, Dict dict) {
 		if (dict.containsElement("match")) {
-			return new SinglePattern(dict);
+			return new SinglePattern(allPatterns, dict);
 		}
 
 		if (dict.containsElement("include")) {
-			
+			return new IncludePattern(dict);
 		}
 
 		if (dict.containsElement("begin")) {
-
+			return new DoublePattern(allPatterns, dict);
 		}
+
 		return null;
 	}
-	
-	protected void loadCaptures(Dict dict){
-		captures = new HashMap<Integer, String>();
-		if (dict == null) {
-			return;
-		} else {
-			for(String captureNumber : dict.value.keySet()){
-				Dict captureDict = dict.getDictionary(captureNumber);
-				int captureInt = Integer.parseInt(captureNumber);
-				String captureName = captureDict.getString("name");
-				captures.put(captureInt, captureName);
-                // System.out.println(captureInt + "->" + captureName);
-			}
+
+	public static Map<Integer, String> makeCapturesFromPlist(Dict pd) {
+		if (pd == null)
+			return new HashMap<Integer, String>();
+		Dict pcd;
+		String ns;
+		Map<Integer, String> captures = new HashMap<Integer, String>();
+		for (String sCapnum : pd.value.keySet()) {
+			int capnum = Integer.parseInt(sCapnum);
+			pcd = pd.getDictionary(sCapnum);
+			ns = pcd.getString("name");
+//			System.out.printf("capture: %d, %s\n", capnum, ns);
+			captures.put((Integer) capnum, ns);
 		}
+		return captures;
 	}
-	
-	public static void replaceIncludePatterns(ArrayList<Pattern> patterns, Grammar grammar) {
+
+	public static void replaceIncludePatterns(List<Pattern> patterns, Grammar grammar) {
 		replaceRepositoryIncludes(patterns, grammar);
 		replaceBaseAndSelfIncludes(patterns, grammar);
 	}
-	
-	public static void replaceRepositoryIncludes(ArrayList<Pattern> patterns, Grammar grammar) {
-		ArrayList<Pattern> includePatterns = new ArrayList<Pattern>();
-		ArrayList<Pattern> patternsToInclude = new ArrayList<Pattern>();
+
+	public static void replaceRepositoryIncludes(List<Pattern> patterns, Grammar grammar) {
+		List<Pattern> includePatterns = new ArrayList<Pattern>();
+		List<Pattern> patternsToInclude = new ArrayList<Pattern>();
 		boolean anyIncluded = true;
 		while (anyIncluded) {
 			anyIncluded = false;
 			for (Pattern p : patterns) {
 				if (p instanceof IncludePattern && p.name.startsWith("#")) {
 					includePatterns.add(p);
-					String reponame = p.name.substring(1, p.name.length() - 1);
-					ArrayList<Pattern> repositoryEntryPatterns = (ArrayList<Pattern>) grammar.repository.get(reponame);
+					String reponame = p.name.substring(1, p.name.length());
+					List<Pattern> repositoryEntryPatterns = grammar.repository.get(reponame);
 					if (repositoryEntryPatterns != null) {
-						for (Pattern p2 : repositoryEntryPatterns) {
-							patternsToInclude.add(p2);
-						}
-					}
-					else {
-						System.out.printf("warning: couldn't find repository key '%s' in grammar '%s'\n", reponame, grammar.name);
+						anyIncluded = true;
+//						System.out.printf("repository %s with size %d\n", reponame, repositoryEntryPatterns.size());
+						patternsToInclude.addAll(repositoryEntryPatterns);
+					} else {
+						System.out.printf("warning: couldn't find repository key '%s' in grammar '%s'\n", reponame,
+								grammar.name);
 					}
 				}
 			}
@@ -72,48 +77,71 @@ public class Pattern {
 			patternsToInclude.clear();
 		}
 	}
-	
-	public static void replaceBaseAndSelfIncludes(ArrayList<Pattern> patterns, Grammar grammar) {
-		ArrayList<Pattern> includePatterns = new ArrayList<Pattern>();
-		ArrayList<Pattern> patternsToInclude = new ArrayList<Pattern>();
+
+	public static void replaceBaseAndSelfIncludes(List<Pattern> patterns, Grammar grammar) {
+		List<Pattern> includePatterns = new ArrayList<Pattern>();
+		List<Pattern> patternsToInclude = new ArrayList<Pattern>();
 		boolean alreadySelf = false; // some patterns have $self twice
 		Grammar ng;
 		for (Pattern p : patterns) {
+//			System.out.printf("    considering %s\n", p.name);
 			if (p instanceof IncludePattern) {
+//				System.out.printf("    replacing %s\n", p.name);
 				if (p.name.startsWith("$")) {
 					includePatterns.add(p);
-					if ((p.name == "$self" || p.name == "$base") && !alreadySelf) {
+					if ((p.name.equals("$self") || p.name.equals("$base")) && !alreadySelf) {
 						alreadySelf = true;
-						for (Pattern pat : grammar.allPatterns) {
-							patternsToInclude.add(pat);
-						}
+						patternsToInclude.addAll(grammar.patterns);
 					}
-				}
-				else if ((ng = Grammar.findByScopeName(p.name)) != null) {
+				} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
+//					System.out.printf("importing toplevel patterns from %s\n", ng.name);
 					ng.initForUse();
 					includePatterns.add(p);
-					for (Pattern pat : ng.allPatterns) {
-						patternsToInclude.add(pat);
+					patternsToInclude.addAll(ng.patterns);
+				} else {
+					if (!p.name.startsWith("#")) {
+						System.out.printf("unknown include pattern: %s\n", p.name);
 					}
-				}
-				else {
-					System.out.printf("unknown include pattern: %s\n", p.name);
 				}
 			}
 		}
-		removePatterns(patterns, includePatterns);
-		addPatterns(patterns, patternsToInclude);
+		patterns.removeAll(includePatterns);
+		patterns.addAll(patternsToInclude);
 	}
-	
-	private static void removePatterns(ArrayList<Pattern> patlist, ArrayList<Pattern> ps) {
+
+	private static void removePatterns(List<Pattern> patlist, List<Pattern> ps) {
 		for (Pattern p : ps) {
 			patlist.remove(p);
 		}
 	}
 
-	private static void addPatterns(ArrayList<Pattern> patlist, ArrayList<Pattern> ps) {
+	private static void addPatterns(List<Pattern> patlist, List<Pattern> ps) {
 		for (Pattern p : ps) {
 			patlist.add(p);
+		}
+	}
+
+	public void setDisabled(Dict dict) {
+		PlistNode<?> plistNode = dict.value.get("disabled");
+		int intn;
+		if (plistNode != null) {
+			if (plistNode.value instanceof String) {
+				String strn = dict.getString("disabled");
+				intn = Integer.parseInt(strn);
+			}
+			else {
+				intn = dict.getInt("disabled");
+			}
+			switch (intn) {
+			case 1:
+				disabled = true;
+				break;
+			default:
+				disabled = false;
+				break;
+			}
+		} else {
+			disabled = false;
 		}
 	}
 }

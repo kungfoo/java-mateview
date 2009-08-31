@@ -1,84 +1,91 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-public class RangeSet {
-	public class Range {
-		public int a;
-		public int b;
-	}
-	
-	private ArrayList<Range> ranges = new ArrayList<Range>();
-	
-	public boolean isEmpty() {
-		return (ranges.size() == 0);
-	}
-	
+import com.redcareditor.onig.Range;
+
+public class RangeSet implements Iterable<Range> {
+	List<Range> ranges = new ArrayList<Range>();
+
 	public void add(int a, int b) {
-		int insert_ix = 0;
-		Range n = new Range();
-		n.a = a;
-		n.b = b;
-		for (Range p : ranges) {
-			if (p.a < n.a)
-				insert_ix++;
+		int insertAt = 0;
+		Range range = new Range(a, b);
+
+		while (insertAt < length() && ranges.get(insertAt).start < range.start) {
+			insertAt++;
 		}
-		ranges.add(insert_ix, n);
-		merge(insert_ix);
+
+		merge(insertAt, range);
 	}
-	
-	public void merge(int ix) {
-		Range n = ranges.get(ix);
-		if (ix > 0) {
-			Range x = ranges.get(ix-1);
-			if (n.a <= x.b+1) {
-				ranges.remove(ix);
-				x.b = Math.max(x.b, n.b);
-				ranges.set(ix-1, x);
-				ix--;
-				n = ranges.get(ix);
-			}
-		}
-		if (ix < ranges.size()-1) {
-			Range y = ranges.get(ix+1);
-			while (ix < ranges.size()-1 && n.b >= y.a-1) {
-				y.a = Math.min(n.a, y.a);
-				if (n.b > y.b)
-					y.b = n.b;
-				ranges.set(ix+1, y);
-				ranges.remove(ix);
-				if (ix < ranges.size()-1)
-					y = ranges.get(ix+1);
-			}
-		}
+
+	public Range get(int i) {
+		return ranges.get(i);
 	}
-	
+
 	public int length() {
-		return ranges.size();
+		return size();
 	}
 	
 	public int size() {
+		return ranges.size();
+	}
+
+	public int rangeSize() {
 		int sizec = 0;
-		for (Range p : this.ranges) {
-			sizec += p.b - p.a + 1;
+		for (int i = 0; i < length(); i++) {
+			sizec += ranges.get(i).end - ranges.get(i).start + 1;
 		}
 		return sizec;
 	}
-	
+
 	public String present() {
+		return toString();
+	}
+
+	public String toString() {
 		StringBuilder sb = new StringBuilder("");
-		for (Range p : ranges) {
-			if (p.b - p.a == 0) {
-				sb.append(p.a);
-				sb.append(", ");
-			}
-			else {
-				sb.append(p.a);
-				sb.append("..");
-				sb.append(p.b);
+		for (int i = 0; i < length(); i++) {
+			sb.append(get(i).toString());
+			if (i != length() - 1) {
 				sb.append(", ");
 			}
 		}
 		return sb.toString();
 	}
+
+	public boolean isEmpty() {
+		return ranges.isEmpty();
+	}
+
+	public Iterator<Range> iterator() {
+		return ranges.iterator();
+	}
+
+	private void merge(int mergeAt, Range range) {
+		ranges.add(mergeAt, range);
+
+		if (mergeAt > 0) {
+			Range beforeMerge = ranges.get(mergeAt - 1);
+			if (range.isTouching(beforeMerge)) {
+				ranges.remove(mergeAt);
+				beforeMerge.end = Math.max(beforeMerge.end, range.end);
+				mergeAt--;
+				range = ranges.get(mergeAt);
+			}
+		}
+
+		if (mergeAt + 1 < length()) {
+			Range afterMerge = ranges.get(mergeAt + 1);
+			while (mergeAt < length() - 1 && range.isTouching(afterMerge)) {
+				range.start = Math.min(range.start, afterMerge.start);
+				range.end = Math.max(range.end, afterMerge.end);
+				ranges.remove(mergeAt + 1);
+				if (mergeAt + 1 < length())
+					afterMerge = ranges.get(mergeAt + 1);
+			}
+		}
+	}
+
 }
