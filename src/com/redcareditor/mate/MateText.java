@@ -1,52 +1,49 @@
 package com.redcareditor.mate;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.CompositeRuler;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.IVerticalRulerColumn;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.source.VerticalRuler;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
+
 import com.redcareditor.onig.NullRx;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.theme.Theme;
 
-public class MateText extends SourceViewer {
+public class MateText extends Composite {
 	public Parser parser;
 	
-	public MateText(Composite parent, CompositeRuler ruler, int style) {
-		super(parent, ruler, SWT.FULL_SELECTION | SWT.VERTICAL | SWT.HORIZONTAL);
-		
-		IDocument document = new Document();
-		setDocument(document);
+	/* components plugged together */
+	private SourceViewer viewer;
+	private IDocument document;
+	private CompositeRuler gutter;
+	
+	public MateText(Composite parent) {
+		super(parent, SWT.NONE);
+		document = new Document();
+		gutter = constructRuler();
+		viewer = new SourceViewer(this, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
+		viewer.setDocument(document);
+		setLayout(new FillLayout());
 	}
 	
-	public static Composite constructContents(Composite parent) {
-		Composite contents = new Composite(parent, SWT.NONE);
-		contents.setLayout(new FillLayout());
-		return contents;
-	}
-	
-	public static CompositeRuler constructRuler() {
+	private static CompositeRuler constructRuler() {
 		CompositeRuler ruler = new CompositeRuler();
 		ruler.addDecorator(0, new LineNumberRulerColumn());
 		return ruler;
 	}
 	
+	public StyledText getTextWidget(){
+		return viewer.getTextWidget();
+	}
 	
+	public IDocument getDocument(){
+		return document;
+	}
 	
 	// Sets the grammar explicitly by name.
 	// TODO: restore the uncolouring stuff

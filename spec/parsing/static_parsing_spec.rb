@@ -5,10 +5,7 @@ describe JavaMateView, "when parsing Ruby from scratch" do
   before(:each) do
     @display = Swt::Widgets::Display.new
     @shell = Swt::Widgets::Shell.new(@display)
-    @mt = JavaMateView::MateText.new(
-		  JavaMateView::MateText.constructContents(@shell), 
-		  ruler = JavaMateView::MateText.constructRuler, 
-		  Swt::SWT::FULL_SELECTION | Swt::SWT::VERTICAL | Swt::SWT::HORIZONTAL)
+    @mt = JavaMateView::MateText.new(@shell)
     @mt.set_grammar_by_name("Ruby")
     @st = @mt.get_text_widget
   end
