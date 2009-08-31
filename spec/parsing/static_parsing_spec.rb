@@ -24,14 +24,14 @@ describe JavaMateView, "when parsing Ruby from scratch" do
   
   it "should have a blank Ruby scope tree" do
     @mt.parser.root.pretty(0).should == (t=<<END)
-+ source.ruby () open
++ source.ruby (inf)-(inf) open
 END
   end
   
   it "parses flat SinglePatterns" do
     @mt.get_text_widget.text = "1 + 2 + Redcar"
     @mt.parser.root.pretty(0).should == (t=<<END)
-+ source.ruby (0,0)-(0,14) open
++ source.ruby (inf)-(inf) open
   + constant.numeric.ruby (0,0)-(0,1) closed
   + keyword.operator.arithmetic.ruby (0,2)-(0,3) closed
   + constant.numeric.ruby (0,4)-(0,5) closed
