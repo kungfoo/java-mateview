@@ -5,7 +5,7 @@ $:.push(File.expand_path(File.join(File.dirname(__FILE__), "..", "lib")))
 
 require 'jdom'
 # TODO: write a method t do this os dependent
-require 'swt-linux'
+require 'swt'
 require 'swt_wrapper'
 
 unless defined?(JavaMateView)
@@ -93,6 +93,6 @@ class MateExample
   end
 end
 
-MateExample.new
+# MateExample.new
 
 
