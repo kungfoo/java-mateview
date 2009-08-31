@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.joni.exception.ValueException;
+
 import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
 import com.redcareditor.plist.PlistNode;
@@ -24,15 +26,20 @@ public class DoublePattern extends Pattern {
 	public DoublePattern(List<Pattern> grammarPatterns, Dict dict) {
 		name = dict.getString("name");
 //		System.out.printf("new DoublePattern name: %s\n", name);
-		begin = Rx.createRx(dict.getString("begin"));
-		endString = dict.getString("end");
-		contentName = dict.getString("contentName");
+		try {
+			begin = Rx.createRx(dict.getString("begin"));
+			endString = dict.getString("end");
+			contentName = dict.getString("contentName");
 
-		loadCaptures(dict);
-		loadPatterns(grammarPatterns, dict);
+			loadCaptures(dict);
+			loadPatterns(grammarPatterns, dict);
 
-		setDisabled(dict);
-		grammarPatterns.add(this);
+			setDisabled(dict);
+			grammarPatterns.add(this);
+		}
+		catch(ValueException e) {
+			System.out.printf("joni.exception.ValueException: %s\n", e.getMessage());
+		}
 	}
 
 	private void loadPatterns(List<Pattern> grammarPatterns, Dict dict) {

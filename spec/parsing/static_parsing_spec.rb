@@ -261,19 +261,19 @@ Gtk gtk_ (Gtk* self) {
     @st.text = source
     @mt.parser.root.pretty(0).should_not include("invalid.illegal")
   end
-# 
-#   it "should parse this PHP without dying" do
-#     source = <<-PHP
-# <?php
-# /**
-# *
-# */
-# class ClassName extends AnotherClass
-# {
-#     PHP
-#     @mb.set_grammar_by_name("PHP")
-#     @mb.text = source
-#   end
+
+  it "should parse this PHP without dying" do
+    source = <<-PHP
+<?php
+/**
+*
+*/
+class ClassName extends AnotherClass
+{
+    PHP
+    @mt.set_grammar_by_name("PHP").should be_true
+    @st.text = source
+  end
 
 end
 

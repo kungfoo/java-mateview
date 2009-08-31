@@ -39,7 +39,8 @@ public class Grammar {
 			propertyLoader.loadStringProperty(property);
 		}
 		propertyLoader.loadRegexProperty("firstLineMatch");
-		fileTypes = plist.getStrings("fileTypes");
+		if (plist.containsElement("fileTypes"))
+			fileTypes = plist.getStrings("fileTypes");
 	}
 
 	public void initForUse() {
