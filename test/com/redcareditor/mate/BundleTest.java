@@ -16,8 +16,10 @@ public class BundleTest {
 	public void shouldHaveCreatedCorrectBundles() {
 		assertTrue(Bundle.getBundleByName("Apache") != null);
 		assertTrue(Bundle.getBundleByName("Ruby") != null);
-		assertTrue(Bundle.getBundleByName("HTML") == null);
-		assertEquals(2, Bundle.bundles.size());
+		assertTrue(Bundle.getBundleByName("HTML") != null);
+		assertTrue(Bundle.getBundleByName("CSS") != null);
+		assertTrue(Bundle.getBundleByName("Perl") == null);
+		assertEquals(4, Bundle.bundles.size());
 	}
 	
 	@Test

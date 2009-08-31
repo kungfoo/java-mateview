@@ -166,6 +166,29 @@ END
 END
   end
 
+  it "embeds HTML in Ruby" do
+    @st.text = <<END
+foo=<<-HTML
+<p>FOO</p>
+HTML
+END
+    @mt.parser.root.pretty(0).should == (t=<<END)
++ source.ruby (0,0)-(3,0) open
+  + keyword.operator.assignment.ruby (0,3)-(0,4) closed
+  + string.unquoted.embedded.html.ruby text.html.embedded.ruby (0,4)-(2,4) closed
+    c punctuation.definition.string.begin.ruby (0,4)-(0,11) closed
+    + meta.tag.block.any.html (1,0)-(1,3) closed
+      c punctuation.definition.tag.begin.html (1,0)-(1,1) closed
+      c entity.name.tag.block.any.html (1,1)-(1,2) closed
+      c punctuation.definition.tag.end.html (1,2)-(1,3) closed
+    + meta.tag.block.any.html (1,6)-(1,10) closed
+      c punctuation.definition.tag.begin.html (1,6)-(1,8) closed
+      c entity.name.tag.block.any.html (1,8)-(1,9) closed
+      c punctuation.definition.tag.end.html (1,9)-(1,10) closed
+    c punctuation.definition.string.end.ruby (2,0)-(2,4) closed
+END
+  end
+
 end
 
 

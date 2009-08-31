@@ -59,9 +59,7 @@ public class Pattern {
 					List<Pattern> repositoryEntryPatterns = grammar.repository.get(reponame);
 					if (repositoryEntryPatterns != null) {
 //						System.out.printf("repository %s with size %d\n", reponame, repositoryEntryPatterns.size());
-						for (Pattern p2 : repositoryEntryPatterns) {
-							patternsToInclude.add(p2);
-						}
+						patternsToInclude.addAll(repositoryEntryPatterns);
 					} else {
 						System.out.printf("warning: couldn't find repository key '%s' in grammar '%s'\n", reponame,
 								grammar.name);
@@ -91,6 +89,7 @@ public class Pattern {
 						patternsToInclude.addAll(grammar.patterns);
 					}
 				} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
+//					System.out.printf("importing toplevel patterns from %s\n", ng.name);
 					ng.initForUse();
 					includePatterns.add(p);
 					patternsToInclude.addAll(ng.patterns);
