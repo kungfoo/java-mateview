@@ -230,6 +230,51 @@ END
 YAML
   end
 
+
+  it "should parse this Python without falling off the end of the line" do
+    source = <<-PYTHON
+      __gsignals__ =  { 
+        "completed": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])
+      }
+    PYTHON
+    @mt.set_grammar_by_name("Python")
+    @st.text = source
+  end
+
+
+  it "should parse this Ruby without dying" do
+    source = <<-RUBY
+"–",
+    RUBY
+    @mt.set_grammar_by_name("Ruby")
+    @st.text = source
+  end
+
+  it "should parse these C comments correctly" do
+    source = <<-C
+/* H
+*/
+Gtk gtk_ (Gtk* self) {
+    C
+    @mt.set_grammar_by_name("C")
+    @st.text = source
+    @mt.parser.root.pretty(0).should_not include("invalid.illegal")
+  end
+# 
+#   it "should parse this PHP without dying" do
+#     source = <<-PHP
+# <?php
+# /**
+# *
+# */
+# class ClassName extends AnotherClass
+# {
+#     PHP
+#     @mb.set_grammar_by_name("PHP")
+#     @mb.text = source
+#   end
+
 end
 
 

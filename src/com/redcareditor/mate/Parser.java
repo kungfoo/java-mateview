@@ -355,8 +355,9 @@ public class Parser {
 		setEndPosSafely(s, m, lineIx, length, 0);
 		s.isOpen = false;
 		s.isCapture = false;
-		s.beginMatchString = line.substring(m.from, m.match.getCapture(0).end);
-		// System.out.printf("_match_string: '%s'\n", s.beginMatch_Sring);
+		byte[] bytes = new byte[m.match.getCapture(0).end - m.from + 1];
+		System.out.printf("beginMatchString '%s' %d - %d\n",  new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from), m.from, m.match.getCapture(0).end);
+		s.beginMatchString = new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from); 
 		s.parent = scanner.getCurrentScope();
 		Scope newScope = s;
 		if (expectedScope != null) {

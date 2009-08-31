@@ -25,7 +25,7 @@ public class Scanner implements Iterable<Marker> {
 	public Scanner(Scope startScope, String line) {
 		this.currentScope = startScope;
 		this.line = line;
-		this.lineLength = line.length();
+		this.lineLength = line.getBytes().length;
 		this.position = 0;
 		this.cachedMarkers = new ArrayList<Marker>();
 	}
@@ -63,6 +63,17 @@ public class Scanner implements Iterable<Marker> {
 		}
 		//stdout.printf("num cached after removals: %d\n", cached_markers.size);
 	}
+
+	public void sleep(int ms) {
+		try{
+		  //do what you want to do before sleeping
+		  Thread.currentThread().sleep(ms);//sleep for 1000 ms
+		  //do what you want to do after sleeptig
+		}
+		catch(InterruptedException ie){
+		//If this thread was intrrupted by
+		}
+	}
 	
 	public Match scanForMatch(int from, Pattern p) {
 		if (p.name != null && (p.name.startsWith("#") || p.name.startsWith("$")))
@@ -82,6 +93,7 @@ public class Scanner implements Iterable<Marker> {
 	public Marker findNextMarker() {
 		System.out.printf("find_next_marker from (current_scope is %s)\n", currentScope.name);
 		System.out.printf("scanning: '%s' from %d to %d\n", this.line, this.position, this.lineLength);
+//		sleep(500);
 		Marker m;
 		int bestLength = 0;
 		int newLength;
