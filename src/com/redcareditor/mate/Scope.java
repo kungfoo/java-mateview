@@ -238,7 +238,12 @@ public class Scope {
 			prettyString.append("c");
 		else
 			prettyString.append("+");
-		prettyString.append(" " + this.name);
+		
+		if (this.name != null)
+			prettyString.append(" " + this.name);
+		else
+			prettyString.append(" " + "[noname]");
+		
 		if (this.pattern instanceof DoublePattern && 
 				this.isCapture == false && 
 				((DoublePattern) this.pattern).contentName != null) 

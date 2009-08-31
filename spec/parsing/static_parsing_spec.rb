@@ -129,6 +129,42 @@ END
     c punctuation.definition.string.end.ruby (0,25)-(0,26) closed
 END
   end
+  
+  it "parses some Ruby correctly" do
+    @st.text = <<END
+class Red < Car
+  attr :foo
+  Dir["*"].each do |fn|
+    p fn
+  end
+end
+END
+    @mt.parser.root.pretty(0).should == (t=<<END)
++ source.ruby (0,0)-(6,0) open
+  + meta.class.ruby (0,0)-(0,15) closed
+    c keyword.control.class.ruby (0,0)-(0,5) closed
+    c entity.name.type.class.ruby (0,6)-(0,15) closed
+      c entity.other.inherited-class.ruby (0,9)-(0,15) closed
+        c punctuation.separator.inheritance.ruby (0,10)-(0,11) closed
+  + keyword.other.special-method.ruby (1,2)-(1,6) closed
+  + constant.other.symbol.ruby (1,7)-(1,11) closed
+    c punctuation.definition.constant.ruby (1,7)-(1,8) closed
+  + support.class.ruby (2,2)-(2,5) closed
+  + punctuation.section.array.ruby (2,5)-(2,6) closed
+  + string.quoted.double.ruby (2,6)-(2,9) closed
+    c punctuation.definition.string.begin.ruby (2,6)-(2,7) closed
+    c punctuation.definition.string.end.ruby (2,8)-(2,9) closed
+  + punctuation.section.array.ruby (2,9)-(2,10) closed
+  + punctuation.separator.method.ruby (2,10)-(2,11) closed
+  + keyword.control.start-block.ruby (2,16)-(2,19) closed
+  + [noname] (2,19)-(2,23) closed
+    c punctuation.separator.variable.ruby (2,19)-(2,20) closed
+    + variable.other.block.ruby (2,20)-(2,22) closed
+    c punctuation.separator.variable.ruby (2,22)-(2,23) closed
+  + keyword.control.ruby (4,2)-(4,5) closed
+  + keyword.control.ruby (5,0)-(5,3) closed
+END
+  end
 
 end
 
