@@ -92,6 +92,11 @@ public class Scope {
 		return false;
 	}
 
+	public boolean surfaceIdenticalToModuloEnding(Scope other) {
+		// TODO: port me
+		return false;
+	}
+
 	public boolean overlapsWith(Scope other) {
 		// TODO: port me
 		return false;
@@ -150,6 +155,10 @@ public class Scope {
 	
 	public void setStartPos(int line, int lineOffset, boolean hasLeftGravity) {
 		this.startPos = makePosition(line, lineOffset);
+	}
+
+	public void setInnerStartPos(int line, int lineOffset, boolean hasLeftGravity) {
+		this.innerStartPos = makePosition(line, lineOffset);
 	}
 
 	public void setEndPos(int line, int lineOffset, boolean c) {

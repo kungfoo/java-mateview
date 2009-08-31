@@ -240,12 +240,61 @@ public class Parser {
 							ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes) {
 		// TODO: port this function
 	}
-	
-	private void openScope(Scanner scanner, Scope expectedScope, int lineIx, String line, 
-							int length, Marker m, ArrayList<Scope> allScopes, 
-							ArrayList<Scope> closedScopes, ArrayList<Scope>removedScopes) {
-		// TODO: port this function
+
+	public void openScope(Scanner scanner, Scope expectedScope, int lineIx, 
+			String line, int length, Marker m,
+			ArrayList<Scope> allScopes, ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes ) {
+		System.out.printf("[opening with %d patterns], \n", ((DoublePattern) m.pattern).patterns.size());
+		Scope s = new Scope(mateText, m.pattern.name);
+		s.pattern = m.pattern;
+		s.openMatch = m.match;
+		setStartPosSafely(s, m, lineIx, length, 0);
+		setInnerStartPosSafely(s, m, lineIx, length, 0);
+		s.beginMatchString = line.substring(m.from, m.match.getCapture(0).end);
+//		var end_iter = buffer.end_iter();
+//		var end_line = end_iter.get_line();
+//		var end_line_index = end_iter.get_line_index();
+//		s.inner_end_mark_set(end_line, end_line_index, false);
+//		s.end_mark_set(end_line, end_line_index, false);
+		s.isOpen = true;
+		s.isCapture = false;
+		s.parent = scanner.getCurrentScope();
+		Scope newScope = s;
+		// is this a bug? captures aren't necessarily to be put into all_scopes yet surely?
+		if (expectedScope != null) {
+			// check mod ending scopes as the new one will not have a closing marker
+			// but the expected one will:
+			if (s.surfaceIdenticalToModuloEnding(expectedScope)) {
+				// stdout.printf("surface_identical_mod_ending: keep expected\n");
+				// don't need to do anything as we have already found this,
+				// but let's keep the old scope since it will have children and what not.
+				newScope = expectedScope;
+				for (Scope child : expectedScope.children) {
+					closedScopes.add(child);
+					allScopes.add(child);
+				}
+				scanner.setCurrentScope(expectedScope);
+			}
+			else {
+				//stdout.printf("surface_NOT_identical_mod_ending: replace expected\n");
+				if (s.overlapsWith(expectedScope)) {
+					scanner.getCurrentScope().removeChild(expectedScope);
+					// removed_scopes << expected_scope
+					removedScopes.add(expectedScope);
+				}
+				handleCaptures(lineIx, length, line, s, m, allScopes, closedScopes);
+				scanner.getCurrentScope().addChild(s);
+				scanner.setCurrentScope(s);
+			}
+		}
+		else {
+			handleCaptures(lineIx, length, line, s, m, allScopes, closedScopes);
+			scanner.getCurrentScope().addChild(s);
+			scanner.setCurrentScope(s);
+		}
+		allScopes.add(newScope);
 	}
+
 
 	public void setStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).start;
@@ -253,6 +302,14 @@ public class Parser {
 			scope.setStartPos(lineIx+1, 0, false);
 		else
 			scope.setStartPos(lineIx, Math.min(to, length), false);
+	}
+
+	public void setInnerStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
+		int to = m.match.getCapture(cap).start;
+		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) 
+			scope.setInnerStartPos(lineIx+1, 0, false);
+		else
+			scope.setInnerStartPos(lineIx, Math.min(to, length), false);
 	}
 
 	public void setEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
