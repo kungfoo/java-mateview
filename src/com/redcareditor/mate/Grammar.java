@@ -71,16 +71,19 @@ public class Grammar {
 		Dict plistRepo = plist.getDictionary("repository");
 		Dict plistRepoEntry;
 		for (String key : plistRepo.keys()) {
+//			System.out.printf("loading repository entry: %s\n", key);
 			List<Pattern> repoArray = new ArrayList<Pattern>();
 			plistRepoEntry = plistRepo.getDictionary(key);
-			if (plistRepoEntry.containsElement("begin") || plistRepo.containsElement("match")) {
+			if (plistRepoEntry.containsElement("begin") || plistRepoEntry.containsElement("match")) {
+//				System.out.printf("    contains begin or match\n");
 				Pattern pattern = Pattern.createPattern(allPatterns, plistRepoEntry);
 				if (pattern != null) {
 					pattern.grammar = this;
 					repoArray.add(pattern);
 				}
 			}
-			if (plistRepo.containsElement("patterns")) {
+			if (plistRepoEntry.containsElement("patterns")) {
+//				System.out.printf("    contains patterns\n");
 				for (PlistNode<?> plistPattern : plistRepoEntry.getArray("patterns")) {
 					Pattern pattern = Pattern.createPattern(allPatterns, (Dict) plistPattern);
 					if (pattern != null) {
@@ -95,7 +98,7 @@ public class Grammar {
 
 	private void replaceIncludePatterns() {
 		for (Pattern p : allPatterns) {
-//			System.out.printf("replaceIncludePattern for %s\n", p.name);
+			System.out.printf("replaceIncludePattern for %s\n", p.name);
 			if (p instanceof DoublePattern) {
 				Pattern.replaceIncludePatterns(((DoublePattern) p).patterns, this);
 			}

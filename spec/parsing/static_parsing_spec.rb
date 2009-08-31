@@ -93,5 +93,15 @@ END
     c punctuation.definition.parameters.ruby (0,12)-(0,13) closed
 END
   end
-
+  
+  it "creates scopes as children of DoublePatterns" do
+    @st.text = "\"laura\\nroslin\""
+    @mt.parser.root.pretty(0).should == (t=<<END)
++ source.ruby (0,0)-(0,15) open
+  + string.quoted.double.ruby (0,0)-(0,15) closed
+    c punctuation.definition.string.begin.ruby (0,0)-(0,1) closed
+    + constant.character.escape.ruby (0,6)-(0,8) closed
+    c punctuation.definition.string.end.ruby (0,14)-(0,15) closed
+END
+  end
 end
