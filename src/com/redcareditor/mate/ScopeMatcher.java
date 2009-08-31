@@ -98,11 +98,11 @@ public class ScopeMatcher {
 	public static Match getMatch(String selectorString, String scopeString) {
 		Match m = match(selectorString, scopeString);
 		if (m != null) {
-			System.out.printf("%d\n", m.numCaptures());
+//			System.out.printf("%d\n", m.numCaptures());
 			Range firstCapture = m.getCapture(0);
-			System.out.printf("test_match('%s', '%s') == %d\n", selectorString, scopeString, firstCapture.start);
+//			System.out.printf("test_match('%s', '%s') == %d\n", selectorString, scopeString, firstCapture.start);
 		} else {
-			System.out.printf("test_match('%s', '%s') == null\n", selectorString, scopeString);
+//			System.out.printf("test_match('%s', '%s') == null\n", selectorString, scopeString);
 		}
 		return m;
 	}
@@ -121,7 +121,7 @@ public class ScopeMatcher {
 		List<ScopeMatcher> ms = new ArrayList<ScopeMatcher>();
 		// FIXME should validate and throw UTF8 error if bad.
 		String[] scopeOrs1 = selectorString.split(",");
-		System.out.printf("match: selector: '%s'\n", selectorString);
+//		System.out.printf("match: selector: '%s'\n", selectorString);
 		for (String selectorString1 : scopeOrs1) {
 			ScopeMatcher m = new ScopeMatcher();
 			m.neg_rxs = new ArrayList<Rx>();
@@ -130,12 +130,12 @@ public class ScopeMatcher {
 				if (m.pos_rx == null) {
 					String s1 = subSelectorString.trim().replaceAll("\\.", "\\\\.");
 					String s2 = s1.replaceAll(" ", ").* .*(");
-					System.out.printf("positive '%s'\n", "(" + s2 + ")");
+//					System.out.printf("positive '%s'\n", "(" + s2 + ")");
 					m.pos_rx = Rx.createRx("(" + s2 + ")");
 				} else {
 					String s1 = subSelectorString.trim().replaceAll("\\.", "\\\\.");
 					String s2 = s1.trim().replaceAll(" ", ".* .*");
-					System.out.printf("negative '%s'\n", s2);
+//					System.out.printf("negative '%s'\n", s2);
 					m.neg_rxs.add(Rx.createRx(s2));
 				}
 			}

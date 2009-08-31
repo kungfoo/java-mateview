@@ -65,7 +65,7 @@ public class GrammarBenchmark {
 	public void benchmarkAllPatternsOnSingleLine() {
 		String line = lines.get(8); // this line has a class definition on it
 		for (SinglePattern p : singlePatterns) {
-			Rx regex = p.regex;
+			Rx regex = p.match;
 			Match m = regex.search(line);
             // if(m != null){
             //  System.out.println(p.name);
@@ -78,7 +78,7 @@ public class GrammarBenchmark {
 	public void benchmarkAllPatternsOnFile() {
 		for(String line : lines){
 			for (SinglePattern p : singlePatterns) {
-				Rx regex = p.regex;
+				Rx regex = p.match;
 				Match m = regex.search(line);
 			}
 		}

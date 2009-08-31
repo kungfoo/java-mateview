@@ -25,7 +25,6 @@ public class Match implements Iterable<Range> {
 		return region.numRegs;
 	}
 
-	
 	public Range getCapture(int capture){
 		checkBounds(capture);
 		return new Range(

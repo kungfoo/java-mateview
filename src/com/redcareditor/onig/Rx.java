@@ -45,7 +45,7 @@ public class Rx {
 		try {
 			bytes = target.getBytes("UTF-8");
 			Matcher matcher = regex.matcher(bytes, 0, bytes.length);
-			int a = matcher.search(0, bytes.length, Option.NONE);
+			int a = matcher.search(start, end, Option.NONE);
 			
 			if(a == -1){
 				return null;

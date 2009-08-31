@@ -1,49 +1,52 @@
 package com.redcareditor.mate;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.CompositeRuler;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IVerticalRulerColumn;
+import org.eclipse.jface.text.source.LineNumberRulerColumn;
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.text.source.VerticalRuler;
 import com.redcareditor.onig.NullRx;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.theme.Theme;
 
-public class MateText extends StyledText {
-	private int modifyStart, modifyEnd;
-	private String modifyText;
+public class MateText extends SourceViewer {
 	public Parser parser;
 	
-	public MateText(Composite composite, int style) {
-		super(composite, style);
-		addListeners();
-	}
-	
-	public void addListeners() {
-		addVerifyListener(new VerifyListener() {
-			public void verifyText(VerifyEvent e) {
-				verifyEventCallback(e.start, e.end, e.text);
-			}
-		});
+	public MateText(Composite parent, CompositeRuler ruler, int style) {
+		super(parent, ruler, SWT.FULL_SELECTION | SWT.VERTICAL | SWT.HORIZONTAL);
 		
-		addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				modifyEventCallback();
-			}
-		});
+		IDocument document = new Document();
+		setDocument(document);
 	}
 	
-	public void verifyEventCallback(int start, int end, String text) {
-		modifyStart = start;
-		modifyEnd   = end;
-		modifyText  = text;
+	public static Composite constructContents(Composite parent) {
+		Composite contents = new Composite(parent, SWT.NONE);
+		contents.setLayout(new FillLayout());
+		return contents;
 	}
 	
-	public void modifyEventCallback() {
-		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, getLineAtOffset(modifyStart), modifyText);
+	public static CompositeRuler constructRuler() {
+		CompositeRuler ruler = new CompositeRuler();
+		ruler.addDecorator(0, new LineNumberRulerColumn());
+		return ruler;
 	}
+	
+	
 	
 	// Sets the grammar explicitly by name.
 	// TODO: restore the uncolouring stuff
