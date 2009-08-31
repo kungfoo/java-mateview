@@ -85,6 +85,7 @@ public class Scanner implements Iterable<Marker> {
 			match = sp.match.search(line, from, this.lineLength);
 		}
 		else if (p instanceof DoublePattern) {
+//			System.out.printf("p: %s, p.begin: %s\n", p, ((DoublePattern) p).begin);
 			match = ((DoublePattern) p).begin.search(this.line, from, this.lineLength);
 		}
 		return match;
@@ -124,7 +125,7 @@ public class Scanner implements Iterable<Marker> {
 		}
 		System.out.printf("scanning for %d patterns\n", ((DoublePattern) currentScope.pattern).patterns.size());
 		for (Pattern p : ((DoublePattern) currentScope.pattern).patterns) {
-//			System.out.printf("     scanning for %s\n", p.name);
+//			System.out.printf("     scanning for %s (%s)\n", p.name, p.disabled);
 			if (p.disabled)
 				continue;
 			int positionNow = position;
@@ -142,8 +143,9 @@ public class Scanner implements Iterable<Marker> {
 				newMarker.isCloseScope = false;
 				this.cachedMarkers.add(newMarker);
 				newLength = newMarker.match.getCapture(0).end - newMarker.from;
-				if (m == null || newMarker.from < m.from || (newMarker.from == m.from && 
-						newLength > bestLength && !isCloseMatch)) {
+				if (m == null || newMarker.from < m.from ||
+						(newMarker.from == m.from && newLength == 0) ||
+						(newMarker.from == m.from && newLength > bestLength && !isCloseMatch)) {
 					m = newMarker;
 					bestLength = newLength;
 				}

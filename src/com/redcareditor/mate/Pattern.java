@@ -62,6 +62,7 @@ public class Pattern {
 					String reponame = p.name.substring(1, p.name.length());
 					List<Pattern> repositoryEntryPatterns = grammar.repository.get(reponame);
 					if (repositoryEntryPatterns != null) {
+						anyIncluded = true;
 //						System.out.printf("repository %s with size %d\n", reponame, repositoryEntryPatterns.size());
 						patternsToInclude.addAll(repositoryEntryPatterns);
 					} else {

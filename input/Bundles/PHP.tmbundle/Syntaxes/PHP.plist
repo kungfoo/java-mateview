@@ -396,6 +396,8 @@
 						</string>
 				</dict>
 				<dict>
+				    <key>disabled</key>
+				    <string>1</string>
 					<key>begin</key>
 					<string>(?=(?&lt;regex&gt;(?#simple syntax)\$(?&lt;name&gt;[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\[(?&lt;index&gt;[a-zA-Z0-9_\x{7f}-\x{ff}]+|\$\g&lt;name&gt;)\]|-&gt;\g&lt;name&gt;(\(.*?\))?)?|(?#simple syntax with braces)\$\{(?:\g&lt;name&gt;(?&lt;indices&gt;\[(?:\g&lt;index&gt;|'(?:\\.|[^'\\])*'|"(?:\g&lt;regex&gt;|\\.|[^"\\])*")\])?|\g&lt;complex&gt;|\$\{\g&lt;complex&gt;\})\}|(?#complex syntax)\{(?&lt;complex&gt;\$(?&lt;segment&gt;\g&lt;name&gt;(\g&lt;indices&gt;*|\(.*?\))?)(?:-&gt;\g&lt;segment&gt;)*|\$\g&lt;complex&gt;|\$\{\g&lt;complex&gt;\})\}))\{</string>
 					<key>beginCaptures</key>

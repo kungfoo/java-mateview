@@ -27,18 +27,17 @@ public class DoublePattern extends Pattern {
 		name = dict.getString("name");
 //		System.out.printf("new DoublePattern name: %s\n", name);
 		try {
-			begin = Rx.createRx(dict.getString("begin"));
+			setDisabled(dict);
 			endString = dict.getString("end");
 			contentName = dict.getString("contentName");
+			begin = Rx.createRx(dict.getString("begin"));
 
 			loadCaptures(dict);
 			loadPatterns(grammarPatterns, dict);
-
-			setDisabled(dict);
 			grammarPatterns.add(this);
 		}
 		catch(ValueException e) {
-			System.out.printf("joni.exception.ValueException: %s\n", e.getMessage());
+			System.out.printf("joni.exception.ValueException: %s in %s\n", e.getMessage(), dict.getString("begin"));
 		}
 	}
 

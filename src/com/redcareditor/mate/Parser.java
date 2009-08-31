@@ -414,7 +414,7 @@ public class Parser {
 			scope.setInnerEndPos(lineIx, length, true);
 		}
 		else {
-			scope.setInnerEndPos(lineIx, Math.min(to, length), true);
+			scope.setInnerEndPos(lineIx, Math.min(to, length-1), true);
 		}
 	}
 	
@@ -424,7 +424,7 @@ public class Parser {
 			scope.setEndPos(lineIx, length, true);
 		}
 		else {
-			scope.setEndPos(lineIx, Math.min(to, length), true);
+			scope.setEndPos(lineIx, Math.min(to, length-1), true);
 		}
 	}
 	
@@ -521,11 +521,14 @@ public class Parser {
 			// find first and longest remaining scope (put it in 's')
 			for (Scope cs : captureScopes) {
 				newLength = cs.endOffset() - cs.startOffset();
-				if (s == null || (cs.startOffset() < s.startOffset() && newLength >= bestLength)) {
+				if (s == null || 
+						cs.startOffset() < s.startOffset() || 
+						(cs.startOffset() == s.startOffset() && newLength > bestLength)) {
 					s = cs;
 					bestLength = newLength;
 				}
 			}
+			System.out.printf("arrange: %s, start: %d, length: %d\n", s.name, s.startOffset(), s.endOffset() - s.startOffset());
 			// look for somewhere to put it from placed_scopes
 			parentScope = null;
 			for (Scope ps : placedScopes) {

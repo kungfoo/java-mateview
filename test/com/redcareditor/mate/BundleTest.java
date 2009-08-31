@@ -18,8 +18,8 @@ public class BundleTest {
 		assertTrue(Bundle.getBundleByName("Ruby") != null);
 		assertTrue(Bundle.getBundleByName("HTML") != null);
 		assertTrue(Bundle.getBundleByName("CSS") != null);
-		assertTrue(Bundle.getBundleByName("Perl") == null);
-		assertEquals(8, Bundle.bundles.size());
+		assertTrue(Bundle.getBundleByName("Perl") != null);
+		assertEquals(9, Bundle.bundles.size());
 	}
 	
 	@Test
