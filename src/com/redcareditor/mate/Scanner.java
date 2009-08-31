@@ -65,6 +65,9 @@ public class Scanner implements Iterable<Marker> {
 	}
 	
 	public Match scanForMatch(int from, Pattern p) {
+		if (p.name != null && (p.name.startsWith("#") || p.name.startsWith("$")))
+			System.out.printf("*** WARNING trying to scan for pattern called %s\n", p.name);
+		
 		Match match = null;
 		if (p instanceof SinglePattern) {
 			SinglePattern sp = (SinglePattern) p;
@@ -109,7 +112,7 @@ public class Scanner implements Iterable<Marker> {
 		}
 		System.out.printf("scanning for %d patterns\n", ((DoublePattern) currentScope.pattern).patterns.size());
 		for (Pattern p : ((DoublePattern) currentScope.pattern).patterns) {
-//			System.out.printf("scanning for %s\n", p.name);
+//			System.out.printf("     scanning for %s\n", p.name);
 			if (p.disabled)
 				continue;
 			int positionNow = position;

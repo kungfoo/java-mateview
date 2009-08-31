@@ -21,6 +21,7 @@ public class Grammar {
 	public String comment;
 
 	public List<Pattern> allPatterns;
+	public List<Pattern> patterns;
 	public List<Pattern> singlePatterns;
 	public Map<String, List<Pattern>> repository;
 	public Rx firstLineMatch;
@@ -48,20 +49,21 @@ public class Grammar {
 		initForReference();
 		propertyLoader.loadRegexProperty("foldingStartMarker");
 		propertyLoader.loadRegexProperty("foldingStopMarker");
-
+		
+		this.allPatterns = new ArrayList<Pattern>();
 		loadPatterns();
 		loadRepository();
 		replaceIncludePatterns();
 	}
 
 	private void loadPatterns() {
-		allPatterns = new ArrayList<Pattern>();
-		Dict[] patterns = plist.getDictionaries("patterns");
-		for (Dict p : patterns) {
+		this.patterns = new ArrayList<Pattern>();
+		Dict[] dictPatterns = plist.getDictionaries("patterns");
+		for (Dict p : dictPatterns) {
 			Pattern pattern = Pattern.createPattern(allPatterns, p);
 			if (pattern != null) {
 				pattern.grammar = this;
-				allPatterns.add(pattern);
+				this.patterns.add(pattern);
 			}
 		}
 	}
@@ -97,8 +99,13 @@ public class Grammar {
 	}
 
 	private void replaceIncludePatterns() {
+//		for (String repoKey : repository.keySet()) {
+//			System.out.printf("replace include patterns for %s\n", repoKey);
+//			Pattern.replaceIncludePatterns(repository.get(repoKey), this);
+//		}
+//		
 		for (Pattern p : allPatterns) {
-//			System.out.printf("replaceIncludePattern for %s\n", p.name);
+			System.out.printf("replaceIncludePattern for %s\n", p.name);
 			if (p instanceof DoublePattern) {
 				Pattern.replaceIncludePatterns(((DoublePattern) p).patterns, this);
 			}

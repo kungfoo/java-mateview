@@ -114,6 +114,22 @@ END
     c punctuation.definition.string.end.ruby (2,0)-(2,3) closed
 END
   end
+
+  it "creates multiple levels of scopes" do
+    @st.text = "\"william \#{:joseph} adama\""
+    @mt.parser.root.pretty(0).should == (t=<<END)
++ source.ruby (0,0)-(0,26) open
+  + string.quoted.double.ruby (0,0)-(0,26) closed
+    c punctuation.definition.string.begin.ruby (0,0)-(0,1) closed
+    + source.ruby.embedded.source (0,9)-(0,19) closed
+      c punctuation.section.embedded.ruby (0,9)-(0,11) closed
+      + constant.other.symbol.ruby (0,11)-(0,18) closed
+        c punctuation.definition.constant.ruby (0,11)-(0,12) closed
+      c punctuation.section.embedded.ruby (0,18)-(0,19) closed
+    c punctuation.definition.string.end.ruby (0,25)-(0,26) closed
+END
+  end
+
 end
 
 

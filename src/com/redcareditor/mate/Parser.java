@@ -61,7 +61,7 @@ public class Parser {
 		System.out.printf("making root: %s\n", this.grammar.scopeName);
 		DoublePattern dp = new DoublePattern();
 		dp.name = this.grammar.name;
-		dp.patterns = this.grammar.allPatterns;
+		dp.patterns = this.grammar.patterns;
 		dp.grammar = this.grammar;
 		this.root.pattern = dp;
 	}
@@ -155,12 +155,12 @@ public class Parser {
 			this.parsedUpto = lineIx;
 		Scope startScope = this.root.scopeAt(lineIx, 0);
 		if (startScope != null) {
-			System.out.printf("startScope is: %s\n", startScope.name);
+//			System.out.printf("startScope is: %s\n", startScope.name);
 			startScope = startScope.containingDoubleScope(lineIx);
 		}
 		System.out.printf("startScope is: %s\n", startScope.name);
 		Scope endScope1 = this.root.scopeAt(lineIx, Integer.MAX_VALUE);
-		System.out.printf("endScope1: %s\n", endScope1.name);
+//		System.out.printf("endScope1: %s\n", endScope1.name);
 		if (endScope1 != null)
 			endScope1 = endScope1.containingDoubleScope(lineIx);
 		System.out.printf("endScope1: %s\n", endScope1.name);

@@ -81,17 +81,19 @@ public class Pattern {
 		boolean alreadySelf = false; // some patterns have $self twice
 		Grammar ng;
 		for (Pattern p : patterns) {
+//			System.out.printf("    considering %s\n", p.name);
 			if (p instanceof IncludePattern) {
+//				System.out.printf("    replacing %s\n", p.name);
 				if (p.name.startsWith("$")) {
 					includePatterns.add(p);
 					if ((p.name.equals("$self") || p.name.equals("$base")) && !alreadySelf) {
 						alreadySelf = true;
-						patternsToInclude.addAll(grammar.allPatterns);
+						patternsToInclude.addAll(grammar.patterns);
 					}
 				} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
 					ng.initForUse();
 					includePatterns.add(p);
-					patternsToInclude.addAll(ng.allPatterns);
+					patternsToInclude.addAll(ng.patterns);
 				} else {
 					if (!p.name.startsWith("#")) {
 						System.out.printf("unknown include pattern: %s\n", p.name);

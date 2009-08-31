@@ -31,6 +31,7 @@ public class DoublePattern extends Pattern {
 		loadPatterns(grammarPatterns, dict);
 
 		setDisabled(dict);
+		grammarPatterns.add(this);
 	}
 
 	private void loadPatterns(List<Pattern> grammarPatterns, Dict dict) {
