@@ -41,7 +41,7 @@ END
   it "parses flat SinglePatterns on multiple lines" do
     @st.text = "1 + \n3 + Redcar"
     @mt.parser.root.pretty(0).should == (t=<<END)
-+ source.ruby (0,0)-(1,15) open
++ source.ruby (0,0)-(1,10) open
   + constant.numeric.ruby (0,0)-(0,1) closed
   + keyword.operator.arithmetic.ruby (0,2)-(0,3) closed
   + constant.numeric.ruby (1,0)-(1,1) closed
@@ -104,4 +104,18 @@ END
     c punctuation.definition.string.end.ruby (0,14)-(0,15) closed
 END
   end
+  
+  it "creates closing regexes correctly" do
+    @st.text = "foo=\<\<END\nstring\nEND"
+    @mt.parser.root.pretty(0).should == (t=<<END)
++ source.ruby (0,0)-(2,3) open
+  + string.unquoted.heredoc.ruby (0,3)-(2,3) closed
+    c punctuation.definition.string.begin.ruby (0,3)-(0,9) closed
+    c punctuation.definition.string.end.ruby (2,0)-(2,3) closed
+END
+  end
 end
+
+
+
+

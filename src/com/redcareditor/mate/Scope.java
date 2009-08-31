@@ -216,7 +216,7 @@ public class Scope {
 	
 	public int endLineOffset() {
 		if (endPos == null)
-			return styledText.getCharCount();
+			return styledText.getCharCount() - styledText.getOffsetAtLine(endLine());
 		else
 			return endPos.offset - styledText.getOffsetAtLine(endLine());
 	}

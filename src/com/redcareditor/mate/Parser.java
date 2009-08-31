@@ -410,7 +410,7 @@ public class Parser {
 	public void setInnerEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).end;
 		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {
-			scope.setInnerEndPos(lineIx, length-1, true);
+			scope.setInnerEndPos(lineIx, length, true);
 		}
 		else {
 			scope.setInnerEndPos(lineIx, Math.min(to, length), true);
@@ -420,7 +420,7 @@ public class Parser {
 	public void setEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).end;
 		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {
-			scope.setEndPos(lineIx, length-1, true);
+			scope.setEndPos(lineIx, length, true);
 		}
 		else {
 			scope.setEndPos(lineIx, Math.min(to, length), true);
