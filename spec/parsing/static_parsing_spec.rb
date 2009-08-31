@@ -10,6 +10,7 @@ describe JavaMateView, "when parsing Ruby from scratch" do
 		  ruler = JavaMateView::MateText.constructRuler, 
 		  Swt::SWT::FULL_SELECTION | Swt::SWT::VERTICAL | Swt::SWT::HORIZONTAL)
     @mt.set_grammar_by_name("Ruby")
+    @st = @mt.get_text_widget
   end
   
   after(:each) do
@@ -19,7 +20,7 @@ describe JavaMateView, "when parsing Ruby from scratch" do
   end
   
   it "does something" do
-    @mt.get_text_widget.get_line_count.should == 1
+    @st.get_line_count.should == 1
   end
   
   it "should have a blank Ruby scope tree" do
@@ -29,7 +30,7 @@ END
   end
   
   it "parses flat SinglePatterns" do
-    @mt.get_text_widget.text = "1 + 2 + Redcar"
+    @st.text = "1 + 2 + Redcar"
     @mt.parser.root.pretty(0).should == (t=<<END)
 + source.ruby (inf)-(inf) open
   + constant.numeric.ruby (0,0)-(0,1) closed
@@ -39,4 +40,17 @@ END
   + variable.other.constant.ruby (0,8)-(0,14) closed
 END
   end
+  
+  it "parses flat SinglePatterns on multiple lines" do
+    @st.text = "1 + \n3 + Redcar"
+    @mt.parser.root.pretty(0).should == (t=<<END)
++ source.ruby (inf)-(inf) open
+  + constant.numeric.ruby (0,0)-(0,1) closed
+  + keyword.operator.arithmetic.ruby (0,2)-(0,3) closed
+  + constant.numeric.ruby (1,0)-(1,1) closed
+  + keyword.operator.arithmetic.ruby (1,2)-(1,3) closed
+  + variable.other.constant.ruby (1,4)-(1,10) closed
+END
+  end
+  
 end

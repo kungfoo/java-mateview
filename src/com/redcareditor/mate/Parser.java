@@ -82,8 +82,9 @@ public class Parser {
 	}
 	
 	public void modifyEventCallback() {
-		changes.add(mateText.getTextWidget().getLineAtOffset(modifyStart), 
-					mateText.getTextWidget().getLineAtOffset(modifyEnd));
+		// TODO: this isn't quite right...
+		changes.add(styledText.getLineAtOffset(modifyStart), 
+				styledText.getLineAtOffset(modifyStart + modifyText.length()));
 		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, mateText.getTextWidget().getLineAtOffset(modifyStart), modifyText);
 		processChanges();
 	}
@@ -274,7 +275,6 @@ public class Parser {
 		s.parent = scanner.getCurrentScope();
 		Scope newScope = s;
 		if (expectedScope != null) {
-			System.out.printf("aaa\n");
 			if (s.surfaceIdenticalTo(expectedScope)) {
 				newScope = expectedScope;
 				for (Scope child : expectedScope.children) {
@@ -298,7 +298,6 @@ public class Parser {
 			}
 		}
 		else {
-			System.out.printf("bbb\n");
 			handleCaptures(lineIx, length, line, s, m, allScopes, closedScopes);
 			scanner.getCurrentScope().addChild(s);
 		}
