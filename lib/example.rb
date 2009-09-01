@@ -10,7 +10,7 @@ class MateExample
 
     build_application_menu
     build_styled_text
-    setup_listeners
+    # setup_listeners
     
     @shell.layout = Swt::Layout::FillLayout.new
     @shell.size = Swt::Graphics::Point.new(600, 400)

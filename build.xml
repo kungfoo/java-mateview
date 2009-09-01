@@ -7,13 +7,35 @@
 	<property name="build.prod.dir" location="${build.dir}" />
 	<property name="build.test.dir" location="${build.dir}/test" />
 	<property name="test.report.dir" location="${build.dir}/test-reports" />
-
+	
+	<condition property="isOsX">
+		<and>
+			<os family="mac"/>
+			<os family="unix"/>
+		</and>
+	</condition>
+	
+	<condition property="isLinux">
+		<and>
+			<os family="unix" />
+			<not>
+				<os family="mac"/>
+			</not>
+		</and>
+	</condition>
+	
+	<condition property="isWindows">
+		<os family="windows" />
+	</condition>
+	
 	<path id="project.classpath">
 		<pathelement location="${build.prod.dir}" />
 		<pathelement location="${build.test.dir}" />
 		<fileset dir="${lib.dir}">
 			<include name="*.jar" />
-			<exclude name="*linux*" />
+			<exclude name="swt-linux.jar" if="${isOsX}"/>
+			<exclude name="swt-osx.jar" if="${isLinux}" />
+			
 		</fileset>
 	</path>
 

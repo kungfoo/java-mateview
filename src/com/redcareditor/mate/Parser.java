@@ -171,7 +171,6 @@ public class Parser {
 		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
 		for (Marker m : scanner) {
-//			sleep(500);
 			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, scanner.position);
 			if (expectedScope != null)
 				System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.startLoc().line, 
@@ -195,7 +194,7 @@ public class Parser {
 				singleScope(scanner, expectedScope, lineIx, line, length, m, 
 							 allScopes, closedScopes, removedScopes);
 			}
-			System.out.printf("pretty:\n%s\n", root.pretty(2));
+			//System.out.printf("pretty:\n%s\n", root.pretty(2));
 			scanner.position = m.match.getCapture(0).end;
 		}
 		clearLine(lineIx, startScope, allScopes, closedScopes, removedScopes);
