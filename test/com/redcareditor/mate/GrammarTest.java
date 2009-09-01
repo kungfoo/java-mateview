@@ -10,11 +10,11 @@ import org.junit.Test;
 import com.redcareditor.plist.Dict;
 
 public class GrammarTest {
-	private Dict ruby;
 	private Grammar g;
 
 	@Before
 	public void setUp() {
+		Dict ruby;
 		ruby = Dict.parseFile("input/Bundles/Apache.tmbundle/Syntaxes/Apache.plist");
 		g = new Grammar(ruby);
 		g.initForUse();
@@ -42,11 +42,25 @@ public class GrammarTest {
 		assertTrue(patternNames().contains("source.include.apache-config"));
 		assertTrue(patternNames().contains("support.constant.apache-config"));
 	}
-	
+
+  @Test
+  public void shouldLoadPatternsWithoutNames() {
+    Pattern foundPattern = null;
+    for (Pattern p : g.allPatterns) {
+      if ((p instanceof DoublePattern) &&
+          ((DoublePattern)p).bothCaptures != null &&
+          ((DoublePattern)p).bothCaptures.values().contains("support.constant.rewritecond.apache-config")) {
+        foundPattern = p;
+        break;
+      }
+    }
+    assertNotNull("Unable to find unnamed rewrite pattern", foundPattern);
+  }
+
 	@Test
 	public void shouldLoadCaptures() {
 		for (Pattern p : g.allPatterns) {
-			if (p.name == "comment.line.number-sign.apache-config") {
+			if ("comment.line.number-sign.apache-config".equals(p.name)) {
 				assertEquals("punctuation.definition.comment.apache-config", ((SinglePattern) p).captures.get(1));
 			}
 		}
