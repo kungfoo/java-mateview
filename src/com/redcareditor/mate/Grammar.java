@@ -21,6 +21,7 @@ public class Grammar {
 	public String comment;
 
 	public List<Pattern> allPatterns;
+	public List<Pattern> patterns;
 	public List<Pattern> singlePatterns;
 	public Map<String, List<Pattern>> repository;
 	public Rx firstLineMatch;
@@ -38,30 +39,33 @@ public class Grammar {
 			propertyLoader.loadStringProperty(property);
 		}
 		propertyLoader.loadRegexProperty("firstLineMatch");
-		fileTypes = plist.getStrings("fileTypes");
+		if (plist.containsElement("fileTypes"))
+			fileTypes = plist.getStrings("fileTypes");
 	}
 
 	public void initForUse() {
+		System.out.printf("initForUse: %s\n", this.name);
 		if (loaded())
 			return;
 		
 		initForReference();
 		propertyLoader.loadRegexProperty("foldingStartMarker");
 		propertyLoader.loadRegexProperty("foldingStopMarker");
-
+		
+		this.allPatterns = new ArrayList<Pattern>();
 		loadPatterns();
 		loadRepository();
 		replaceIncludePatterns();
 	}
 
 	private void loadPatterns() {
-		allPatterns = new ArrayList<Pattern>();
-		Dict[] patterns = plist.getDictionaries("patterns");
-		for (Dict p : patterns) {
+		this.patterns = new ArrayList<Pattern>();
+		Dict[] dictPatterns = plist.getDictionaries("patterns");
+		for (Dict p : dictPatterns) {
 			Pattern pattern = Pattern.createPattern(allPatterns, p);
 			if (pattern != null) {
 				pattern.grammar = this;
-				allPatterns.add(pattern);
+				this.patterns.add(pattern);
 			}
 		}
 	}
@@ -71,18 +75,21 @@ public class Grammar {
 		Dict plistRepo = plist.getDictionary("repository");
 		Dict plistRepoEntry;
 		for (String key : plistRepo.keys()) {
+//			System.out.printf("loading repository entry: %s\n", key);
 			List<Pattern> repoArray = new ArrayList<Pattern>();
 			plistRepoEntry = plistRepo.getDictionary(key);
-			if (plistRepoEntry.containsElement("begin") || plistRepo.containsElement("match")) {
-				Pattern pattern = Pattern.createPattern(allPatterns, plistRepoEntry);
+			if (plistRepoEntry.containsElement("begin") || plistRepoEntry.containsElement("match")) {
+//				System.out.printf("    contains begin or match\n");
+				Pattern pattern = Pattern.createPattern(this.allPatterns, plistRepoEntry);
 				if (pattern != null) {
 					pattern.grammar = this;
 					repoArray.add(pattern);
 				}
 			}
-			if (plistRepo.containsElement("patterns")) {
+			else if (plistRepoEntry.containsElement("patterns")) {
+//				System.out.printf("    contains patterns\n");
 				for (PlistNode<?> plistPattern : plistRepoEntry.getArray("patterns")) {
-					Pattern pattern = Pattern.createPattern(allPatterns, (Dict) plistPattern);
+					Pattern pattern = Pattern.createPattern(this.allPatterns, (Dict) plistPattern);
 					if (pattern != null) {
 						pattern.grammar = this;
 						repoArray.add(pattern);
@@ -95,11 +102,13 @@ public class Grammar {
 
 	private void replaceIncludePatterns() {
 		for (Pattern p : allPatterns) {
+//			System.out.printf("%s replaceIncludePattern for %s\n", this.name, p.name);
 			if (p instanceof DoublePattern) {
 				Pattern.replaceIncludePatterns(((DoublePattern) p).patterns, this);
 			}
+//			System.out.printf("%s replaceIncludePattern for %s [done]\n", this.name, p.name);
 		}
-		Pattern.replaceIncludePatterns(allPatterns, this);
+		Pattern.replaceIncludePatterns(patterns, this);
 	}
 
 	public static Grammar findByScopeName(String scope) {

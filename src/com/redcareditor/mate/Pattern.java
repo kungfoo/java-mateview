@@ -1,8 +1,12 @@
 package com.redcareditor.mate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.redcareditor.plist.Dict;
+import com.redcareditor.plist.PlistNode;
 
 public class Pattern {
 	public Grammar grammar;
@@ -58,9 +62,9 @@ public class Pattern {
 					String reponame = p.name.substring(1, p.name.length());
 					List<Pattern> repositoryEntryPatterns = grammar.repository.get(reponame);
 					if (repositoryEntryPatterns != null) {
-						for (Pattern p2 : repositoryEntryPatterns) {
-							patternsToInclude.add(p2);
-						}
+						anyIncluded = true;
+//						System.out.printf("repository %s with size %d\n", reponame, repositoryEntryPatterns.size());
+						patternsToInclude.addAll(repositoryEntryPatterns);
 					} else {
 						System.out.printf("warning: couldn't find repository key '%s' in grammar '%s'\n", reponame,
 								grammar.name);
@@ -80,19 +84,24 @@ public class Pattern {
 		boolean alreadySelf = false; // some patterns have $self twice
 		Grammar ng;
 		for (Pattern p : patterns) {
+//			System.out.printf("    considering %s\n", p.name);
 			if (p instanceof IncludePattern) {
+//				System.out.printf("    replacing %s\n", p.name);
 				if (p.name.startsWith("$")) {
 					includePatterns.add(p);
-					if ((p.name == "$self" || p.name == "$base") && !alreadySelf) {
+					if ((p.name.equals("$self") || p.name.equals("$base")) && !alreadySelf) {
 						alreadySelf = true;
-						patternsToInclude.addAll(grammar.allPatterns);
+						patternsToInclude.addAll(grammar.patterns);
 					}
 				} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
+//					System.out.printf("importing toplevel patterns from %s\n", ng.name);
 					ng.initForUse();
 					includePatterns.add(p);
-					patternsToInclude.addAll(ng.allPatterns);
+					patternsToInclude.addAll(ng.patterns);
 				} else {
-					System.out.printf("unknown include pattern: %s\n", p.name);
+					if (!p.name.startsWith("#")) {
+						System.out.printf("unknown include pattern: %s\n", p.name);
+					}
 				}
 			}
 		}
@@ -113,8 +122,16 @@ public class Pattern {
 	}
 
 	public void setDisabled(Dict dict) {
-		if (dict.containsElement("disabled")) {
-			int intn = dict.getInt("disabled");
+		PlistNode<?> plistNode = dict.value.get("disabled");
+		int intn;
+		if (plistNode != null) {
+			if (plistNode.value instanceof String) {
+				String strn = dict.getString("disabled");
+				intn = Integer.parseInt(strn);
+			}
+			else {
+				intn = dict.getInt("disabled");
+			}
 			switch (intn) {
 			case 1:
 				disabled = true;

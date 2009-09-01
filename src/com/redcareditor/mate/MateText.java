@@ -82,10 +82,12 @@ public class MateText extends Composite {
 		long bestLength = 0;
 		for (Bundle bundle : Bundle.bundles) {
 			for (Grammar grammar : bundle.grammars) {
-				for (String ext : grammar.fileTypes) {
-					if (fileName.endsWith(ext) && (bestName == null || ext.length() > bestLength)) {
-						bestName = grammar.name;
-						bestLength = ext.length();
+				if (grammar.fileTypes != null) {
+					for (String ext : grammar.fileTypes) {
+						if (fileName.endsWith(ext) && (bestName == null || ext.length() > bestLength)) {
+							bestName = grammar.name;
+							bestLength = ext.length();
+						}
 					}
 				}
 			}

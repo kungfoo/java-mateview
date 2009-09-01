@@ -25,7 +25,7 @@ public class Scanner implements Iterable<Marker> {
 	public Scanner(Scope startScope, String line) {
 		this.currentScope = startScope;
 		this.line = line;
-		this.lineLength = line.length();
+		this.lineLength = line.getBytes().length;
 		this.position = 0;
 		this.cachedMarkers = new ArrayList<Marker>();
 	}
@@ -63,14 +63,29 @@ public class Scanner implements Iterable<Marker> {
 		}
 		//stdout.printf("num cached after removals: %d\n", cached_markers.size);
 	}
+
+	public void sleep(int ms) {
+		try{
+		  //do what you want to do before sleeping
+		  Thread.currentThread().sleep(ms);//sleep for 1000 ms
+		  //do what you want to do after sleeptig
+		}
+		catch(InterruptedException ie){
+		//If this thread was intrrupted by
+		}
+	}
 	
 	public Match scanForMatch(int from, Pattern p) {
+		if (p.name != null && (p.name.startsWith("#") || p.name.startsWith("$")))
+			System.out.printf("*** WARNING trying to scan for pattern called %s\n", p.name);
+		
 		Match match = null;
 		if (p instanceof SinglePattern) {
 			SinglePattern sp = (SinglePattern) p;
 			match = sp.match.search(line, from, this.lineLength);
 		}
 		else if (p instanceof DoublePattern) {
+//			System.out.printf("p: %s, p.begin: %s\n", p, ((DoublePattern) p).begin);
 			match = ((DoublePattern) p).begin.search(this.line, from, this.lineLength);
 		}
 		return match;
@@ -79,6 +94,7 @@ public class Scanner implements Iterable<Marker> {
 	public Marker findNextMarker() {
 		System.out.printf("find_next_marker from (current_scope is %s)\n", currentScope.name);
 		System.out.printf("scanning: '%s' from %d to %d\n", this.line, this.position, this.lineLength);
+//		sleep(500);
 		Marker m;
 		int bestLength = 0;
 		int newLength;
@@ -109,7 +125,7 @@ public class Scanner implements Iterable<Marker> {
 		}
 		System.out.printf("scanning for %d patterns\n", ((DoublePattern) currentScope.pattern).patterns.size());
 		for (Pattern p : ((DoublePattern) currentScope.pattern).patterns) {
-//			System.out.printf("scanning for %s\n", p.name);
+//			System.out.printf("     scanning for %s (%s)\n", p.name, p.disabled);
 			if (p.disabled)
 				continue;
 			int positionNow = position;
@@ -127,8 +143,9 @@ public class Scanner implements Iterable<Marker> {
 				newMarker.isCloseScope = false;
 				this.cachedMarkers.add(newMarker);
 				newLength = newMarker.match.getCapture(0).end - newMarker.from;
-				if (m == null || newMarker.from < m.from || (newMarker.from == m.from && 
-						newLength > bestLength && !isCloseMatch)) {
+				if (m == null || newMarker.from < m.from ||
+						(newMarker.from == m.from && newLength == 0) ||
+						(newMarker.from == m.from && newLength > bestLength && !isCloseMatch)) {
 					m = newMarker;
 					bestLength = newLength;
 				}

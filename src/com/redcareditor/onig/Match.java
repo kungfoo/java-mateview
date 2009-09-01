@@ -34,7 +34,8 @@ public class Match implements Iterable<Range> {
 	}
 
 	private void checkBounds(int capture) {
-		if (capture > regex.numberOfCaptures() || capture < 0) {
+//		System.out.printf("checkBounds(%d) (out of %d)\n", capture, numCaptures()-1);
+		if (capture > numCaptures()-1 || capture < 0) {
 			throw new IllegalArgumentException("Capture Index out of bounds!");
 		}
 	}
