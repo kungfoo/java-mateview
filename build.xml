@@ -18,9 +18,6 @@
 	<condition property="isLinux">
 		<and>
 			<os family="unix" />
-			<not>
-				<os family="mac"/>
-			</not>
 		</and>
 	</condition>
 	
@@ -31,11 +28,10 @@
 	<path id="project.classpath">
 		<pathelement location="${build.prod.dir}" />
 		<pathelement location="${build.test.dir}" />
+		
 		<fileset dir="${lib.dir}">
 			<include name="*.jar" />
-			<exclude name="swt-linux.jar" if="${isOsX}"/>
-			<exclude name="swt-osx.jar" if="${isLinux}" />
-			
+			<exclude name="swt-linux.jar" />
 		</fileset>
 	</path>
 
@@ -44,6 +40,7 @@
 	</target>
 
 	<target name="prepare" depends="clean">
+		<echo message="${isLinux}"/>
 		<mkdir dir="${build.prod.dir}" />
 		<mkdir dir="${build.test.dir}" />
 	</target>
