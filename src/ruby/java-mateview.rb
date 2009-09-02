@@ -8,9 +8,9 @@ require 'jdom'
 require 'rbconfig'
 
 if Config::CONFIG["host_os"] =~ /darwin/
-  require 'swt-osx'
+  require 'osx/swt'
 else
-  require 'swt-linux'
+  require 'linux/swt'
 end
 
 require 'swt_wrapper'
