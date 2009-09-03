@@ -389,6 +389,7 @@ public class Parser {
 		closedScopes.add(newScope);
 	}
 
+	// TODO: please, give this method a meaningful name.
 	private boolean iDontKnowHowToNameThisFunctionButItsDuplicateCode(int lineIx, int length, int to) {
 		return to == length && styledText.getLineCount() > lineIx+1;
 	}
