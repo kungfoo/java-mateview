@@ -9,8 +9,8 @@ public class TextLocationPosition extends Position {
 	StyledText styledText;
 	TextLocation location;
 	
-	public TextLocationPosition(int offset,TextLocation location,StyledText styledText) {
-		super(offset);
+	public TextLocationPosition(TextLocation location,StyledText styledText) {
+		super(convertTextLocationToOffset(location, styledText));
 		this.location = location;
 		this.styledText = styledText;
 	}
@@ -20,5 +20,11 @@ public class TextLocationPosition extends Position {
 		location.line = styledText.getLineAtOffset(offset);
 		location.lineOffset = offset - styledText.getOffsetAtLine(location.line);
 		super.setOffset(offset);
+	}
+	
+	private static int convertTextLocationToOffset(TextLocation location,StyledText styledText){
+		int line = location.line;
+		int offset = location.lineOffset;
+		return styledText.getOffsetAtLine(line)+offset;
 	}
 }

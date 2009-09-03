@@ -20,7 +20,7 @@ public class SwtMateDocument implements MateDocument {
 
 	public boolean addTextLocation(TextLocation location) {
 		sanatizeTextLocaition(location);
-		Position position = convertTextLocation(location);
+		Position position = new TextLocationPosition(location,styledText);
 		
 		try {
 			mateText.getDocument().addPosition(position);
@@ -59,11 +59,4 @@ public class SwtMateDocument implements MateDocument {
 			location.lineOffset = getLineLength(location.line)-1;
 		}
 	}
-	
-	private Position convertTextLocation(TextLocation location){
-		int line = location.line;
-		int offset = location.lineOffset;
-		return new TextLocationPosition(styledText.getOffsetAtLine(line)+offset,location,styledText);
-	}
-	
 }
