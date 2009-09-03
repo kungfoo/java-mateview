@@ -11,17 +11,20 @@ public class BundleTest {
 	public void setUp() {
 		Bundle.loadBundles("input/");
 	}
-	
+
 	@Test
 	public void shouldHaveCreatedCorrectBundles() {
-		assertTrue(Bundle.getBundleByName("Apache") != null);
-		assertTrue(Bundle.getBundleByName("Ruby") != null);
-		assertTrue(Bundle.getBundleByName("HTML") != null);
-		assertTrue(Bundle.getBundleByName("CSS") != null);
-		assertTrue(Bundle.getBundleByName("Perl") != null);
+		String[] bundleNames = new String[] { "Apache", "Ruby", "HTML", "CSS", "Perl" };
+		for (String bundleName : bundleNames) {
+			containsBundleNamed(bundleName);
+		}
 		assertEquals(9, Bundle.bundles.size());
 	}
-	
+
+	private void containsBundleNamed(String bundleName) {
+		assertNotNull(Bundle.getBundleByName(bundleName));
+	}
+
 	@Test
 	public void shouldHaveCreatedCorrectGrammars() {
 		assertEquals(1, Bundle.getBundleByName("Apache").grammars.size());
