@@ -63,7 +63,7 @@ public class SwtMateDocument implements MateDocument {
 	private Position convertTextLocation(TextLocation location){
 		int line = location.line;
 		int offset = location.lineOffset;
-		return new Position(styledText.getOffsetAtLine(line)+offset);
+		return new TextLocationPosition(styledText.getOffsetAtLine(line)+offset,location,styledText);
 	}
 	
 }
