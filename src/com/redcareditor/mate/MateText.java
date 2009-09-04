@@ -41,6 +41,14 @@ public class MateText extends Composite {
 		return ruler;
 	}
 	
+	public void undo(){
+		undoManager.undo();
+	}
+	
+	public void redo(){
+		undoManager.redo();
+	}
+	
 	public void attachUpdater(){
 		
 	}
