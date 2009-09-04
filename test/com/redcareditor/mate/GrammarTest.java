@@ -15,9 +15,7 @@ public class GrammarTest {
 
 	@Before
 	public void setUp() {
-		Dict ruby;
-		ruby = Dict.parseFile("input/Bundles/Apache.tmbundle/Syntaxes/Apache.plist");
-		g = new Grammar(ruby);
+		g = new Grammar(Dict.parseFile("input/Bundles/Apache.tmbundle/Syntaxes/Apache.plist"));
 		g.initForUse();
 	}
 
@@ -105,6 +103,40 @@ public class GrammarTest {
 			}
 		}
 	}
+
+  @Test
+  public void shouldMarkDisabledPatternsAsDisabled() {
+    Bundle.loadBundles("input/");
+    Bundle htmlBundle = null;
+    for (Bundle b : Bundle.bundles) {
+      if ("HTML".equals(b.name)) {
+        htmlBundle = b; break;
+      }
+    }
+
+    if (htmlBundle != null) {
+      Grammar html = null;
+      for (Grammar g : htmlBundle.grammars) {
+        if ("HTML".equals(g.name)) {
+          html = g; break;
+        }
+      }
+
+      if (html != null) {
+        html.initForUse();
+        Pattern smarty = find(html.allPatterns, new Predicate() {
+          public boolean match(Pattern p) {
+            return "source.smarty.embedded.html".equals(p.name);
+          }
+        });
+        assertTrue(smarty.disabled);
+      } else {
+        fail("Unable to find HTML grammar in HTML bundle.");
+      }
+    } else {
+      fail("Unable to find HTML bundle.");
+    }
+  }
 
   public ArrayList<String> patternNames(List<Pattern> patterns) {
     ArrayList<String> result = new ArrayList<String>();
