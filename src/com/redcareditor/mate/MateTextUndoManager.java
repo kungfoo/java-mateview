@@ -19,16 +19,10 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 	private Stack<UndoRedoStep> redoStack;
 	private StyledText styledText;
 
-	/**
-	 * this is needed so that undo/redo can disattach/reattach the listener.
-	 */
-	private MateTextUndoManager self;
-
 	public MateTextUndoManager(MateText matetext) {
 		styledText = matetext.getTextWidget();
 		undoStack = new Stack<UndoRedoStep>();
 		redoStack = new Stack<UndoRedoStep>();
-		self = this;
 		styledText.addExtendedModifyListener(this);
 	}
 
@@ -72,15 +66,24 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 	private boolean isTextReplaceEvent(ExtendedModifyEvent e) {
 		return e.replacedText != null && e.replacedText.length() > 0;
 	}
+	
+	private void attachListener(){
+		styledText.addExtendedModifyListener(this);
+	}
 
+	private void disattachListener(){
+		styledText.removeExtendedModifyListener(this);
+	}
 	
 	
 	
 	
 	/*
+	 * ----------------------------------------------------------
 	 * these are private classes, because the outside world doesn't need or
 	 * understand them. Plus we can easily access and juggle around the instance
 	 * variables from here.
+	 * ----------------------------------------------------------
 	 */
 	private abstract class UndoRedoStep {
 		public int location;
@@ -112,15 +115,15 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 		public void undo() {
 			String changedText = styledText.getText().substring(location, location + data.length());
 			redoStack.push(new EntryUndoRedoStep(location, changedText));
-			styledText.removeExtendedModifyListener(self);
+			disattachListener();
 			styledText.replaceTextRange(location, data.length(), "");
 			styledText.setCaretOffset(location + data.length());
-			styledText.addExtendedModifyListener(self);
+			attachListener();
 		}
 	}
 
 	/**
-	 * Represents text that has been entered.
+	 * Represents text that has been entered. Also deleted text, that is undone.
 	 */
 	private class EntryUndoRedoStep extends UndoRedoStep {
 		public EntryUndoRedoStep(int location, String data) {
@@ -128,15 +131,15 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 		}
 
 		public void redo() {
-
+			
 		}
 
 		public void undo() {
 			redoStack.push(new ReplaceUndoRedoStep(location, data));
-			styledText.removeExtendedModifyListener(self);
+			disattachListener();
 			styledText.replaceTextRange(location, 0, data);
 			styledText.setCaretOffset(location + data.length());
-			styledText.addExtendedModifyListener(self);
+			attachListener();
 		}
 	}
 }
