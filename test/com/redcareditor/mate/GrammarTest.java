@@ -83,6 +83,20 @@ public class GrammarTest {
     }
   }
 
+  @Test
+  public void shouldReplaceVarsProperly() {
+    Pattern pt = find(g.allPatterns, new Predicate() {
+      public boolean match(Pattern p) {
+        return (p instanceof DoublePattern) &&
+               ((DoublePattern)p).bothCaptures != null &&
+               ((DoublePattern)p).bothCaptures.values().contains("support.constant.rewritecond.apache-config");
+      }
+    });
+    List<String> names = patternNames(((DoublePattern)((DoublePattern)pt).patterns.get(0)).patterns);
+    assertTrue(names.contains("support.variable.apache-config"));
+    assertTrue(names.contains("invalid.illegal.bad-var.apache-config"));
+  }
+
 	@Test
 	public void shouldLoadCaptures() {
 		for (Pattern p : g.allPatterns) {
