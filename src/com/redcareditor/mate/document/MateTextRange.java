@@ -8,6 +8,7 @@ public interface MateTextRange {
 	public MateTextLocation getEnd();
 	public void setEnd(MateTextLocation location);
 	
-	
 	public int getLength();
+	public boolean conatains(MateTextLocation location);
+	public boolean overlaps(MateTextRange range);
 }

@@ -75,10 +75,6 @@ public class MateText extends Composite {
 		return mateDocument;
 	}
 	
-	public MateTextFactory getTextLocationFactory(){
-		return mateDocument;
-	}
-	
 	// Sets the grammar explicitly by name.
 	// TODO: restore the uncolouring stuff
 	public boolean setGrammarByName(String name) {

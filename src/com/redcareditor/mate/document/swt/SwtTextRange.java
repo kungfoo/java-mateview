@@ -60,4 +60,16 @@ public class SwtTextRange implements MateTextRange {
 				location.getLine(), 
 				location.getLineOffset());
 	}
+
+	public boolean conatains(MateTextLocation location) {
+		return getStart().compareTo(location) <= 0 && getEnd().compareTo(location) > 0;
+	}
+
+	public boolean overlaps(MateTextRange range) {
+		if(getStart().compareTo(range.getStart()) >= 0){
+			return getStart().compareTo(range.getEnd()) <= 0;
+		}else{
+			return getEnd().compareTo(range.getStart()) >= 0;
+		}
+	}
 }

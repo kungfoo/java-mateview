@@ -10,6 +10,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 
+import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Range;
 import com.redcareditor.onig.Rx;
@@ -19,6 +20,7 @@ public class Parser {
 	public Colourer colourer;
 	public MateText mateText;
 	public StyledText styledText;
+	public MateDocument document;
 	
 	public int parsed_upto;	
 	public int lookAhead;
@@ -49,6 +51,7 @@ public class Parser {
 		attachListeners();
 		parsedUpto = 0;
 		alwaysParseAll = false;
+		document = m.getMateDocument();
 	}
 	
 	public void makeRoot() {
@@ -173,8 +176,8 @@ public class Parser {
 		for (Marker m : scanner) {
 			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, scanner.position);
 			if (expectedScope != null)
-				System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.startLoc().line, 
-					           expectedScope.startLoc().lineOffset);
+				System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.getStart().getLine(), 
+					           expectedScope.getStart().getLineOffset());
 			else
 				System.out.printf("no expected scope\n");
 			System.out.printf("  scope: %s (%d, %d) (line length: %d)\n", 
@@ -218,11 +221,11 @@ public class Parser {
 
 	public Scope getExpectedScope(Scope currentScope, int line, int lineOffset) {
 		System.out.printf("get_expected_scope(%s, %d, %d)\n", currentScope.name, line, lineOffset);
-		Scope expectedScope = currentScope.firstChildAfter(new TextLocation(line, lineOffset));
+		Scope expectedScope = currentScope.firstChildAfter(document.getTextLocation(line, lineOffset));
 //		System.out.printf("first_child_after: %s\n", expectedScope.name);
 		assert(expectedScope != currentScope);
 		if (expectedScope != null) {
-			if (expectedScope.startLine() != line)
+			if (expectedScope.getStart().getLine() != line)
 				expectedScope = null;
 			while (expectedScope != null && expectedScope.isCapture) {
 				expectedScope = expectedScope.parent;
@@ -247,8 +250,8 @@ public class Parser {
 //				scanner.current_scope.end_match_string, end_match_string);
 //		  
 		if (//scanner.getCurrentScope().endPos != null &&
-				scanner.getCurrentScope().endLoc().equals(new TextLocation(lineIx, m.match.getCapture(0).end)) &&
-				scanner.getCurrentScope().innerEndLoc().equals(new TextLocation(lineIx, m.from)) &&
+				scanner.getCurrentScope().getEnd().equals(document.getTextLocation(lineIx, m.match.getCapture(0).end)) &&
+				scanner.getCurrentScope().getInnerEnd().equals(document.getTextLocation(lineIx, m.from)) &&
 				scanner.getCurrentScope().endMatchString == endMatchString) {
 				// we have already parsed this line and this scope ends here
 
@@ -256,7 +259,7 @@ public class Parser {
 			// tracking arrays
 			for (Scope child : scanner.getCurrentScope().children) {
 				if (child.isCapture && 
-						child.startLine() == lineIx) {
+						child.getStart().getLine() == lineIx) {
 					if (!closedScopes.contains(child))
 						closedScopes.add(child);
 					if (!allScopes.contains(child))

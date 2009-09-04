@@ -1,7 +1,7 @@
 package com.redcareditor.mate.document;
 
 
-public interface MateDocument {
+public interface MateDocument extends MateTextFactory{
 	
 	public int getLineCount();
 	
