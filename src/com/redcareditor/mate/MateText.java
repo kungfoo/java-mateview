@@ -10,6 +10,9 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import com.redcareditor.mate.document.MateDocument;
+import com.redcareditor.mate.document.MateTextFactory;
+import com.redcareditor.mate.document.swt.SwtMateDocument;
 import com.redcareditor.onig.NullRx;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.theme.Theme;
@@ -21,6 +24,7 @@ public class MateText extends Composite {
 	private SourceViewer viewer;
 	private IDocument document;
 	private CompositeRuler gutter;
+	private SwtMateDocument mateDocument;
 	
 	private MateTextUndoManager undoManager;
 	
@@ -33,6 +37,7 @@ public class MateText extends Composite {
 		setLayout(new FillLayout());
 		
 		undoManager = new MateTextUndoManager(this);
+		mateDocument = new SwtMateDocument(this);
 	}
 	
 	private static CompositeRuler constructRuler() {
@@ -63,6 +68,14 @@ public class MateText extends Composite {
 	
 	public IDocument getDocument(){
 		return document;
+	}
+	
+	public MateDocument getMateDocument(){
+		return mateDocument;
+	}
+	
+	public MateTextFactory getTextLocationFactory(){
+		return mateDocument;
 	}
 	
 	// Sets the grammar explicitly by name.
