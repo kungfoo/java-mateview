@@ -1,4 +1,4 @@
-package com.redcareditor.mate.document;
+package com.redcareditor.mate.document.swt;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Position;
@@ -6,10 +6,13 @@ import org.eclipse.swt.custom.StyledText;
 
 import com.redcareditor.mate.MateText;
 import com.redcareditor.mate.TextLocation;
+import com.redcareditor.mate.document.MateDocument;
+import com.redcareditor.mate.document.MateTextLocation;
+import com.redcareditor.mate.document.MateTextLocationFactory;
 
-public class SwtMateDocument implements MateDocument {
+public class SwtMateDocument implements MateDocument, MateTextLocationFactory {
 	private MateText mateText;
-	private StyledText styledText;
+	public StyledText styledText;
 	
 	
 	
@@ -18,9 +21,8 @@ public class SwtMateDocument implements MateDocument {
 		this.styledText = mateText.getTextWidget();
 	}
 
-	public boolean addTextLocation(TextLocation location) {
-		sanatizeTextLocaition(location);
-		Position position = new TextLocationPosition(location,styledText);
+	public boolean addTextLocation(MateTextLocation location) {
+		Position position = new SwtTextLocation(location,this);
 		
 		try {
 			mateText.getDocument().addPosition(position);
@@ -50,13 +52,7 @@ public class SwtMateDocument implements MateDocument {
 		return endOffset - startOffset;
 	}
 
-	private void sanatizeTextLocaition(TextLocation location){
-		if(location.line >= getLineCount()){
-			location.line = getLineCount()-1;
-		}
-		
-		if(location.lineOffset >= getLineLength(location.line)){
-			location.lineOffset = getLineLength(location.line)-1;
-		}
+	public MateTextLocation getTextLocation(int line, int offset) {
+		return new SwtTextLocation(line,offset,this);
 	}
 }

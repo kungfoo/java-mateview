@@ -1,6 +1,5 @@
 package com.redcareditor.mate.document;
 
-import com.redcareditor.mate.TextLocation;
 
 public interface MateDocument {
 	
@@ -8,5 +7,5 @@ public interface MateDocument {
 	
 	public int getLineLength(int line);
 	
-	public boolean addTextLocation(TextLocation location);
+	public boolean addTextLocation(MateTextLocation location);
 }
