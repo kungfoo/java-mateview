@@ -19,3 +19,9 @@ module Swt
     import org.eclipse.swt.graphics.Point
   end
 end
+
+module Jface
+  import org.eclipse.jface.action.Action
+  import org.eclipse.jface.action.MenuManager
+  import org.eclipse.jface.window.ApplicationWindow
+end

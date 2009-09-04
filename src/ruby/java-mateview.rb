@@ -13,7 +13,6 @@ else
   require 'swt-linux'
 end
 
-require 'swt_wrapper'
 require 'org.eclipse.core.commands'
 require 'org.eclipse.core.runtime_3.5.0.v20090525'
 require 'org.eclipse.equinox.common'
@@ -23,9 +22,11 @@ require 'org.eclipse.jface.text_3.5.0'
 require 'org.eclipse.osgi'
 require 'org.eclipse.text_3.5.0.v20090513-2000'
 
+require 'swt_wrapper'
+
 unless defined?(JavaMateView)
 
-  class JavaMateView
+  module JavaMateView
     import com.redcareditor.mate.MateText
     import com.redcareditor.mate.Grammar
     import com.redcareditor.mate.Bundle
@@ -34,13 +35,13 @@ unless defined?(JavaMateView)
     import com.redcareditor.theme.ThemeManager
   end
 
-  class Plist
+  module Plist
     import com.redcareditor.plist.Dict
     import com.redcareditor.plist.PlistNode
     import com.redcareditor.plist.PlistPropertyLoader
   end
 
-  class Onig
+  module Onig
     import com.redcareditor.onig.Rx
     import com.redcareditor.onig.Match
   end
