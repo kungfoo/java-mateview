@@ -14,7 +14,8 @@ import org.eclipse.swt.custom.StyledText;
  * {@link SourceViewer}.
  */
 public class MateTextUndoManager implements ExtendedModifyListener {
-	// TODO: maybe these stacks needs limits, if we want unlimited undo/redo, there you go...
+	// TODO: maybe these stacks needs limits, if we want unlimited undo/redo,
+	// there you go...
 	private Stack<UndoRedoStep> undoStack;
 	private Stack<UndoRedoStep> redoStack;
 	private StyledText styledText;
@@ -32,13 +33,11 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 	public void modifyText(ExtendedModifyEvent e) {
 		String currentText = styledText.getText();
 		String newText = currentText.substring(e.start, e.start + e.length);
-
+		
 		if (isTextReplaceEvent(e)) {
-			System.out.println("pushing ReplaceStep : " + e.replacedText);
 			undoStack.push(new ReplaceStep(e.start, e.replacedText));
 		}
 		if (isTextEntryEvent(newText)) {
-			System.out.println("pushing EntryStep : " + newText);
 			undoStack.push(new EntryStep(e.start, newText));
 		}
 	}
@@ -66,24 +65,20 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 	private boolean isTextReplaceEvent(ExtendedModifyEvent e) {
 		return e.replacedText != null && e.replacedText.length() > 0;
 	}
-	
-	private void attachListener(){
+
+	private void attachListener() {
 		styledText.addExtendedModifyListener(this);
 	}
 
-	private void disattachListener(){
+	private void disattachListener() {
 		styledText.removeExtendedModifyListener(this);
 	}
-	
-	
-	
-	
+
 	/*
-	 * ----------------------------------------------------------
-	 * these are private classes, because the outside world doesn't need or
-	 * understand them. Plus we can easily access and juggle around the instance
-	 * variables from here.
-	 * ----------------------------------------------------------
+	 * ---------------------------------------------------------- these are
+	 * private classes, because the outside world doesn't need or understand
+	 * them. Plus we can easily access and juggle around the instance variables
+	 * from here. ----------------------------------------------------------
 	 */
 	private abstract class UndoRedoStep {
 		public int location;
@@ -94,7 +89,7 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 			this.location = location;
 			this.text = text;
 		}
-		
+
 		@Override
 		public String toString() {
 			return getClass().getName() + String.format("{%d : %s}", location, text);
@@ -104,9 +99,10 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 
 		public abstract void redo();
 	}
-	
+
 	/**
-	 * When text is replaced or deleted. Deleting is considered replacing it with ''
+	 * When text is replaced or deleted. Deleting is considered replacing it
+	 * with ''
 	 */
 	private class ReplaceStep extends UndoRedoStep {
 		public ReplaceStep(int location, String text) {
@@ -115,6 +111,7 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 
 		public void redo() {
 			disattachListener();
+			undoStack.push(new EntryStep(location, text));
 			styledText.replaceTextRange(location, 0, text);
 			styledText.setCaretOffset(location + text.length());
 			attachListener();
@@ -139,6 +136,7 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 
 		public void redo() {
 			disattachListener();
+			undoStack.push(new ReplaceStep(location, text));
 			styledText.replaceTextRange(location, text.length(), "");
 			styledText.setCaretOffset(location + text.length());
 			attachListener();

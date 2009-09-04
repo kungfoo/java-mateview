@@ -17,17 +17,40 @@ public class MateTextUndoRedoTest {
 		mateText = new MateText(new MateText(shell));
 		text = mateText.getTextWidget();
 	}
+	
+	@Test
+	public void testCleanDocumentThenDirty(){
+		checkNotDirty();
+		text.replaceTextRange(0, 0, "hello");
+		checkDirty();
+		mateText.undo();
+		checkNotDirty();
+	}
+
+	private void checkNotDirty() {
+		assertFalse(mateText.isDirty());
+	}
+
+	private void checkDirty() {
+		assertTrue(mateText.isDirty());
+	}
 
 	@Test
 	public void testOneStepUndoRedo() {
 		String string = "Hey, I entered this text just now!";
 		text.replaceTextRange(0, 0, string);
 		mateText.undo();
+		checkTextIsEmpty();
+		mateText.redo();
+		assertEquals(string, text.getText());
+		mateText.redo();
+		assertEquals(string, text.getText());
+		mateText.undo();
+		checkTextIsEmpty();
+	}
+
+	private void checkTextIsEmpty() {
 		assertEquals("", text.getText());
-		mateText.redo();
-		assertEquals(string, text.getText());
-		mateText.redo();
-		assertEquals(string, text.getText());
 	}
 	
 	@Test
@@ -36,7 +59,7 @@ public class MateTextUndoRedoTest {
 		String string2 = "I entered this just now!";
 		text.replaceTextRange(0, 0, string1);
 		mateText.undo();
-		assertEquals("", text.getText());
+		checkTextIsEmpty();
 		
 		text.replaceTextRange(0, 0, string1);
 		text.replaceTextRange(string1.length(), 0, string2);
@@ -47,11 +70,13 @@ public class MateTextUndoRedoTest {
 		assertEquals(string1, text.getText());
 		mateText.redo();
 		assertEquals(combined, text.getText());
-		mateText.redo();
-		assertEquals(combined, text.getText());
 		mateText.undo();
 		assertEquals(string1, text.getText());
 		mateText.undo();
-		assertEquals("", text.getText());
+		checkTextIsEmpty();
+		checkNotDirty();
+		mateText.redo();
+		mateText.redo();
+		assertEquals(combined, text.getText());
 	}
 }
