@@ -37,6 +37,10 @@ public class MateText extends Composite {
 		return ruler;
 	}
 	
+	public void attachUpdater(){
+		
+	}
+	
 	public StyledText getTextWidget(){
 		return viewer.getTextWidget();
 	}

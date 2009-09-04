@@ -90,7 +90,7 @@ public class Parser {
 		// TODO: this isn't quite right...
 		changes.add(styledText.getLineAtOffset(modifyStart), 
 				styledText.getLineAtOffset(modifyStart + modifyText.length()));
-		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, mateText.getTextWidget().getLineAtOffset(modifyStart), modifyText);
+		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
 		processChanges();
 	}
 
@@ -116,7 +116,7 @@ public class Parser {
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
 		boolean scopeEverChanged = false;
-		int endLine = Math.min(lastVisibleLine + 100, mateText.getTextWidget().getLineCount() - 1);
+		int endLine = Math.min(lastVisibleLine + 100, styledText.getLineCount() - 1);
 		while (lineIx <= toLine || scopeEverChanged && lineIx <= endLine) {
 			scopeChanged = parseLine(lineIx++);
 			if (scopeChanged) {
@@ -354,7 +354,6 @@ public class Parser {
 		setEndPosSafely(s, m, lineIx, length, 0);
 		s.isOpen = false;
 		s.isCapture = false;
-		byte[] bytes = new byte[m.match.getCapture(0).end - m.from + 1];
 		System.out.printf("beginMatchString '%s' %d - %d\n",  new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from), m.from, m.match.getCapture(0).end);
 		s.beginMatchString = new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from); 
 		s.parent = scanner.getCurrentScope();
@@ -390,10 +389,14 @@ public class Parser {
 		closedScopes.add(newScope);
 	}
 
+	// TODO: please, give this method a meaningful name.
+	private boolean iDontKnowHowToNameThisFunctionButItsDuplicateCode(int lineIx, int length, int to) {
+		return to == length && styledText.getLineCount() > lineIx+1;
+	}
 
 	public void setStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).start;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) 
+		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) 
 			scope.setStartPos(lineIx+1, 0, false);
 		else
 			scope.setStartPos(lineIx, Math.min(to, length), false);
@@ -401,7 +404,7 @@ public class Parser {
 
 	public void setInnerStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).start;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) 
+		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) 
 			scope.setInnerStartPos(lineIx+1, 0, false);
 		else
 			scope.setInnerStartPos(lineIx, Math.min(to, length), false);
@@ -409,7 +412,7 @@ public class Parser {
 
 	public void setInnerEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).end;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {
+		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) {
 			scope.setInnerEndPos(lineIx, length, true);
 		}
 		else {
@@ -419,7 +422,7 @@ public class Parser {
 	
 	public void setEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).end;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {
+		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) {
 			scope.setEndPos(lineIx, length, true);
 		}
 		else {
@@ -492,7 +495,7 @@ public class Parser {
 			for (Integer cap : captures.keySet()) {
 				System.out.printf("%s\n", m.match.numCaptures() >= cap);
 				if (m.match.numCaptures() - 1 >= cap && m.match.getCapture(cap).start != -1) {
-					s = new Scope(this.mateText, captures.get(cap));
+					s = new Scope(mateText, captures.get(cap));
 					s.pattern = scope.pattern;
 					s.setStartPos(lineIx, Math.min(m.match.getCapture(cap).start, length-1), false);
 					setEndPosSafely(s, m, lineIx, length, cap);
