@@ -40,10 +40,18 @@ public class MateTextUndoRedoTest {
 		
 		text.replaceTextRange(0, 0, string1);
 		text.replaceTextRange(string1.length(), 0, string2);
-		assertEquals(string1 + string2, text.getText());
+		
+		String combined = string1 + string2;
+		assertEquals(combined, text.getText());
 		mateText.undo();
 		assertEquals(string1, text.getText());
 		mateText.redo();
-		assertEquals(string1 + string2, text.getText());
+		assertEquals(combined, text.getText());
+		mateText.redo();
+		assertEquals(combined, text.getText());
+		mateText.undo();
+		assertEquals(string1, text.getText());
+		mateText.undo();
+		assertEquals("", text.getText());
 	}
 }
