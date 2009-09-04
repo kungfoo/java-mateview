@@ -87,12 +87,12 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 	 */
 	private abstract class UndoRedoStep {
 		public int location;
-		public String data;
+		public String text;
 
-		public UndoRedoStep(int location, String data) {
+		public UndoRedoStep(int location, String text) {
 			super();
 			this.location = location;
-			this.data = data;
+			this.text = text;
 		}
 
 		public abstract void undo();
@@ -104,20 +104,23 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 	 * When text is replaced or deleted. Deleting is considered replacing it with ''
 	 */
 	private class ReplaceUndoRedoStep extends UndoRedoStep {
-		public ReplaceUndoRedoStep(int location, String data) {
-			super(location, data);
+		public ReplaceUndoRedoStep(int location, String text) {
+			super(location, text);
 		}
 
 		public void redo() {
-
+			disattachListener();
+			styledText.replaceTextRange(location, 0, text);
+			styledText.setCaretOffset(location + text.length());
+			attachListener();
 		}
 
 		public void undo() {
-			String changedText = styledText.getText().substring(location, location + data.length());
+			String changedText = styledText.getText().substring(location, location + text.length());
 			redoStack.push(new EntryUndoRedoStep(location, changedText));
 			disattachListener();
-			styledText.replaceTextRange(location, data.length(), "");
-			styledText.setCaretOffset(location + data.length());
+			styledText.replaceTextRange(location, text.length(), "");
+			styledText.setCaretOffset(location + text.length());
 			attachListener();
 		}
 	}
@@ -126,19 +129,22 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 	 * Represents text that has been entered. Also deleted text, that is undone.
 	 */
 	private class EntryUndoRedoStep extends UndoRedoStep {
-		public EntryUndoRedoStep(int location, String data) {
-			super(location, data);
+		public EntryUndoRedoStep(int location, String text) {
+			super(location, text);
 		}
 
 		public void redo() {
-			
+			disattachListener();
+			styledText.replaceTextRange(location, text.length(), "");
+			styledText.setCaretOffset(location + text.length());
+			attachListener();
 		}
 
 		public void undo() {
-			redoStack.push(new ReplaceUndoRedoStep(location, data));
+			redoStack.push(new ReplaceUndoRedoStep(location, text));
 			disattachListener();
-			styledText.replaceTextRange(location, 0, data);
-			styledText.setCaretOffset(location + data.length());
+			styledText.replaceTextRange(location, 0, text);
+			styledText.setCaretOffset(location + text.length());
 			attachListener();
 		}
 	}
