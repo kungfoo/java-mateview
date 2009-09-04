@@ -50,7 +50,7 @@ class MateExample < Jface::ApplicationWindow
     
     window = MateExample.new
     window.block_on_open = true
-    window.add_menu_bar
+    window.addMenuBar
     window.open
     Swt::Widgets::Display.getCurrent.dispose
   end
