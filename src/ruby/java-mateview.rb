@@ -8,7 +8,11 @@ require 'jdom'
 require 'rbconfig'
 
 if Config::CONFIG["host_os"] =~ /darwin/
-  require 'osx/swt'
+  if Config::CONFIG["host_cpu"] == "x86_64"
+    require 'osx64/swt'
+  else
+    require 'osx/swt'
+  end
 else
   require 'linux/swt'
 end
