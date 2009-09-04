@@ -5,12 +5,12 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.swt.custom.StyledText;
 
 import com.redcareditor.mate.MateText;
-import com.redcareditor.mate.TextLocation;
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.mate.document.MateTextLocation;
-import com.redcareditor.mate.document.MateTextLocationFactory;
+import com.redcareditor.mate.document.MateTextFactory;
+import com.redcareditor.mate.document.MateTextRange;
 
-public class SwtMateDocument implements MateDocument, MateTextLocationFactory {
+public class SwtMateDocument implements MateDocument, MateTextFactory {
 	private MateText mateText;
 	public StyledText styledText;
 	
@@ -54,5 +54,14 @@ public class SwtMateDocument implements MateDocument, MateTextLocationFactory {
 
 	public MateTextLocation getTextLocation(int line, int offset) {
 		return new SwtTextLocation(line,offset,this);
+	}
+	
+	public MateTextRange getTextRange(MateTextLocation start,
+			MateTextLocation end) {
+		return new SwtTextRange(start,end,this);
+	}
+	
+	public MateTextRange getTextRange() {
+		return new SwtTextRange(this);
 	}
 }

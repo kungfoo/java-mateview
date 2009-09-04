@@ -246,7 +246,7 @@ public class Parser {
 //				line_ix, m.from,
 //				scanner.current_scope.end_match_string, end_match_string);
 //		  
-		if (scanner.getCurrentScope().endPos != null &&
+		if (//scanner.getCurrentScope().endPos != null &&
 				scanner.getCurrentScope().endLoc().equals(new TextLocation(lineIx, m.match.getCapture(0).end)) &&
 				scanner.getCurrentScope().innerEndLoc().equals(new TextLocation(lineIx, m.from)) &&
 				scanner.getCurrentScope().endMatchString == endMatchString) {
@@ -514,27 +514,24 @@ public class Parser {
 		// placed capture, and if so we add it as a child (we know that the latest 
 		// such capture is the one to add it to by the ordering). If not we
 		// add it as a child of the matched scope.
-		int bestLength = 0;
-		int newLength;
+
 		List<Scope> placedScopes = new ArrayList<Scope>();
 		Scope parentScope;
 		while (captureScopes.size() > 0) {
 			s = null;
 			// find first and longest remaining scope (put it in 's')
 			for (Scope cs : captureScopes) {
-				newLength = cs.endOffset() - cs.startOffset();
 				if (s == null || 
-						cs.startOffset() < s.startOffset() || 
-						(cs.startOffset() == s.startOffset() && newLength > bestLength)) {
+						cs.getStart().compareTo(s.getStart()) < 0 || 
+						(cs.getStart().compareTo(s.getStart()) == 0 && cs.getLength() > s.getLength())) {
 					s = cs;
-					bestLength = newLength;
 				}
 			}
-			System.out.printf("arrange: %s, start: %d, length: %d\n", s.name, s.startOffset(), s.endOffset() - s.startOffset());
+			//System.out.printf("arrange: %s, start: %d, length: %d\n", s.name, s.startOffset(), s.endOffset() - s.startOffset());
 			// look for somewhere to put it from placed_scopes
 			parentScope = null;
 			for (Scope ps : placedScopes) {
-				if (s.startOffset() >= ps.startOffset() && s.endOffset() <= ps.endOffset()) {
+				if (s.getStart().compareTo(ps.getStart()) >= 0 && s.getEnd().compareTo(ps.getEnd()) <= 0) {
 					parentScope = ps;
 				}
 			}
