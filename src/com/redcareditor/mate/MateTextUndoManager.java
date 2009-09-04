@@ -34,12 +34,12 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 		String newText = currentText.substring(e.start, e.start + e.length);
 
 		if (isTextReplaceEvent(e)) {
-			System.out.println("pushing replaceEvent : " + e.replacedText);
-			undoStack.push(new ReplaceUndoRedoStep(e.start, e.replacedText));
+			System.out.println("pushing ReplaceStep : " + e.replacedText);
+			undoStack.push(new ReplaceStep(e.start, e.replacedText));
 		}
 		if (isTextEntryEvent(newText)) {
-			System.out.println("pushing EntryEvent : " + newText);
-			undoStack.push(new EntryUndoRedoStep(e.start, newText));
+			System.out.println("pushing EntryStep : " + newText);
+			undoStack.push(new EntryStep(e.start, newText));
 		}
 	}
 
@@ -103,8 +103,8 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 	/**
 	 * When text is replaced or deleted. Deleting is considered replacing it with ''
 	 */
-	private class ReplaceUndoRedoStep extends UndoRedoStep {
-		public ReplaceUndoRedoStep(int location, String text) {
+	private class ReplaceStep extends UndoRedoStep {
+		public ReplaceStep(int location, String text) {
 			super(location, text);
 		}
 
@@ -117,7 +117,7 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 
 		public void undo() {
 			String changedText = styledText.getText().substring(location, location + text.length());
-			redoStack.push(new EntryUndoRedoStep(location, changedText));
+			redoStack.push(new EntryStep(location, changedText));
 			disattachListener();
 			styledText.replaceTextRange(location, text.length(), "");
 			styledText.setCaretOffset(location + text.length());
@@ -128,8 +128,8 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 	/**
 	 * Represents text that has been entered. Also deleted text, that is undone.
 	 */
-	private class EntryUndoRedoStep extends UndoRedoStep {
-		public EntryUndoRedoStep(int location, String text) {
+	private class EntryStep extends UndoRedoStep {
+		public EntryStep(int location, String text) {
 			super(location, text);
 		}
 
@@ -141,9 +141,9 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 		}
 
 		public void undo() {
-			redoStack.push(new ReplaceUndoRedoStep(location, text));
+			redoStack.push(new ReplaceStep(location, text));
 			disattachListener();
-			styledText.replaceTextRange(location, 0, text);
+			styledText.replaceTextRange(location, text.length(), "");
 			styledText.setCaretOffset(location + text.length());
 			attachListener();
 		}
