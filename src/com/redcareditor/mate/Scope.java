@@ -3,6 +3,8 @@ package com.redcareditor.mate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Position;
@@ -11,8 +13,8 @@ import org.eclipse.swt.custom.StyledText;
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Rx;
 
-public class Scope {
-	public MateText mateText;
+public class Scope implements Comparable<Scope>{
+	private MateText mateText;
 	private StyledText styledText;
 	
 	public String name;
@@ -34,7 +36,7 @@ public class Scope {
 	public String endMatchString;
 	
 	public Scope parent;
-	public List<Scope> children;
+	public SortedSet<Scope> children;
 	
 	StringBuilder prettyString;
 	int indent;
@@ -43,7 +45,7 @@ public class Scope {
 		this.mateText = mt;
 		this.styledText = mt.getTextWidget();
 		this.name = name;
-		this.children = new ArrayList<Scope>();
+		this.children = new TreeSet<Scope>();
 	}
 	
 	public void clearAfter(int lineIx, int something) {
@@ -51,14 +53,10 @@ public class Scope {
 	}
 
 	public Scope scopeAt(int line, int lineOffset) {
-//		System.out.printf("scopeAt(%d, %d) isOpen:%s\n", line, lineOffset, isOpen);
 		TextLocation loc = new TextLocation(line, lineOffset);
-		TextLocation start = startLoc();
-		if (TextLocation.lte(start, loc) || parent == null) {
-			if (isOpen || TextLocation.gte(endLoc(), loc)) {
-				if (children.size() == 0) {
-					return this;
-				}
+		
+		if (startLoc().compareTo(loc) <= 0 || parent == null) {
+			if (isOpen || endLoc().compareTo(loc) >= 0) {
 				for (Scope child : children) {
 					if (child.containsLoc(loc)) {
 						return child.scopeAt(line, lineOffset);
@@ -66,20 +64,21 @@ public class Scope {
 				}
 				return this;
 			}
-			else {
-				return null;
-			}
+			
 		}
-		else {
-			return null;
+
+		return null;
+	}
+	
+	public int compareTo(Scope o) {
+		if(startLoc().compareTo(o.startLoc()) == 0){
+			return endLoc().compareTo(o.endLoc());
 		}
+		return startLoc().compareTo(o.startLoc());
 	}
 	
 	private boolean containsLoc(TextLocation loc) {
-		if (TextLocation.lte(startLoc(), loc) && TextLocation.gt(endLoc(), loc))
-			return true;
-		else 
-			return false;
+		return startLoc().compareTo(loc) <= 0 && endLoc().compareTo(loc) > 0;
 	}
 
 	public Scope containingDoubleScope(int lineIx) {
@@ -103,26 +102,7 @@ public class Scope {
 	}
 
 	public void addChild(Scope newChild) {
-		// TODO: should insert in the correct position
-		if (children.size() == 0){
-			children.add(newChild);
-			return;
-		}
-			
-		if (children.get(0).startOffset() > newChild.startOffset()){
-			children.add(0, newChild);
-			return;
-		}
-		
-		int insertIx = 0;
-		int ix = 1;
-		for (Scope child : children) {
-			if (child.startOffset() <= newChild.startOffset()) {
-				insertIx = ix;
-			}
-			ix++;
-		}
-		children.add(insertIx, newChild);
+		children.add(newChild);
 	}
 	
 	public void removeChild(Scope child) {
@@ -135,11 +115,9 @@ public class Scope {
 
 	public Scope firstChildAfter(TextLocation loc) {
 //		stdout.printf("\"%s\".first_child_after(%d, %d)\n", name, loc.line, loc.line_offset);
-		if (children.size() == 0)
-			return null;
 		
 		for (Scope child : children) {
-			if (TextLocation.gte(child.startLoc(), loc)) {
+			if (child.startLoc().compareTo(loc) >= 0) {
 				return child;
 			}
 		}
@@ -150,12 +128,13 @@ public class Scope {
 		Position pos = new Position(styledText.getOffsetAtLine(line) + lineOffset, 0);
 		try {
 			mateText.getDocument().addPosition(pos);
+			return pos;
 		}
 		catch(BadLocationException e) {
 			System.out.printf("BadLocationException in Scope (%d, %d)\n", line, lineOffset);
 			e.printStackTrace();
 		}
-		return pos;
+		return null;
 	}
 	
 	public void setStartPos(int line, int lineOffset, boolean hasLeftGravity) {
