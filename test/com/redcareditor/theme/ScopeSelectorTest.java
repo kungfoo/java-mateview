@@ -33,6 +33,6 @@ public class ScopeSelectorTest {
 	public void testPositiveAndNegativeSelector(){
 		String selector = "source.ruby string - string source";
 		List<ScopeSelector> selectors = ScopeSelector.compile(selector);
-		
+		// TODO: test something here!
 	}
 }

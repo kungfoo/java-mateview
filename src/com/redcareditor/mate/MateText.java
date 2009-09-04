@@ -25,6 +25,9 @@ public class MateText extends Composite {
 	private IDocument document;
 	private CompositeRuler gutter;
 	private SwtMateDocument mateDocument;
+
+	
+	private MateTextUndoManager undoManager;
 	
 	public MateText(Composite parent) {
 		super(parent, SWT.NONE);
@@ -33,6 +36,8 @@ public class MateText extends Composite {
 		viewer = new SourceViewer(this, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		viewer.setDocument(document);
 		setLayout(new FillLayout());
+
+		undoManager = new MateTextUndoManager(this);
 		mateDocument = new SwtMateDocument(this);
 	}
 	
@@ -40,6 +45,22 @@ public class MateText extends Composite {
 		CompositeRuler ruler = new CompositeRuler();
 		ruler.addDecorator(0, new LineNumberRulerColumn());
 		return ruler;
+	}
+	
+	public void undo(){
+		undoManager.undo();
+	}
+	
+	public void redo(){
+		undoManager.redo();
+	}
+	
+	public boolean isDirty(){
+		return undoManager.isDirty();
+	}
+	
+	public void attachUpdater(){
+		
 	}
 	
 	public StyledText getTextWidget(){
