@@ -22,6 +22,8 @@ public class MateText extends Composite {
 	private IDocument document;
 	private CompositeRuler gutter;
 	
+	private MateTextUndoManager undoManager;
+	
 	public MateText(Composite parent) {
 		super(parent, SWT.NONE);
 		document = new Document();
@@ -29,6 +31,8 @@ public class MateText extends Composite {
 		viewer = new SourceViewer(this, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		viewer.setDocument(document);
 		setLayout(new FillLayout());
+		
+		undoManager = new MateTextUndoManager(this);
 	}
 	
 	private static CompositeRuler constructRuler() {
