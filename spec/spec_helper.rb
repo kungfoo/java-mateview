@@ -15,8 +15,6 @@ class JavaMateView::MateText
   def backspace(line, line_offset)
     line_start = get_text_widget.get_offset_at_line(line)
     getMateDocument.replace(line_start + line_offset - 1, 1, "")
-    # delete(get_iter_at_line_offset(line, pos-1),
-    #        get_iter_at_line_offset(line, pos))
   end
       
   def clean_reparse

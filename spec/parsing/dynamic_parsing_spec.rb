@@ -63,9 +63,7 @@ describe JavaMateView, "when reparsing after changes" do
     
     it "reparses flat SinglePatterns that have no changes to scopes" do
       @st.text = "1 + 2 + Redcar"
-      puts "((((()))))"
       @mt.type(0, 1, " ")
-      puts "**********"
       it_should_match_clean_reparse
     end
             
@@ -103,9 +101,7 @@ describe JavaMateView, "when reparsing after changes" do
 
     it "opens expected scopes again" do
       @st.text = "def foo(a, b, c"
-      puts "(((((())))))"
       @mt.type(0, 15, ")")
-      puts "***********"
       it_should_match_clean_reparse
     end
 
@@ -121,11 +117,28 @@ describe JavaMateView, "when reparsing after changes" do
       p :asdf
       END
       puts "(((())))"
-      1.times { |i| @mt.backspace(4, 10-i)}
+      4.times { |i| @mt.backspace(4, 10-i)}
       puts "********"
       it_should_match_clean_reparse
     end
 
+    it "should interpolate an opening scope" do
+      @st.text = "\"asdf{1+2}asdf\""
+      @mt.type(0, 5, "#")
+      it_should_match_clean_reparse
+     end
+
+    it "should reparse closing scopes" do
+      @st.text = "fo=<<HI\nHI"
+      @mt.type(1, 2, "\n")
+      it_should_match_clean_reparse
+    end
+
+    it "should reparse strings correctly" do
+      @st.text = "bus(\"les/\#{name}\").data = self\n\n"
+      @mt.type(0, 30, " ")
+      it_should_match_clean_reparse
+    end
   end
 end
 

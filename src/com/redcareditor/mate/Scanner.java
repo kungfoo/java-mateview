@@ -92,9 +92,8 @@ public class Scanner implements Iterable<Marker> {
 	}
 	
 	public Marker findNextMarker() {
-		System.out.printf("find_next_marker from (current_scope is %s)\n", currentScope.name);
-		System.out.printf("scanning: '%s' from %d to %d\n", this.line, this.position, this.lineLength);
-//		sleep(500);
+//		System.out.printf("find_next_marker from (current_scope is %s)\n", currentScope.name);
+//		System.out.printf("scanning: '%s' from %d to %d\n", this.line, this.position, this.lineLength);
 //		if (this.position == this.lineLength)
 //			return null;
 		Marker m;
@@ -102,7 +101,7 @@ public class Scanner implements Iterable<Marker> {
 		int newLength;
 		boolean isCloseMatch = false;
 		if ((m = getCachedMarker()) != null) {
-			System.out.printf("got cached marker\n");
+//			System.out.printf("got cached marker\n");
 			this.cachedMarkers.remove(m);
 			removePrecedingCachedMarkers(m);
 			return m;
@@ -125,7 +124,7 @@ public class Scanner implements Iterable<Marker> {
 				isCloseMatch = true;
 			}
 		}
-		System.out.printf("scanning for %d patterns\n", ((DoublePattern) currentScope.pattern).patterns.size());
+//		System.out.printf("scanning for %d patterns\n", ((DoublePattern) currentScope.pattern).patterns.size());
 		for (Pattern p : ((DoublePattern) currentScope.pattern).patterns) {
 //			System.out.printf("     scanning for %s (%s)\n", p.name, p.disabled);
 			if (p.disabled)
