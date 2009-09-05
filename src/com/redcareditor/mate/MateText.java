@@ -35,9 +35,11 @@ public class MateText extends Composite {
 	private SourceViewer viewer;
 	private IDocument document;
 	private CompositeRuler gutter;
+	private LineNumberRulerColumn lineNumbers;
 	private SwtMateDocument mateDocument;
 
 	private MateTextUndoManager undoManager;
+
 
 	public MateText(Composite parent) {
 		super(parent, SWT.NONE);
@@ -51,9 +53,10 @@ public class MateText extends Composite {
 		mateDocument = new SwtMateDocument(this);
 	}
 
-	private static CompositeRuler constructRuler() {
+	private CompositeRuler constructRuler() {
 		CompositeRuler ruler = new CompositeRuler();
-		ruler.addDecorator(0, new LineNumberRulerColumn());
+		lineNumbers = new LineNumberRulerColumn();
+		ruler.addDecorator(0, lineNumbers);
 		return ruler;
 	}
 
@@ -179,28 +182,17 @@ public class MateText extends Composite {
 	}
 
 	public void setFont(String name, int size) {
-		viewer.getTextWidget().setFont(new Font(Display.getCurrent(), name, size, 0));
+		Font font = new Font(Display.getCurrent(), name, size, 0);
+		viewer.getTextWidget().setFont(font);
+		lineNumbers.setFont(font);
 	}
 
 	@SuppressWarnings("unchecked")
 	public void setGutterBackground(Color color) {
-		/* this is so ugly because of SWT... */
-		Iterator<IVerticalRulerColumn> it = gutter.getDecoratorIterator();
-		while (it.hasNext()) {
-			IVerticalRulerColumn column = it.next();
-			if (column instanceof LineNumberRulerColumn) {
-				((LineNumberRulerColumn) column).setBackground(color);
-			}
-		}
+		lineNumbers.setBackground(color);
 	}
 
 	public void setGutterForeground(Color color) {
-		Iterator<IVerticalRulerColumn> it = gutter.getDecoratorIterator();
-		while (it.hasNext()) {
-			IVerticalRulerColumn column = it.next();
-			if (column instanceof LineNumberRulerColumn) {
-				((LineNumberRulerColumn) column).setForeground(color);
-			}
-		}
+		lineNumbers.setForeground(color);
 	}
 }

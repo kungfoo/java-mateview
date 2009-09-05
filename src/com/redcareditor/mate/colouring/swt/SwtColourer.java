@@ -32,6 +32,7 @@ public class SwtColourer implements Colourer {
 	/* cached swt colors */
 	private Color globalLineBackground;
 	private Color globalBackground;
+	private Color globalForeground;
 
 	public SwtColourer(MateText mt) {
 		mateText = mt;
@@ -75,6 +76,7 @@ public class SwtColourer implements Colourer {
 
 	private void setMateTextColors() {
 		control.setBackground(globalBackground);
+		control.setForeground(globalForeground);
 		int currentLine = control.getLineAtOffset(control.getCaretOffset());
 		control.setLineBackground(currentLine, 1, globalLineBackground);
 		mateText.setGutterBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
@@ -82,8 +84,9 @@ public class SwtColourer implements Colourer {
 	}
 
 	private void initCachedColours() {
-		globalLineBackground = ColourUtil.getColour(globalLineBackgroundColour());
-		globalBackground = ColourUtil.getColour(globalBackgroundColour());
+		globalLineBackground = ColourUtil.getColour(globalColour("lineHighlight"));
+		globalBackground = ColourUtil.getColour(globalColour("background"));
+		globalForeground = ColourUtil.getColour(globalColour("foreground"));
 	}
 
 	/* (non-Javadoc)
@@ -93,24 +96,15 @@ public class SwtColourer implements Colourer {
 		return theme;
 	}
 
-	private String globalBackgroundColour() {
-		String bgColour = theme.globalSettings.get("background");
-		if (bgColour != null && bgColour != "") {
-			bgColour = ColourUtil.mergeColour("#FFFFFF", bgColour);
-			return bgColour;
-		}
-		return null;
-	}
-
-	private String globalLineBackgroundColour() {
-		String colour = theme.globalSettings.get("lineHighlight");
+	private String globalColour(String name) {
+		String colour = theme.globalSettings.get(name);
 		if (colour != null && colour != "") {
 			colour = ColourUtil.mergeColour("#FFFFFF", colour);
 			return colour;
 		}
 		return null;
 	}
-
+	
 	private void colourLine(LineStyleEvent event) {
 		if (theme == null)
 			return;
@@ -152,8 +146,8 @@ public class SwtColourer implements Colourer {
 		else {
 			styleRange.start = scope.getStart().getOffset();
 			styleRange.length = scope.getEnd().getOffset() - styleRange.start;
-			System.out.printf("colour %s (%d, %d)\n", scope.name, styleRange.start, styleRange.length);
 		}
+		System.out.printf("colour %s (%d, %d)\n", scope.name, styleRange.start, styleRange.length);
 		if (setting != null)
 			setStyleRangeProperties(scope, setting, styleRange);
 		
@@ -174,10 +168,10 @@ public class SwtColourer implements Colourer {
 			styleRange.fontStyle = SWT.NORMAL; 
 		
 		String background = setting.settings.get("background");
-//		stdout.printf("        scope background:        %s\n", background);
+		System.out.printf("        scope background:        %s\n", background);
 		String mergedBgColour;
 		String parentBg = theme.globalSettings.get("background");
-//		stdout.printf("        global background: %s\n", parent_bg);
+		System.out.printf("        global background: %s\n", parentBg);
 		// TODO: wasn't this a better way of creating the background colours?
 //		var parent_bg = scope.nearest_background_colour();
 //		if (parent_bg == null) {
@@ -195,7 +189,7 @@ public class SwtColourer implements Colourer {
 			if (mergedBgColour != null) {
 				scope.bgColour = mergedBgColour;
 				styleRange.background = ColourUtil.getColour(mergedBgColour);
-//				stdout.printf("       tag.background = %s\n", merged_bg_colour);
+				System.out.printf("       tag.background = %s\n", mergedBgColour);
 			}
 		}
 		else {
