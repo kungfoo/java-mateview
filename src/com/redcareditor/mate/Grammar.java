@@ -28,6 +28,8 @@ public class Grammar {
 	public Rx foldingStartMarker;
 	public Rx foldingStopMarker;
 
+	/* these are here for lookup speed purposes */
+	private static Map<String, Grammar> grammarsByScopeNames = new HashMap<String, Grammar>();
 	
 	public Grammar(String name, String plistFile){
 		this(Dict.parseFile(plistFile));
@@ -44,6 +46,7 @@ public class Grammar {
 		for (String property : properties) {
 			propertyLoader.loadStringProperty(property);
 		}
+		grammarsByScopeNames.put(scopeName, this);
 		propertyLoader.loadRegexProperty("firstLineMatch");
 		if (plist.containsElement("fileTypes"))
 			fileTypes = plist.getStrings("fileTypes");
@@ -118,11 +121,7 @@ public class Grammar {
 	}
 
 	public static Grammar findByScopeName(String scope) {
-		for (Bundle b : Bundle.getBundles())
-			for (Grammar g : b.getGrammars())
-				if (g.scopeName.equals(scope))
-					return g;
-		return null;
+		return grammarsByScopeNames.get(scope);
 	}
 
 	private boolean loaded() {
