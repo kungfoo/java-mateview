@@ -17,6 +17,7 @@ public class Theme {
 	public Map<String, ThemeSetting> cachedSettingsForScopes = new HashMap<String, ThemeSetting>();
 
 	private PlistPropertyLoader propertyLoader;
+	private boolean isInitialized = false;
 
 	public Theme(Dict dict) {
 		propertyLoader = new PlistPropertyLoader(dict, this);
@@ -56,6 +57,17 @@ public class Theme {
 
 	private boolean isSettingAlreadyCached(String scope) {
 		return cachedSettingsForScopes.containsKey(scope);
+	}
+
+	public void initForUse() {
+		if (isInitialized)
+			return;
+		isInitialized = true;
+		System.out.printf("initializing theme for use: %s\n", name);
+		this.cachedSettingsForScopes = new HashMap<String, ThemeSetting>();
+		for (ThemeSetting setting : settings) {
+			setting.compileScopeMatchers();
+		}
 	}
 
 	private ThemeSetting findSetting(String scope) {
