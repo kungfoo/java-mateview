@@ -1,6 +1,7 @@
 
 package com.redcareditor.mate;
 
+import java.util.ArrayList;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -26,7 +27,6 @@ public class Scope implements Comparable<Scope>{
 	
 	public Match openMatch;
 	public Match closeMatch;
-	
 	
 	public Rx closingRegex;
 	public String beginMatchString;
@@ -114,6 +114,20 @@ public class Scope implements Comparable<Scope>{
 		return null;
 	}
 	
+	public ArrayList<Scope> deleteAnyOnLineNotIn(int lineIx, ArrayList<Scope> scopes) {
+//		var start_scope = scope_at(line_ix, -1);
+		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
+//		var iter = children.get_begin_iter();
+		for (Scope child : children) {
+			int childStartLine = child.getStart().getLine();
+			if (childStartLine == lineIx && !scopes.contains(child)) {
+				removedScopes.add(child);
+			}
+		}
+		children.removeAll(removedScopes);
+		return removedScopes;
+	}
+	
 	public void setStartPos(int line, int lineOffset, boolean hasLeftGravity) {
 		MateTextLocation start = document.getTextLocation(line, lineOffset);
 		this.range.setStart(start);
@@ -153,7 +167,7 @@ public class Scope implements Comparable<Scope>{
 	public MateTextLocation getInnerEnd(){
 		return innerRange.getEnd();
 	}
-	
+		
 	public boolean contains(MateTextLocation location){
 		return range.conatains(location);
 	}
@@ -178,26 +192,17 @@ public class Scope implements Comparable<Scope>{
 				((DoublePattern) this.pattern).contentName != null) 
 			prettyString.append(" " + ((DoublePattern) this.pattern).contentName);
 		prettyString.append(" (");
-		// TODO: port these sections once Positions are figured out
-//		if (startPos == null) {
-//			prettyString.append("inf");
-//		}
-//		else {
-			prettyString.append(String.format(
-					"%d,%d",
-					getStart().getLine(), 
-					getStart().getLineOffset()));
-//		}
+		prettyString.append(String.format(
+				"%d,%d",
+				getStart().getLine(), 
+				getStart().getLineOffset()));
+//		prettyString.append(getStart().getOffset());
 		prettyString.append(")-(");
-//		if (endPos == null) {
-//			prettyString.append("inf");
-//		}
-//		else {
-			prettyString.append(String.format(
-					"%d,%d",
-					getEnd().getLine(), 
-					getEnd().getLineOffset()));
-//		}
+		prettyString.append(String.format(
+				"%d,%d",
+				getEnd().getLine(), 
+				getEnd().getLineOffset()));
+//		prettyString.append(getEnd().getOffset());
 		prettyString.append(")");
 		prettyString.append((isOpen ? " open" : " closed"));
 		prettyString.append("\n");

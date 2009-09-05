@@ -18,10 +18,13 @@ describe JavaMateView, "when reparsing after changes" do
     lines = text.split("\n")
     lines.first =~ /^(\s*)/
     whitespace = $1 || ""
-    lines.map{|line| line[(whitespace.length)..-1]}.join("\n")
+    result = lines.map{|line| line[(whitespace.length)..-1]}.join("\n")
+    p result
+    p result.length
+    result
   end
   
-  describe "when parsing Ruby from scratch" do
+  describe "when parsing Ruby" do
     before(:each) do
       @mt.set_grammar_by_name("Ruby")
     end

@@ -26,7 +26,6 @@ public class MateText extends Composite {
 	private CompositeRuler gutter;
 	private SwtMateDocument mateDocument;
 
-	
 	private MateTextUndoManager undoManager;
 	
 	public MateText(Composite parent) {

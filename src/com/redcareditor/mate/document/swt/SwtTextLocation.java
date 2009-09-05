@@ -11,6 +11,11 @@ public class SwtTextLocation extends Position implements MateTextLocation {
 	private static final MateTextLocationComparator comperator = new MateTextLocationComparator();
 	private SwtMateDocument document;
 
+	public SwtTextLocation(int offset, SwtMateDocument document) {
+		super(offset);
+		this.document = document;
+	}
+
 	public SwtTextLocation(int line, int lineOffset, SwtMateDocument document) {
 		super(computeOffset(line, lineOffset, document.styledText));
 		this.document = document;
@@ -22,7 +27,7 @@ public class SwtTextLocation extends Position implements MateTextLocation {
 	}
 
 	public int getLine() {
-//		System.out.printf("getLine() (getOffset() = %d)\n", getOffset());
+//		System.out.printf("getLine() (getOffset() = %d, charCount() = %d)\n", getOffset(), document.styledText.getCharCount());
 		return document.styledText.getLineAtOffset(getOffset());
 	}
 

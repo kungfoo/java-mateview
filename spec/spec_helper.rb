@@ -9,7 +9,7 @@ class JavaMateView::MateText
   
   def type(line, line_offset, char)
     line_start = get_text_widget.get_offset_at_line(line)
-    getDocument.replace(line_start + line_offset, 3, char)
+    getMateDocument.replace(line_start + line_offset, 0, char)
   end
     # 
     # def backspace(line, pos)

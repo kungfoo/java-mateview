@@ -100,7 +100,7 @@ public class Parser {
 	// Process all change ranges.
 	public void processChanges() {
 		int thisParsedUpto = -1;
-		System.out.printf("process_changes (lastVisibleLine: %d)\n", lastVisibleLine);
+		System.out.printf("process_changes (lastVisibleLine: %d) (charCount = %d)\n", lastVisibleLine, styledText.getCharCount());
 		for (Range range : changes) {
 			if (range.end > thisParsedUpto && range.start <= lastVisibleLine + lookAhead) {
 				int rangeEnd = Math.min(lastVisibleLine + lookAhead, range.end);
@@ -563,6 +563,52 @@ public class Parser {
 
 	private void clearLine(int lineIx, Scope startScope, ArrayList<Scope> allScopes, 
 							ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes) {
-		// TODO: port this function
+		// If we are reparsing, we might find that some scopes have disappeared,
+		// delete them:
+		Scope cs = startScope;
+		while (cs != null) {
+			// stdout.printf("  removing_scopes from: %s\n", cs.name);
+			ArrayList<Scope> newRemovedScopes = cs.deleteAnyOnLineNotIn(lineIx, allScopes);
+			removedScopes.addAll(newRemovedScopes);
+			cs = cs.parent;
+		}
+
+		// any that we expected to close on this line that now don't?
+		// first build list of scopes that close on this line (including ones
+		// that did but haven't been removed yet).
+		ArrayList<Scope> scopesThatClosedOnLine = new ArrayList<Scope>();
+		Scope ts = startScope;
+		while (ts.parent != null) {
+			// stdout.printf("checking for closing scope: %s (%d)\n", ts.name, ts.inner_end_line());
+			if (ts.getInnerEnd().getLine() == lineIx) {
+				// stdout.printf("scope that closed on line: %s\n", ts.name);
+				scopesThatClosedOnLine.add(ts);
+			}
+			ts = ts.parent;
+		}
+		for (Scope s : scopesThatClosedOnLine) {
+			if (!closedScopes.contains(s)) {
+				if (s.isCapture) {
+					// stdout.printf("    removing scope: %s\n", s.name);
+					s.parent.removeChild(s);
+					removedScopes.add(s);
+					// @removed_scopes << s
+				}
+				else {
+					if (colourer != null)
+						colourer.uncolourScope(s, false);
+					// s.inner_end_mark = null;
+					// s.end_mark = null;
+					// s.is_open = true;
+					int line = styledText.getLineCount() - 1;
+					int lineOffset = styledText.getCharCount() - styledText.getOffsetAtLine(line);
+					// TODO: why are we setting an end position here for the end of the doc,
+					// but using a null to represent open elsewhere?
+					s.setInnerEndPos(line, lineOffset, false);
+					s.setEndPos(line, lineOffset, false);
+					s.isOpen = true;
+				}
+			}
+		}
 	}
 }
