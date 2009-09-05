@@ -7,6 +7,7 @@ import org.eclipse.swt.custom.LineBackgroundEvent;
 import org.eclipse.swt.custom.LineBackgroundListener;
 import org.eclipse.swt.custom.LineStyleEvent;
 import org.eclipse.swt.custom.LineStyleListener;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -48,9 +49,25 @@ public class Colourer {
 		int eventLine = mateText.getControl().getLineAtOffset(event.lineOffset);
 		ArrayList<Scope> scopes = mateText.parser.root.scopesOnLine(eventLine);
 		System.out.printf("got to colour %d scopes\n", scopes.size());
+		ArrayList<StyleRange> styleRanges = new ArrayList<StyleRange>();
 		for (Scope scope : scopes) {
 			System.out.printf("  %s\n", scope.name);
+			if (scope.parent == null) {
+				continue;
+			}
+			if (scope.name == null && scope.pattern != null &&
+				(scope.pattern instanceof SinglePattern || ((DoublePattern) scope.pattern).contentName == null)) {
+				continue;
+			}
+			styleRanges.add(getStyleRangeForScope(scope, true));
+			if (scope.pattern instanceof DoublePattern && ((DoublePattern) scope.pattern).contentName != null && scope.isCapture == false)
+				styleRanges.add(getStyleRangeForScope(scope, true));
 		}
+		event.styles = (StyleRange[]) styleRanges.toArray();
+	}
+	
+	private StyleRange getStyleRangeForScope(Scope scope, boolean inner) {
+		StyleRange styleRange = new StyleRange();
 	}
 	
 	private void colourLineBackground(LineBackgroundEvent event) {
