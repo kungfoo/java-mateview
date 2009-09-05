@@ -3,6 +3,8 @@ package com.redcareditor.mate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.custom.CaretEvent;
+import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.LineBackgroundEvent;
 import org.eclipse.swt.custom.LineBackgroundListener;
 import org.eclipse.swt.custom.LineStyleEvent;
@@ -12,24 +14,37 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
+import com.redcareditor.mate.document.MateTextLocation;
+import com.redcareditor.mate.document.swt.SwtMateDocument;
+import com.redcareditor.mate.document.swt.SwtTextLocation;
 import com.redcareditor.theme.Theme;
 
 public class Colourer {
 	private Theme theme;
 	private MateText mateText;
 	
+	private int highlightedLine = 0;
+	
 	public Colourer(MateText mt) {
-		this.mateText = mt;
-		this.mateText.getControl().addLineStyleListener(new LineStyleListener() {
-			public void lineGetStyle(LineStyleEvent event) {
-				colourLine(event);
+		mateText = mt;
+		
+		mateText.getControl().addCaretListener(new CaretListener() {
+			public void caretMoved(CaretEvent e) {
+				updateHighlightedLine(mateText.getControl().getLineAtOffset(e.caretOffset));
 			}
 		});
-		this.mateText.getControl().addLineBackgroundListener(new LineBackgroundListener() {
-			public void lineGetBackground(LineBackgroundEvent event) {
-				colourLineBackground(event);
-			}
-		});
+	}
+	
+	private void updateHighlightedLine(int line){
+		if (caretLineHasChanged(line)){
+			mateText.getControl().setLineBackground(line, 1, getColour(globalLineBackgroundColour()));
+			mateText.getControl().setLineBackground(highlightedLine, 1, getColour(globalBackgroundColour()));
+			highlightedLine = line;
+		}
+	}
+
+	private boolean caretLineHasChanged(int line) {
+		return line != highlightedLine;
 	}
 
 	public void setTheme(Theme theme) {
@@ -40,11 +55,11 @@ public class Colourer {
 	}
 	
 	public Theme getTheme() {
-		return this.theme;
+		return theme;
 	}
 	
 	private void colourLine(LineStyleEvent event) {
-		if (this.theme == null)
+		if (theme == null)
 			return;
 		int eventLine = mateText.getControl().getLineAtOffset(event.lineOffset);
 		ArrayList<Scope> scopes = mateText.parser.root.scopesOnLine(eventLine);
@@ -71,7 +86,7 @@ public class Colourer {
 	}
 	
 	private void colourLineBackground(LineBackgroundEvent event) {
-		if (this.theme == null)
+		if (theme == null)
 			return;
 		StyledText styledText = mateText.getControl();
 		int eventLine = styledText.getLineAtOffset(event.lineOffset);
