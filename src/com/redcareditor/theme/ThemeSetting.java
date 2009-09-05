@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.redcareditor.mate.ScopeMatcher;
+import com.redcareditor.onig.Match;
 import com.redcareditor.plist.Dict;
 import com.redcareditor.plist.PlistPropertyLoader;
 
@@ -36,5 +37,17 @@ public class ThemeSetting {
 	public void compileScopeMatchers() {
 		//stdout.printf("  compiling '%s'\n", selector);
 		this.matchers = ScopeMatcher.compile(scopeSelector);
+	}
+
+	public Match match(String scope) {
+		Match m;
+		if (this.matchers == null)
+			compileScopeMatchers();
+		
+		for (ScopeMatcher matcher : this.matchers) {
+			if ((m = ScopeMatcher.testMatchRe(matcher.pos_rx, matcher.neg_rxs, scope)) != null)
+				return m;
+		}
+		return null;
 	}
 }

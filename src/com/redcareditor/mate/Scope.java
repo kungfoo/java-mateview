@@ -2,14 +2,13 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.MateTextRange;
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Rx;
+import com.redcareditor.theme.ThemeSetting;
 
 public class Scope implements Comparable<Scope>{
 	private MateText mateText;
@@ -35,8 +34,13 @@ public class Scope implements Comparable<Scope>{
 	public Scope parent;
 	public ArrayList<Scope> children;
 	
+	public String bgColour;
+	public String fgColour;
+	
 	StringBuilder prettyString;
 	int indent;
+	
+	public ThemeSetting themeSetting;
 	
 	public Scope(MateText mt, String name) {
 		this.mateText = mt;
@@ -113,6 +117,23 @@ public class Scope implements Comparable<Scope>{
 		return false;
 	}
 
+	public ArrayList<Scope> scopesOnLine(int lineIx) {
+		ArrayList<Scope> scopes = new ArrayList<Scope>();
+		if (getStart().getLine() <= lineIx && getEnd().getLine() >= lineIx)
+			scopes.add(this);
+		childScopesOnLine(lineIx, scopes);
+		return scopes;
+	}
+	
+	public void childScopesOnLine(int lineIx, ArrayList<Scope> scopes) {
+		for (Scope child : children) {
+			if (child.getStart().getLine() <= lineIx && child.getEnd().getLine() >= lineIx) {
+				scopes.add(child);
+				child.childScopesOnLine(lineIx, scopes);
+			}
+		}
+	}
+	
 	public boolean overlapsWith(Scope other) {
 		// sd1    +---
 		// sd2  +---
@@ -227,7 +248,31 @@ public class Scope implements Comparable<Scope>{
 	public boolean contains(MateTextLocation location){
 		return range.conatains(location);
 	}
-	
+
+	public String hierarchyNames(boolean inner) {
+		String selfName;
+		// stdout.printf("'%s'.hierarchy_names(%s)\n", name, inner ? "true" : "false");
+		if (pattern instanceof DoublePattern &&
+				((DoublePattern) pattern).contentName != null &&
+				inner) {
+			selfName = name + " " + ((DoublePattern) pattern).contentName;
+		}
+		else {
+			selfName = name;
+		}
+		if (parent != null) {
+			boolean next_inner;
+			if (isCapture)
+				next_inner = false;
+			else
+				next_inner = true;
+			return parent.hierarchyNames(next_inner) + " " + selfName;
+		}
+		else {
+			return selfName;
+		}
+	}
+
 	public String pretty(int indent) {
 		prettyString = new StringBuilder("");
 		this.indent = indent;
@@ -269,5 +314,38 @@ public class Scope implements Comparable<Scope>{
 		}
 		
 		return prettyString.toString();
+	}
+	
+
+	public String nearestBackgroundColour() {
+		if (parent != null) {
+			return parent.nearestBackgroundColour1();
+		}
+		return null;
+	}
+
+	public String nearestBackgroundColour1() {
+		if (bgColour != null)
+			return bgColour;
+		if (parent != null) {
+			return parent.nearestBackgroundColour1();
+		}
+		return null;
+	}
+
+	public String nearestForegroundColour() {
+		if (parent != null) {
+			return parent.nearestForegroundColour1();
+		}
+		return null;
+	}
+
+	public String nearestForegroundColour1() {
+		if (fgColour != null)
+			return fgColour;
+		if (parent != null) {
+			return parent.nearestForegroundColour1();
+		}
+		return null;
 	}
 }
