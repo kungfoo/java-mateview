@@ -365,21 +365,21 @@ END
     end
 
     it "Test an embedded php string which starts at the beginning of the line" do
-      @st.text = "<? print(\"Asdf\")?>"
+      @st.text = "<? print(\"Asdf\") ?>"
       @mt.parser.root.pretty(0).should == (t=<<END)
-+ text.html.basic (0,0)-(0,18) open
-  + [noname] (0,0)-(0,18) closed
-    + [noname] (0,0)-(0,18) closed
++ text.html.basic (0,0)-(0,19) open
+  + [noname] (0,0)-(0,19) closed
+    + [noname] (0,0)-(0,19) closed
       c punctuation.whitespace.embedded.leading.php (0,0)-(0,0) closed
-      + source.php.embedded.block.html (0,0)-(0,18) closed
+      + source.php.embedded.block.html (0,0)-(0,19) closed
         c punctuation.section.embedded.begin.php (0,0)-(0,2) closed
         + support.function.construct.php (0,3)-(0,8) closed
         + string.quoted.double.php meta.string-contents.quoted.double.php (0,9)-(0,15) closed
           c punctuation.definition.string.begin.php (0,9)-(0,10) closed
           c punctuation.definition.string.end.php (0,14)-(0,15) closed
-        c punctuation.section.embedded.end.php (0,16)-(0,18) closed
-          c source.php (0,16)-(0,17) closed
-      c punctuation.whitespace.embedded.trailing.php (0,18)-(0,18) closed
+        c punctuation.section.embedded.end.php (0,17)-(0,19) closed
+          c source.php (0,17)-(0,18) closed
+      c punctuation.whitespace.embedded.trailing.php (0,19)-(0,19) closed
 END
     end
   end
