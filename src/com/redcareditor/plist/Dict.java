@@ -60,11 +60,12 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<String> getStrings(String key) {
+	public String[] getStrings(String key) {
 		List<PlistNode<String>> strings = (List<PlistNode<String>>) value.get(key).value;
-		List<String> result = new ArrayList<String>();
+		String[] result = new String[strings.size()];
+		int i = 0;
 		for (PlistNode<String> str : strings) {
-			result.add(str.value);
+			result[i++] = str.value;
 		}
 		return result;
 	}

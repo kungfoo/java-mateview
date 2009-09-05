@@ -30,6 +30,7 @@ public class GrammarBenchmark {
 		
 		Dict d = Dict.parseFile("input/Ruby.plist");
 		grammar = new Grammar(d);
+		grammar.initForUse();
 
 		for (Pattern p : grammar.allPatterns) {
 			if (p instanceof SinglePattern) {

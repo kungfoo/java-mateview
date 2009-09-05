@@ -15,22 +15,19 @@ public class Grammar {
 	public String fileName;
 	public Dict plist;
 	private PlistPropertyLoader propertyLoader;
+	public String[] fileTypes;
 	public String keyEquivalent;
 	public String scopeName;
 	public String comment;
 
-	private boolean loaded = false;
-	
-	public List<String> fileTypes = new ArrayList<String>();
-	public List<Pattern> allPatterns = new ArrayList<Pattern>();
-	public List<Pattern> patterns = new ArrayList<Pattern>();
-	public List<Pattern> singlePatterns = new ArrayList<Pattern>();
-	public Map<String, List<Pattern>> repository = new HashMap<String, List<Pattern>>();
+	public List<Pattern> allPatterns;
+	public List<Pattern> patterns;
+	public List<Pattern> singlePatterns;
+	public Map<String, List<Pattern>> repository;
 	public Rx firstLineMatch;
 	public Rx foldingStartMarker;
 	public Rx foldingStopMarker;
 
-	
 	
 	public Grammar(String name, String plistFile){
 		this(Dict.parseFile(plistFile));
@@ -40,8 +37,6 @@ public class Grammar {
 	public Grammar(Dict plist) {
 		propertyLoader = new PlistPropertyLoader(plist, this);
 		this.plist = plist;
-		initForReference();
-		initForUse();
 	}
 
 	public void initForReference() {
@@ -50,23 +45,23 @@ public class Grammar {
 			propertyLoader.loadStringProperty(property);
 		}
 		propertyLoader.loadRegexProperty("firstLineMatch");
-		if (plist.containsElement("fileTypes")){
+		if (plist.containsElement("fileTypes"))
 			fileTypes = plist.getStrings("fileTypes");
-		}
 	}
 
-	private void initForUse() {
+	public void initForUse() {
 		System.out.printf("initForUse: %s\n", this.name);
-		if (loaded)
+		if (loaded())
 			return;
 		
+		initForReference();
 		propertyLoader.loadRegexProperty("foldingStartMarker");
 		propertyLoader.loadRegexProperty("foldingStopMarker");
 		
+		this.allPatterns = new ArrayList<Pattern>();
 		loadPatterns();
 		loadRepository();
 		replaceIncludePatterns();
-		loaded = true;
 	}
 
 	private void loadPatterns() {
@@ -128,5 +123,9 @@ public class Grammar {
 				if (g.scopeName.equals(scope))
 					return g;
 		return null;
+	}
+
+	private boolean loaded() {
+		return allPatterns != null && repository != null;
 	}
 }
