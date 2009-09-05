@@ -10,6 +10,9 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import com.redcareditor.mate.document.MateDocument;
+import com.redcareditor.mate.document.MateTextFactory;
+import com.redcareditor.mate.document.swt.SwtMateDocument;
 import com.redcareditor.onig.NullRx;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.theme.Theme;
@@ -21,6 +24,9 @@ public class MateText extends Composite {
 	private SourceViewer viewer;
 	private IDocument document;
 	private CompositeRuler gutter;
+	private SwtMateDocument mateDocument;
+	
+	private MateTextUndoManager undoManager;
 	
 	public MateText(Composite parent) {
 		super(parent, SWT.NONE);
@@ -29,6 +35,9 @@ public class MateText extends Composite {
 		viewer = new SourceViewer(this, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		viewer.setDocument(document);
 		setLayout(new FillLayout());
+		
+		undoManager = new MateTextUndoManager(this);
+		mateDocument = new SwtMateDocument(this);
 	}
 	
 	private static CompositeRuler constructRuler() {
@@ -37,12 +46,36 @@ public class MateText extends Composite {
 		return ruler;
 	}
 	
+	public void undo(){
+		undoManager.undo();
+	}
+	
+	public void redo(){
+		undoManager.redo();
+	}
+	
+	public boolean isDirty(){
+		return undoManager.isDirty();
+	}
+	
+	public void attachUpdater(){
+		
+	}
+	
 	public StyledText getTextWidget(){
 		return viewer.getTextWidget();
 	}
 	
 	public IDocument getDocument(){
 		return document;
+	}
+	
+	public MateDocument getMateDocument(){
+		return mateDocument;
+	}
+	
+	public MateTextFactory getTextLocationFactory(){
+		return mateDocument;
 	}
 	
 	// Sets the grammar explicitly by name.
