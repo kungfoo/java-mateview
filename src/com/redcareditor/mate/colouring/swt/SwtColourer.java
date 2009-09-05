@@ -57,6 +57,7 @@ public class SwtColourer implements Colourer {
 		control.setBackground(globalBackground);
 		int currentLine = control.getLineAtOffset(control.getCaretOffset());
 		control.setLineBackground(currentLine, 1, globalLineBackground);
+		mateText.setGutterBackground(globalBackground);
 	}
 
 	private void initCachedColours() {

@@ -1,12 +1,16 @@
 package com.redcareditor.mate;
 
+import java.util.Iterator;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.CompositeRuler;
+import org.eclipse.jface.text.source.IVerticalRulerColumn;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -26,7 +30,7 @@ import com.redcareditor.theme.ThemeManager;
 public class MateText extends Composite {
 	public Parser parser;
 	public Colourer colourer;
-	
+
 	/* components plugged together */
 	private SourceViewer viewer;
 	private IDocument document;
@@ -34,7 +38,7 @@ public class MateText extends Composite {
 	private SwtMateDocument mateDocument;
 
 	private MateTextUndoManager undoManager;
-	
+
 	public MateText(Composite parent) {
 		super(parent, SWT.NONE);
 		document = new Document();
@@ -42,71 +46,73 @@ public class MateText extends Composite {
 		viewer = new SourceViewer(this, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		viewer.setDocument(document);
 		setLayout(new FillLayout());
-		this.colourer = new SwtColourer(this);
+		colourer = new SwtColourer(this);
 		undoManager = new SwtMateTextUndoManager(this);
 		mateDocument = new SwtMateDocument(this);
 	}
-	
+
 	private static CompositeRuler constructRuler() {
 		CompositeRuler ruler = new CompositeRuler();
 		ruler.addDecorator(0, new LineNumberRulerColumn());
 		return ruler;
 	}
-	
-	public void undo(){
+
+	public void undo() {
 		undoManager.undo();
 	}
-	
-	public void redo(){
+
+	public void redo() {
 		undoManager.redo();
 	}
-	
-	public boolean isDirty(){
+
+	public boolean isDirty() {
 		return undoManager.isDirty();
 	}
-	
-	public void attachUpdater(){
-		
+
+	public void attachUpdater() {
+
 	}
-	
-	public StyledText getTextWidget(){
+
+	public StyledText getTextWidget() {
 		return viewer.getTextWidget();
 	}
-	
-	public IDocument getDocument(){
+
+	public IDocument getDocument() {
 		return document;
 	}
-	
-	public MateDocument getMateDocument(){
+
+	public MateDocument getMateDocument() {
 		return mateDocument;
 	}
-	
+
 	public StyledText getControl() {
 		return viewer.getTextWidget();
 	}
-	
+
 	// Sets the grammar explicitly by name.
 	// TODO: restore the uncolouring stuff
 	public boolean setGrammarByName(String name) {
 		if (this.parser != null && this.parser.grammar.name.equals(name))
 			return true;
-	  
+
 		for (Bundle bundle : Bundle.getBundles()) {
 			for (Grammar grammar : bundle.getGrammars()) {
 				if (grammar.name.equals(name)) {
-//					int parsed_upto = 150;
+					// int parsed_upto = 150;
 					Theme theme;
-//					if (this.parser != null) {
-//						theme = this.parser.colourer.theme;
-//						this.parser.colourer.uncolour_scope(this.parser.root, true);
-//						parsed_upto = this.parser.parsed_upto;
-//						this.parser.close();
-//					}
+					// if (this.parser != null) {
+					// theme = this.parser.colourer.theme;
+					// this.parser.colourer.uncolour_scope(this.parser.root,
+					// true);
+					// parsed_upto = this.parser.parsed_upto;
+					// this.parser.close();
+					// }
 					this.parser = new Parser(grammar, this);
-//					this.parser.last_visible_line_changed(parsed_upto);
-//					GLib.Signal.emit_by_name(this, "grammar_changed", gr.name);
-//					if (theme != null)
-//					  this.parser.change_theme(theme);
+					// this.parser.last_visible_line_changed(parsed_upto);
+					// GLib.Signal.emit_by_name(this, "grammar_changed",
+					// gr.name);
+					// if (theme != null)
+					// this.parser.change_theme(theme);
 					return true;
 				}
 			}
@@ -150,8 +156,7 @@ public class MateText extends Composite {
 			for (Grammar grammar : bundle.getGrammars()) {
 				re = grammar.firstLineMatch;
 				if (re instanceof NullRx) {
-				}
-				else {
+				} else {
 					if (re.search(firstLine, 0, (int) firstLine.length()) != null) {
 						System.out.printf("matched: %s '%s' %s\n", grammar.name, firstLine, re.pattern);
 						setGrammarByName(grammar.name);
@@ -162,7 +167,7 @@ public class MateText extends Composite {
 		}
 		return null;
 	}
-	
+
 	public boolean setThemeByName(String name) {
 		for (Theme theme : ThemeManager.themes) {
 			if (theme.name.equals(name)) {
@@ -172,12 +177,30 @@ public class MateText extends Composite {
 		}
 		return false;
 	}
-	
-	public boolean setFont(String name, int size) {
+
+	public void setFont(String name, int size) {
 		viewer.getTextWidget().setFont(new Font(Display.getCurrent(), name, size, 0));
-		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	public void setGutterBackground(Color color) {
+		/* this is so ugly because of SWT... */
+		Iterator<IVerticalRulerColumn> it = gutter.getDecoratorIterator();
+		while (it.hasNext()) {
+			IVerticalRulerColumn column = it.next();
+			if (column instanceof LineNumberRulerColumn) {
+				((LineNumberRulerColumn) column).setBackground(color);
+			}
+		}
+	}
+
+	public void setGutterForeground(Color color) {
+		Iterator<IVerticalRulerColumn> it = gutter.getDecoratorIterator();
+		while (it.hasNext()) {
+			IVerticalRulerColumn column = it.next();
+			if (column instanceof LineNumberRulerColumn) {
+				((LineNumberRulerColumn) column).setForeground(color);
+			}
+		}
 	}
 }
-
-
-
