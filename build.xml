@@ -8,20 +8,29 @@
 	<property name="build.test.dir" location="${build.dir}/test" />
 	<property name="test.report.dir" location="${build.dir}/test-reports" />
 	
-	<condition property="isOsX">
+	<condition property="platform" value="osx">
 		<and>
 			<os family="mac"/>
 			<os family="unix"/>
+			<os arch="i386"/>
 		</and>
 	</condition>
 	
-	<condition property="isLinux">
+	<condition property="platform" value="osx64">
+		<and>
+			<os family="mac"/>
+			<os family="unix"/>
+			<os arch="x86_64"/>
+		</and>
+	</condition>
+	
+	<condition property="platform" value="linux">
 		<and>
 			<os family="unix" />
 		</and>
 	</condition>
 	
-	<condition property="isWindows">
+	<condition property="platform" value="windows">
 		<os family="windows" />
 	</condition>
 	

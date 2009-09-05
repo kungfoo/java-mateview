@@ -1,15 +1,11 @@
 
 package com.redcareditor.mate;
 
+import java.util.ArrayList;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Position;
-import org.eclipse.swt.custom.StyledText;
-
 import com.redcareditor.mate.document.MateDocument;
-import com.redcareditor.mate.document.MateTextFactory;
 import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.MateTextRange;
 import com.redcareditor.onig.Match;
@@ -19,7 +15,6 @@ public class Scope implements Comparable<Scope>{
 	private MateText mateText;
 	
 	private MateDocument document;
-	private MateTextFactory factory;
 	
 	private MateTextRange range;
 	private MateTextRange innerRange;
@@ -33,17 +28,12 @@ public class Scope implements Comparable<Scope>{
 	public Match openMatch;
 	public Match closeMatch;
 	
-//	public Position startPos;
-//	public Position innerStartPos;
-//	public Position innerEndPos;
-//	public Position endPos;
-	
 	public Rx closingRegex;
 	public String beginMatchString;
 	public String endMatchString;
 	
 	public Scope parent;
-	public SortedSet<Scope> children;
+	public ArrayList<Scope> children;
 	
 	StringBuilder prettyString;
 	int indent;
@@ -51,25 +41,24 @@ public class Scope implements Comparable<Scope>{
 	public Scope(MateText mt, String name) {
 		this.mateText = mt;
 		this.name = name;
-		this.children = new TreeSet<Scope>();
+		this.children = new ArrayList<Scope>();
 		this.document = mt.getMateDocument();
-		this.factory = mt.getTextLocationFactory();
 		
-		this.range = factory.getTextRange();
-		this.innerRange = factory.getTextRange();
+		this.range = document.getTextRange();
+		this.innerRange = document.getTextRange();
 	}
 	
 	public void clearAfter(int lineIx, int something) {
 		// TODO: port this method
 	}
-
+	
 	public Scope scopeAt(int line, int lineOffset) {
-		TextLocation loc = new TextLocation(line, lineOffset);
+		MateTextLocation location = document.getTextLocation(line, lineOffset);
 		
-		if (startLoc().compareTo(loc) <= 0 || parent == null) {
-			if (isOpen || endLoc().compareTo(loc) >= 0) {
+		if (getStart().compareTo(location) <= 0 || parent == null) {
+			if (isOpen || getEnd().compareTo(location) >= 0) {
 				for (Scope child : children) {
-					if (child.containsLoc(loc)) {
+					if (child.contains(location)) {
 						return child.scopeAt(line, lineOffset);
 					}
 				}
@@ -82,113 +71,137 @@ public class Scope implements Comparable<Scope>{
 	}
 	
 	public int compareTo(Scope o) {
-		if(startLoc().compareTo(o.startLoc()) == 0){
-			return endLoc().compareTo(o.endLoc());
+		if(getStart().compareTo(o.getStart()) == 0){
+			return getEnd().compareTo(o.getEnd());
 		}
-		return startLoc().compareTo(o.startLoc());
-	}
-	
-	private boolean containsLoc(TextLocation loc) {
-		return startLoc().compareTo(loc) <= 0 && endLoc().compareTo(loc) > 0;
+		return getStart().compareTo(o.getStart());
 	}
 
 	public Scope containingDoubleScope(int lineIx) {
-		// TODO: port this method
-		return this;
+		Scope scope = this;
+		while ((scope.pattern instanceof SinglePattern || 
+			      scope.isCapture || 
+			      (scope.getStart().getLine() == lineIx && scope.getStart().getLineOffset() == 0)) && 
+					 scope.parent != null) {
+			scope = scope.parent;
+		}
+		return scope;
 	}
 	
 	public boolean surfaceIdenticalTo(Scope other) {
-		// TODO: port me
+		if (surfaceIdenticalToModuloEnding(other) &&
+				getEnd().equals(other.getEnd()) &&
+				getInnerEnd().equals(other.getInnerEnd()) &&
+				beginMatchString == other.beginMatchString) {
+			return true;
+		}
 		return false;
 	}
 
 	public boolean surfaceIdenticalToModuloEnding(Scope other) {
-		// TODO: port me
+		// stdout.printf("%s == %s and %s == %s and %s == %s and %s == %s and %s == %s",
+		// 			  name, other.name, pattern.name, other.pattern.name, start_loc().to_s(),
+		// 			  other.start_loc().to_s(), inner_start_loc().to_s(), other.inner_start_loc().to_s(),
+		// 			  begin_match_string, other.begin_match_string);
+		if (name == other.name &&
+				pattern == other.pattern &&
+				getStart().equals(other.getStart()) &&
+				getInnerStart().equals(other.getInnerStart()) &&
+				beginMatchString == other.beginMatchString) {
+			return true;
+		}
 		return false;
 	}
 
 	public boolean overlapsWith(Scope other) {
-		// TODO: port me
+		// sd1    +---
+		// sd2  +---
+		if (getStart().compareTo(other.getStart()) >= 0) {
+			if (getStart().compareTo(other.getEnd()) < 0) {
+				return true;
+			}
+			return false;
+		}
+
+		// sd1 +---
+		// sd2   +---
+		if (getEnd().compareTo(other.getStart()) > 0) {
+			return true;
+		}
 		return false;
 	}
 
 	public void addChild(Scope newChild) {
-		children.add(newChild);
+		if (children.size() == 0){
+			children.add(newChild);
+			return;
+		}
+
+		if (children.get(0).getStart().getOffset() > newChild.getStart().getOffset()){
+			children.add(0, newChild);
+			return;
+		}
+
+		int insertIx = 0;
+		int ix = 1;
+		for (Scope child : children) {
+			if (child.getStart().getOffset() <= newChild.getStart().getOffset()) {
+				insertIx = ix;
+			}
+			ix++;
+		}
+		children.add(insertIx, newChild);
+//		children.add(newChild);
 	}
 	
 	public void removeChild(Scope child) {
 		children.remove(child);
 	}
 
-	private int comparePositions(Position a, Position b) {
-		return 0;
-	}
-
-	public Scope firstChildAfter(TextLocation loc) {
-//		stdout.printf("\"%s\".first_child_after(%d, %d)\n", name, loc.line, loc.line_offset);
-		
+	public Scope firstChildAfter(MateTextLocation location) {
 		for (Scope child : children) {
-			if (child.startLoc().compareTo(loc) >= 0) {
+			if (child.getStart().compareTo(location) >= 0) {
 				return child;
 			}
 		}
 		return null;
 	}
 	
+	public ArrayList<Scope> deleteAnyOnLineNotIn(int lineIx, ArrayList<Scope> scopes) {
+		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
+		for (Scope child : children) {
+			int childStartLine = child.getStart().getLine();
+			if (childStartLine == lineIx && !scopes.contains(child)) {
+				System.out.printf("deleteAnyOnLineNotIn removing: %s\n", child.pattern.name);
+				removedScopes.add(child);
+			}
+		}
+		children.removeAll(removedScopes);
+		return removedScopes;
+	}
+	
 	public void setStartPos(int line, int lineOffset, boolean hasLeftGravity) {
-		MateTextLocation start = factory.getTextLocation(line, lineOffset);
+		MateTextLocation start = document.getTextLocation(line, lineOffset);
 		this.range.setStart(start);
+		document.addTextLocation(start);
 	}
 
 	public void setInnerStartPos(int line, int lineOffset, boolean hasLeftGravity) {
-		MateTextLocation innerStart = factory.getTextLocation(line, lineOffset);
+		MateTextLocation innerStart = document.getTextLocation(line, lineOffset);
 		this.innerRange.setStart(innerStart);
+		document.addTextLocation(innerStart);
 	}
 
 	public void setInnerEndPos(int line, int lineOffset, boolean c) {
-		MateTextLocation innerEnd = factory.getTextLocation(line, lineOffset);
+		MateTextLocation innerEnd = document.getTextLocation(line, lineOffset);
 		this.innerRange.setEnd(innerEnd);
+		document.addTextLocation(innerEnd);
 	}
 
 	public void setEndPos(int line, int lineOffset, boolean c) {
-		MateTextLocation end = factory.getTextLocation(line, lineOffset);
+		MateTextLocation end = document.getTextLocation(line, lineOffset);
 		this.range.setEnd(end);
-	}
-
-	public TextLocation startLoc() {
-		return new TextLocation(startLine(), startLineOffset());
-	}
-
-	public TextLocation innerEndLoc() {
-		return new TextLocation(endLine(), innerEndLineOffset());
-	}
-	
-	public TextLocation endLoc() {
-		return new TextLocation(endLine(), endLineOffset());
-	}
-	
-	public int startLine() {
-		return range.getStart().getLine();
-	}
-
-	public int endLine() {
-		return range.getEnd().getLine();
-	}
-
-	public int startLineOffset() {
-		return range.getStart().getLineOffset();
-	}
-
-	public int innerEndLineOffset() {
-		return innerRange.getEnd().getLineOffset();
-	}
-	
-	public int endLineOffset() {
-		return range.getEnd().getLineOffset();
-	}
-	
-	public MateTextRange getTextRange(){
-		return range;
+		document.addTextLocation(end);
 	}
 	
 	public int getLength(){
@@ -202,14 +215,18 @@ public class Scope implements Comparable<Scope>{
 	public MateTextLocation getEnd(){
 		return range.getEnd();
 	}
-	
-//	public int startOffset() {
-//		return this.startPos.offset;
-//	}
-//	
-//	public int endOffset() {
-//		return this.endPos.offset;
-//	}
+
+	public MateTextLocation getInnerStart(){
+		return innerRange.getStart();
+	}
+		
+	public MateTextLocation getInnerEnd(){
+		return innerRange.getEnd();
+	}
+		
+	public boolean contains(MateTextLocation location){
+		return range.conatains(location);
+	}
 	
 	public String pretty(int indent) {
 		prettyString = new StringBuilder("");
@@ -231,26 +248,17 @@ public class Scope implements Comparable<Scope>{
 				((DoublePattern) this.pattern).contentName != null) 
 			prettyString.append(" " + ((DoublePattern) this.pattern).contentName);
 		prettyString.append(" (");
-		// TODO: port these sections once Positions are figured out
-//		if (startPos == null) {
-//			prettyString.append("inf");
-//		}
-//		else {
-			prettyString.append(String.format(
-					"%d,%d",
-					startLine(), 
-					startLineOffset()));
-//		}
+		prettyString.append(String.format(
+				"%d,%d",
+				getStart().getLine(), 
+				getStart().getLineOffset()));
+//		prettyString.append(getStart().getOffset());
 		prettyString.append(")-(");
-//		if (endPos == null) {
-//			prettyString.append("inf");
-//		}
-//		else {
-			prettyString.append(String.format(
-					"%d,%d",
-					endLine(), 
-					endLineOffset()));
-//		}
+		prettyString.append(String.format(
+				"%d,%d",
+				getEnd().getLine(), 
+				getEnd().getLineOffset()));
+//		prettyString.append(getEnd().getOffset());
 		prettyString.append(")");
 		prettyString.append((isOpen ? " open" : " closed"));
 		prettyString.append("\n");
