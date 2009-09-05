@@ -11,6 +11,7 @@ import org.eclipse.swt.custom.LineStyleListener;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 
 import com.redcareditor.mate.DoublePattern;
 import com.redcareditor.mate.MateText;
@@ -69,10 +70,15 @@ public class SwtColourer implements Colourer {
 		this.theme = theme;
 		theme.initForUse();
 		initCachedColours();
+		setMateTextColors();
+	}
+
+	private void setMateTextColors() {
 		control.setBackground(globalBackground);
 		int currentLine = control.getLineAtOffset(control.getCaretOffset());
 		control.setLineBackground(currentLine, 1, globalLineBackground);
-		mateText.setGutterBackground(globalBackground);
+		mateText.setGutterBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		mateText.setGutterForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
 	}
 
 	private void initCachedColours() {
