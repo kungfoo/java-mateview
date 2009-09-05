@@ -34,8 +34,8 @@ public class Scope implements Comparable<Scope>{
 	public Scope parent;
 	public ArrayList<Scope> children;
 	
-	String bgColour;
-	String fgColour;
+	public String bgColour;
+	public String fgColour;
 	
 	StringBuilder prettyString;
 	int indent;
