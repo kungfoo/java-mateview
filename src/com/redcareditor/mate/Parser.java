@@ -17,7 +17,6 @@ import com.redcareditor.onig.Rx;
 
 public class Parser {
 	public Grammar grammar;
-	public Colourer colourer;
 	public MateText mateText;
 	public StyledText styledText;
 	public MateDocument document;
@@ -45,7 +44,6 @@ public class Parser {
 		lastVisibleLine = 0;
 //		tags = new Sequence<TextTag>(null);
 		changes = new RangeSet();
-		colourer = new Colourer(m);
 		deactivationLevel = 0;
 		makeRoot();
 		attachListeners();
@@ -216,16 +214,16 @@ public class Parser {
 		Scope endScope2 = scopeAfterEndOfLine(lineIx, length);
 //		System.out.printf("end_scope2: %s\n", endScope2.name);
 //		System.out.printf("%s\n", this.root.pretty(0));
-		if (colourer != null) {
-			// System.out.printf("before_uncolour_scopes\n");
-			colourer.uncolourScopes(removedScopes);
-			// System.out.printf("before_colour_line_with_scopes\n");
-			colourer.colourLineWithScopes(allScopes);
-			// System.out.printf("after_colour_line_with_scopes\n");
-		}
-		else {
-			// stdout.printf("no colourer");
-		}
+//		if (colourer != null) {
+//			// System.out.printf("before_uncolour_scopes\n");
+//			colourer.uncolourScopes(removedScopes);
+//			// System.out.printf("before_colour_line_with_scopes\n");
+//			colourer.colourLineWithScopes(allScopes);
+//			// System.out.printf("after_colour_line_with_scopes\n");
+//		}
+//		else {
+//			// stdout.printf("no colourer");
+//		}
 		return (endScope1 != endScope2);
 	}
 
@@ -282,9 +280,9 @@ public class Parser {
 		}
 		else {
 			// stdout.printf("closing scope at %d\n", m.from);
-			if (colourer != null) {
-				colourer.uncolourScope(scanner.getCurrentScope(), false);
-			}
+//			if (colourer != null) {
+//				colourer.uncolourScope(scanner.getCurrentScope(), false);
+//			}
 			setInnerEndPosSafely(scanner.getCurrentScope(), m, lineIx, length, 0);
 			setEndPosSafely(scanner.getCurrentScope(), m, lineIx, length, 0);
 			scanner.getCurrentScope().isOpen = false;
@@ -592,8 +590,8 @@ public class Parser {
 					// @removed_scopes << s
 				}
 				else {
-					if (colourer != null)
-						colourer.uncolourScope(s, false);
+//					if (colourer != null)
+//						colourer.uncolourScope(s, false);
 					// s.inner_end_mark = null;
 					// s.end_mark = null;
 					// s.is_open = true;

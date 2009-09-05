@@ -11,14 +11,15 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import com.redcareditor.mate.document.MateDocument;
-import com.redcareditor.mate.document.MateTextFactory;
 import com.redcareditor.mate.document.swt.SwtMateDocument;
 import com.redcareditor.onig.NullRx;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.theme.Theme;
+import com.redcareditor.theme.ThemeManager;
 
 public class MateText extends Composite {
 	public Parser parser;
+	public Colourer colourer;
 	
 	/* components plugged together */
 	private SourceViewer viewer;
@@ -35,7 +36,7 @@ public class MateText extends Composite {
 		viewer = new SourceViewer(this, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		viewer.setDocument(document);
 		setLayout(new FillLayout());
-
+		this.colourer = new Colourer(this);
 		undoManager = new MateTextUndoManager(this);
 		mateDocument = new SwtMateDocument(this);
 	}
@@ -72,6 +73,10 @@ public class MateText extends Composite {
 	
 	public MateDocument getMateDocument(){
 		return mateDocument;
+	}
+	
+	public StyledText getControl() {
+		return viewer.getTextWidget();
 	}
 	
 	// Sets the grammar explicitly by name.
@@ -151,6 +156,19 @@ public class MateText extends Composite {
 		}
 		return null;
 	}
+	
+
+	public boolean setThemeByName(String name) {
+		for (Theme theme : ThemeManager.themes) {
+			if (theme.name.equals(name)) {
+//				theme.initForUse();
+				this.colourer.setTheme(theme);
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }
 
 
