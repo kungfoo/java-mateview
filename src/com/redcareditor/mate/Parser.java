@@ -512,6 +512,7 @@ public class Parser {
 					s = new Scope(mateText, captures.get(cap));
 					s.pattern = scope.pattern;
 					s.setStartPos(lineIx, Math.min(m.match.getCapture(cap).start, length-1), false);
+					setInnerEndPosSafely(s, m, lineIx, length, cap);
 					setEndPosSafely(s, m, lineIx, length, cap);
 					s.isOpen = false;
 					s.isCapture = true;
@@ -579,9 +580,9 @@ public class Parser {
 		ArrayList<Scope> scopesThatClosedOnLine = new ArrayList<Scope>();
 		Scope ts = startScope;
 		while (ts.parent != null) {
-			// stdout.printf("checking for closing scope: %s (%d)\n", ts.name, ts.inner_end_line());
+			System.out.printf("checking for closing scope: %s (%d %d)\n", ts.name, ts.getEnd().getLine(), ts.getInnerEnd().getLine());
 			if (ts.getInnerEnd().getLine() == lineIx) {
-				// stdout.printf("scope that closed on line: %s\n", ts.name);
+				System.out.printf("scope that closed on line: %s\n", ts.name);
 				scopesThatClosedOnLine.add(ts);
 			}
 			ts = ts.parent;
@@ -589,7 +590,7 @@ public class Parser {
 		for (Scope s : scopesThatClosedOnLine) {
 			if (!closedScopes.contains(s)) {
 				if (s.isCapture) {
-					// stdout.printf("    removing scope: %s\n", s.name);
+//					System.out.printf("    removing scope: %s\n", s.name);
 					s.parent.removeChild(s);
 					removedScopes.add(s);
 					// @removed_scopes << s
