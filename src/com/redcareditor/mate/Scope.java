@@ -113,6 +113,23 @@ public class Scope implements Comparable<Scope>{
 		return false;
 	}
 
+	public ArrayList<Scope> scopesOnLine(int lineIx) {
+		ArrayList<Scope> scopes = new ArrayList<Scope>();
+		if (getStart().getLine() <= lineIx && getEnd().getLine() >= lineIx)
+			scopes.add(this);
+		childScopesOnLine(lineIx, scopes);
+		return scopes;
+	}
+	
+	public void childScopesOnLine(int lineIx, ArrayList<Scope> scopes) {
+		for (Scope child : children) {
+			if (child.getStart().getLine() <= lineIx && child.getEnd().getLine() >= lineIx) {
+				scopes.add(child);
+				child.childScopesOnLine(lineIx, scopes);
+			}
+		}
+	}
+	
 	public boolean overlapsWith(Scope other) {
 		// sd1    +---
 		// sd2  +---

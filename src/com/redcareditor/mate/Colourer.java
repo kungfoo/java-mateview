@@ -1,5 +1,6 @@
 package com.redcareditor.mate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.custom.LineBackgroundEvent;
@@ -44,6 +45,12 @@ public class Colourer {
 	private void colourLine(LineStyleEvent event) {
 		if (this.theme == null)
 			return;
+		int eventLine = mateText.getControl().getLineAtOffset(event.lineOffset);
+		ArrayList<Scope> scopes = mateText.parser.root.scopesOnLine(eventLine);
+		System.out.printf("got to colour %d scopes\n", scopes.size());
+		for (Scope scope : scopes) {
+			System.out.printf("  %s\n", scope.name);
+		}
 	}
 	
 	private void colourLineBackground(LineBackgroundEvent event) {
