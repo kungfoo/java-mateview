@@ -90,7 +90,7 @@ public class Parser {
 		// TODO: this isn't quite right...
 		changes.add(styledText.getLineAtOffset(modifyStart), 
 				styledText.getLineAtOffset(modifyStart + modifyText.length()));
-		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, mateText.getTextWidget().getLineAtOffset(modifyStart), modifyText);
+		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
 		processChanges();
 	}
 
@@ -116,7 +116,7 @@ public class Parser {
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
 		boolean scopeEverChanged = false;
-		int endLine = Math.min(lastVisibleLine + 100, mateText.getTextWidget().getLineCount() - 1);
+		int endLine = Math.min(lastVisibleLine + 100, styledText.getLineCount() - 1);
 		while (lineIx <= toLine || scopeEverChanged && lineIx <= endLine) {
 			scopeChanged = parseLine(lineIx++);
 			if (scopeChanged) {
@@ -171,7 +171,6 @@ public class Parser {
 		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
 		for (Marker m : scanner) {
-//			sleep(500);
 			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, scanner.position);
 			if (expectedScope != null)
 				System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.startLoc().line, 
@@ -195,7 +194,7 @@ public class Parser {
 				singleScope(scanner, expectedScope, lineIx, line, length, m, 
 							 allScopes, closedScopes, removedScopes);
 			}
-			System.out.printf("pretty:\n%s\n", root.pretty(2));
+			//System.out.printf("pretty:\n%s\n", root.pretty(2));
 			scanner.position = m.match.getCapture(0).end;
 		}
 		clearLine(lineIx, startScope, allScopes, closedScopes, removedScopes);
@@ -247,7 +246,7 @@ public class Parser {
 //				line_ix, m.from,
 //				scanner.current_scope.end_match_string, end_match_string);
 //		  
-		if (scanner.getCurrentScope().endPos != null &&
+		if (//scanner.getCurrentScope().endPos != null &&
 				scanner.getCurrentScope().endLoc().equals(new TextLocation(lineIx, m.match.getCapture(0).end)) &&
 				scanner.getCurrentScope().innerEndLoc().equals(new TextLocation(lineIx, m.from)) &&
 				scanner.getCurrentScope().endMatchString == endMatchString) {
@@ -355,7 +354,6 @@ public class Parser {
 		setEndPosSafely(s, m, lineIx, length, 0);
 		s.isOpen = false;
 		s.isCapture = false;
-		byte[] bytes = new byte[m.match.getCapture(0).end - m.from + 1];
 		System.out.printf("beginMatchString '%s' %d - %d\n",  new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from), m.from, m.match.getCapture(0).end);
 		s.beginMatchString = new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from); 
 		s.parent = scanner.getCurrentScope();
@@ -391,10 +389,14 @@ public class Parser {
 		closedScopes.add(newScope);
 	}
 
+	// TODO: please, give this method a meaningful name.
+	private boolean iDontKnowHowToNameThisFunctionButItsDuplicateCode(int lineIx, int length, int to) {
+		return to == length && styledText.getLineCount() > lineIx+1;
+	}
 
 	public void setStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).start;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) 
+		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) 
 			scope.setStartPos(lineIx+1, 0, false);
 		else
 			scope.setStartPos(lineIx, Math.min(to, length), false);
@@ -402,7 +404,7 @@ public class Parser {
 
 	public void setInnerStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).start;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) 
+		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) 
 			scope.setInnerStartPos(lineIx+1, 0, false);
 		else
 			scope.setInnerStartPos(lineIx, Math.min(to, length), false);
@@ -410,7 +412,7 @@ public class Parser {
 
 	public void setInnerEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).end;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {
+		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) {
 			scope.setInnerEndPos(lineIx, length, true);
 		}
 		else {
@@ -420,7 +422,7 @@ public class Parser {
 	
 	public void setEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).end;
-		if (to == length && this.mateText.getTextWidget().getLineCount() > lineIx+1) {
+		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) {
 			scope.setEndPos(lineIx, length, true);
 		}
 		else {
@@ -493,7 +495,7 @@ public class Parser {
 			for (Integer cap : captures.keySet()) {
 				System.out.printf("%s\n", m.match.numCaptures() >= cap);
 				if (m.match.numCaptures() - 1 >= cap && m.match.getCapture(cap).start != -1) {
-					s = new Scope(this.mateText, captures.get(cap));
+					s = new Scope(mateText, captures.get(cap));
 					s.pattern = scope.pattern;
 					s.setStartPos(lineIx, Math.min(m.match.getCapture(cap).start, length-1), false);
 					setEndPosSafely(s, m, lineIx, length, cap);
@@ -512,27 +514,24 @@ public class Parser {
 		// placed capture, and if so we add it as a child (we know that the latest 
 		// such capture is the one to add it to by the ordering). If not we
 		// add it as a child of the matched scope.
-		int bestLength = 0;
-		int newLength;
+
 		List<Scope> placedScopes = new ArrayList<Scope>();
 		Scope parentScope;
 		while (captureScopes.size() > 0) {
 			s = null;
 			// find first and longest remaining scope (put it in 's')
 			for (Scope cs : captureScopes) {
-				newLength = cs.endOffset() - cs.startOffset();
 				if (s == null || 
-						cs.startOffset() < s.startOffset() || 
-						(cs.startOffset() == s.startOffset() && newLength > bestLength)) {
+						cs.getStart().compareTo(s.getStart()) < 0 || 
+						(cs.getStart().compareTo(s.getStart()) == 0 && cs.getLength() > s.getLength())) {
 					s = cs;
-					bestLength = newLength;
 				}
 			}
-			System.out.printf("arrange: %s, start: %d, length: %d\n", s.name, s.startOffset(), s.endOffset() - s.startOffset());
+			//System.out.printf("arrange: %s, start: %d, length: %d\n", s.name, s.startOffset(), s.endOffset() - s.startOffset());
 			// look for somewhere to put it from placed_scopes
 			parentScope = null;
 			for (Scope ps : placedScopes) {
-				if (s.startOffset() >= ps.startOffset() && s.endOffset() <= ps.endOffset()) {
+				if (s.getStart().compareTo(ps.getStart()) >= 0 && s.getEnd().compareTo(ps.getEnd()) <= 0) {
 					parentScope = ps;
 				}
 			}

@@ -15,8 +15,7 @@ public class GrammarTest {
 
 	@Before
 	public void setUp() {
-		ruby = Dict.parseFile("input/Bundles/Apache.tmbundle/Syntaxes/Apache.plist");
-		g = new Grammar(ruby);
+		g = new Grammar("input/Bundles/Apache.tmbundle/Syntaxes/Apache.plist");
 		g.initForUse();
 	}
 
