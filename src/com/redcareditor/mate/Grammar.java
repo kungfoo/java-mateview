@@ -37,7 +37,7 @@ public class Grammar {
 		initForReference();
 	}
 
-	public void initForReference() {
+	private void initForReference() {
 		String[] properties = new String[] { "name", "keyEquivalent", "scopeName", "comment" };
 		for (String property : properties) {
 			propertyLoader.loadStringProperty(property);

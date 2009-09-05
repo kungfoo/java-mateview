@@ -63,12 +63,6 @@ public class Bundle {
 				loadGrammar(bundle, grammarDirectory);
 			}
 		}
-
-		for (Bundle b : getBundles()) {
-			for (Grammar g : b.getGrammars()) {
-				g.initForReference();
-			}
-		}
 	}
 
 	private static void loadGrammar(Bundle bundle, File syntaxDir) {
