@@ -5,8 +5,8 @@ import java.util.List;
 import com.redcareditor.theme.Theme;
 
 public class Colourer {
-	public Theme theme;
-	public MateText mateText;
+	private Theme theme;
+	private MateText mateText;
 	
 	public Colourer(MateText mt) {
 		mateText = mt;

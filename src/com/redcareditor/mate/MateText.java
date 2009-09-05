@@ -81,8 +81,8 @@ public class MateText extends Composite {
 		if (this.parser != null && this.parser.grammar.name.equals(name))
 			return true;
 	  
-		for (Bundle bundle : Bundle.bundles) {
-			for (Grammar grammar : bundle.grammars) {
+		for (Bundle bundle : Bundle.getBundles()) {
+			for (Grammar grammar : bundle.getGrammars()) {
 				if (grammar.name.equals(name)) {
 //					int parsed_upto = 150;
 					Theme theme;
@@ -110,8 +110,8 @@ public class MateText extends Composite {
 	public String setGrammarByFilename(String fileName) {
 		String bestName = null;
 		long bestLength = 0;
-		for (Bundle bundle : Bundle.bundles) {
-			for (Grammar grammar : bundle.grammars) {
+		for (Bundle bundle : Bundle.getBundles()) {
+			for (Grammar grammar : bundle.getGrammars()) {
 				if (grammar.fileTypes != null) {
 					for (String ext : grammar.fileTypes) {
 						if (fileName.endsWith(ext) && (bestName == null || ext.length() > bestLength)) {
@@ -136,8 +136,8 @@ public class MateText extends Composite {
 	// name or null.
 	public String setGrammarByFirstLine(String firstLine) {
 		Rx re;
-		for (Bundle bundle : Bundle.bundles) {
-			for (Grammar grammar : bundle.grammars) {
+		for (Bundle bundle : Bundle.getBundles()) {
+			for (Grammar grammar : bundle.getGrammars()) {
 				re = grammar.firstLineMatch;
 				if (re instanceof NullRx) {
 				}

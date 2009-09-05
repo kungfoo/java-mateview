@@ -4,24 +4,34 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.redcareditor.plist.Dict;
-
 public class Bundle {
-	public String name;
-	public List<Grammar> grammars;
-	public static List<Bundle> bundles;
+	private String name;
+	private List<Grammar> grammars;
+	private static List<Bundle> bundles;
 
 	public Bundle(String name) {
 		this.name = name;
-		this.grammars = new ArrayList<Grammar>();
+		grammars = new ArrayList<Grammar>();
 	}
 
 	public static Bundle getBundleByName(String findName) {
-		for (Bundle b : bundles) {
-			if (b.name.equals(findName))
+		for (Bundle b : getBundles()) {
+			if (b.getName().equals(findName))
 				return b;
 		}
 		return null;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public List<Grammar> getGrammars() {
+		return grammars;
+	}
+
+	public static List<Bundle> getBundles() {
+		return bundles;
 	}
 
 	/**
@@ -41,35 +51,32 @@ public class Bundle {
 	}
 
 	public static void loadBundles(String textmateDir) {
-		if (bundles != null) {
+		if (getBundles() != null) {
 			return;
 		}
 		bundles = new ArrayList<Bundle>();
 		for (String bundleDir : bundleDirs(textmateDir)) {
 			Bundle bundle = new Bundle(bundleDir.split("\\.")[0]);
-			bundles.add(bundle);
-			File syntaxDir = new File(textmateDir + "/Bundles/" + bundleDir + "/Syntaxes");
-			if (syntaxDir.exists()) {
-				loadSyntax(bundle, syntaxDir);
+			getBundles().add(bundle);
+			File grammarDirectory = new File(textmateDir + "/Bundles/" + bundleDir + "/Syntaxes");
+			if (grammarDirectory.exists()) {
+				loadGrammar(bundle, grammarDirectory);
 			}
 		}
 
-		for (Bundle b : bundles) {
-			for (Grammar g : b.grammars) {
+		for (Bundle b : getBundles()) {
+			for (Grammar g : b.getGrammars()) {
 				g.initForReference();
 			}
 		}
 	}
 
-	private static void loadSyntax(Bundle bundle, File syntaxDir) {
-		for (String syntaxFileName : syntaxDir.list()) {
-			if (isTmBundlefile(syntaxFileName)) {
-				Dict plist = Dict.parseFile(syntaxDir.getPath() + "/" + syntaxFileName);
-				if (plist != null) {
-					Grammar grammar = new Grammar(plist);
-					grammar.fileName = syntaxFileName;
-					bundle.grammars.add(grammar);
-				}
+	private static void loadGrammar(Bundle bundle, File syntaxDir) {
+		for (String grammarFileName : syntaxDir.list()) {
+			if (isTmBundlefile(grammarFileName)) {
+				String grammarFilePath = syntaxDir.getPath() + "/" + grammarFileName;
+				Grammar grammar = new Grammar(grammarFileName, grammarFilePath);
+				bundle.getGrammars().add(grammar);
 			}
 		}
 	}
