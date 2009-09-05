@@ -12,8 +12,8 @@ public class Bundle {
 	private static List<Bundle> bundles;
 
 	public Bundle(String name) {
-		this.setName(name);
-		this.setGrammars(new ArrayList<Grammar>());
+		this.name = name;
+		grammars = new ArrayList<Grammar>();
 	}
 
 	public static Bundle getBundleByName(String findName) {
@@ -24,24 +24,12 @@ public class Bundle {
 		return null;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getName() {
 		return name;
 	}
 
-	public void setGrammars(List<Grammar> grammars) {
-		this.grammars = grammars;
-	}
-
 	public List<Grammar> getGrammars() {
 		return grammars;
-	}
-
-	public static void setBundles(List<Bundle> bundles) {
-		Bundle.bundles = bundles;
 	}
 
 	public static List<Bundle> getBundles() {
@@ -68,7 +56,7 @@ public class Bundle {
 		if (getBundles() != null) {
 			return;
 		}
-		setBundles(new ArrayList<Bundle>());
+		bundles = new ArrayList<Bundle>();
 		for (String bundleDir : bundleDirs(textmateDir)) {
 			Bundle bundle = new Bundle(bundleDir.split("\\.")[0]);
 			getBundles().add(bundle);
