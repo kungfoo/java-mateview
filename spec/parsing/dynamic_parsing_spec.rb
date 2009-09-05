@@ -97,9 +97,32 @@ describe JavaMateView, "when reparsing after changes" do
       HI
       puts "hello"
       END
-      puts "(((((())))))"
       1.times { @mt.type(4, 2, " ") }
+      it_should_match_clean_reparse
+    end
+
+    it "opens expected scopes again" do
+      @st.text = "def foo(a, b, c"
+      puts "(((((())))))"
+      @mt.type(0, 15, ")")
       puts "***********"
+      it_should_match_clean_reparse
+    end
+
+    it "clears after at multiple levels correctly" do
+      @st.text = strip(<<-END)
+      f=<<-HTML
+        <style>
+          .foo {
+          }
+        </style>
+        <br />
+      HTML
+      p :asdf
+      END
+      puts "(((())))"
+      1.times { |i| @mt.backspace(4, 10-i)}
+      puts "********"
       it_should_match_clean_reparse
     end
 

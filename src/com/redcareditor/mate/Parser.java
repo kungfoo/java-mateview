@@ -152,7 +152,8 @@ public class Parser {
 	
 	private Scope scopeBeforeStartOfLine(int lineIx) {
 		Scope startScope = this.root.scopeAt(lineIx, 0);
-		if (startScope.pattern instanceof SinglePattern) {
+		if (startScope.getStart().getLine() == lineIx) {
+//			System.out.printf("sbsol: %s\n", startScope.pattern.name);
 			startScope = startScope.containingDoubleScope(lineIx);
 		}
 
@@ -161,7 +162,7 @@ public class Parser {
 
 	private Scope scopeAfterEndOfLine(int lineIx, int lineLength) {
 		Scope endScope = this.root.scopeAt(lineIx, lineLength - 1);
-		if (endScope.pattern instanceof SinglePattern ) {
+		if (endScope.getStart().getLine() == lineIx ) {
 			endScope = endScope.containingDoubleScope(lineIx);
 		}
 
@@ -213,8 +214,8 @@ public class Parser {
 		}
 		clearLine(lineIx, startScope, allScopes, closedScopes, removedScopes);
 		Scope endScope2 = scopeAfterEndOfLine(lineIx, length);
-		// System.out.printf("end_scope2: %s\n", endScope2.name);
-		// System.out.printf("%s\n", this.root.pretty(0));
+		System.out.printf("end_scope2: %s\n", endScope2.name);
+		System.out.printf("%s\n", this.root.pretty(0));
 		if (colourer != null) {
 			// System.out.printf("before_uncolour_scopes\n");
 			colourer.uncolourScopes(removedScopes);
@@ -368,7 +369,7 @@ public class Parser {
 		setEndPosSafely(s, m, lineIx, length, 0);
 		s.isOpen = false;
 		s.isCapture = false;
-		System.out.printf("beginMatchString '%s' %d - %d\n",  new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from), m.from, m.match.getCapture(0).end);
+//		System.out.printf("beginMatchString '%s' %d - %d\n",  new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from), m.from, m.match.getCapture(0).end);
 		s.beginMatchString = new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from); 
 		s.parent = scanner.getCurrentScope();
 		Scope newScope = s;
@@ -382,7 +383,6 @@ public class Parser {
 			else {
 				handleCaptures(lineIx, length, line, s, m, allScopes, closedScopes);
 				if (s.overlapsWith(expectedScope)) {
-					// System.out.printf("%s overlaps with expected %s (current: %s)\n", s.name, expectedScope.name, scanner.currentScope.name);
 					if (expectedScope == scanner.getCurrentScope()) {
 						// we expected this scope to close, but it doesn't
 					}
@@ -425,12 +425,12 @@ public class Parser {
 	}
 
 	public void setInnerEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
-		int to = m.match.getCapture(cap).end;
-		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) {
+		int from = m.match.getCapture(cap).start;
+		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, from)) {
 			scope.setInnerEndPos(lineIx, length, true);
 		}
 		else {
-			scope.setInnerEndPos(lineIx, Math.min(to, length-1), true);
+			scope.setInnerEndPos(lineIx, Math.min(from, length-1), true);
 		}
 	}
 	
@@ -590,7 +590,7 @@ public class Parser {
 		for (Scope s : scopesThatClosedOnLine) {
 			if (!closedScopes.contains(s)) {
 				if (s.isCapture) {
-//					System.out.printf("    removing scope: %s\n", s.name);
+					System.out.printf("    removing scope: %s\n", s.name);
 					s.parent.removeChild(s);
 					removedScopes.add(s);
 					// @removed_scopes << s

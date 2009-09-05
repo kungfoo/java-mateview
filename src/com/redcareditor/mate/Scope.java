@@ -33,7 +33,7 @@ public class Scope implements Comparable<Scope>{
 	public String endMatchString;
 	
 	public Scope parent;
-	public SortedSet<Scope> children;
+	public ArrayList<Scope> children;
 	
 	StringBuilder prettyString;
 	int indent;
@@ -41,7 +41,7 @@ public class Scope implements Comparable<Scope>{
 	public Scope(MateText mt, String name) {
 		this.mateText = mt;
 		this.name = name;
-		this.children = new TreeSet<Scope>();
+		this.children = new ArrayList<Scope>();
 		this.document = mt.getMateDocument();
 		
 		this.range = document.getTextRange();
@@ -132,7 +132,26 @@ public class Scope implements Comparable<Scope>{
 	}
 
 	public void addChild(Scope newChild) {
-		children.add(newChild);
+		if (children.size() == 0){
+			children.add(newChild);
+			return;
+		}
+
+		if (children.get(0).getStart().getOffset() > newChild.getStart().getOffset()){
+			children.add(0, newChild);
+			return;
+		}
+
+		int insertIx = 0;
+		int ix = 1;
+		for (Scope child : children) {
+			if (child.getStart().getOffset() <= newChild.getStart().getOffset()) {
+				insertIx = ix;
+			}
+			ix++;
+		}
+		children.add(insertIx, newChild);
+//		children.add(newChild);
 	}
 	
 	public void removeChild(Scope child) {
@@ -149,12 +168,11 @@ public class Scope implements Comparable<Scope>{
 	}
 	
 	public ArrayList<Scope> deleteAnyOnLineNotIn(int lineIx, ArrayList<Scope> scopes) {
-//		var start_scope = scope_at(line_ix, -1);
 		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
-//		var iter = children.get_begin_iter();
 		for (Scope child : children) {
 			int childStartLine = child.getStart().getLine();
 			if (childStartLine == lineIx && !scopes.contains(child)) {
+				System.out.printf("deleteAnyOnLineNotIn removing: %s\n", child.pattern.name);
 				removedScopes.add(child);
 			}
 		}

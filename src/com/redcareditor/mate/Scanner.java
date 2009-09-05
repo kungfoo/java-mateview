@@ -107,13 +107,13 @@ public class Scanner implements Iterable<Marker> {
 			removePrecedingCachedMarkers(m);
 			return m;
 		}
-		System.out.printf("no cached marker\n");
+//		System.out.printf("no cached marker\n");
 		assert(cachedMarkers.size() == 0);
 		Rx closingRegex = currentScope.closingRegex;
 		if (closingRegex != null) {
 			Match match = closingRegex.search(this.line, this.position, this.lineLength);
 			if (match != null) {
-				System.out.printf("closing match: %s (%d-%d)\n", this.currentScope.name, match.getCapture(0).start, match.getCapture(0).end);
+//				System.out.printf("closing match: %s (%d-%d)\n", this.currentScope.name, match.getCapture(0).start, match.getCapture(0).end);
 				Marker newMarker = new Marker();
 				newMarker.pattern = this.currentScope.pattern;
 				newMarker.match = match;
@@ -137,7 +137,7 @@ public class Scanner implements Iterable<Marker> {
 				   positionNow != positionPrev // some regex's have zero width (meta.selector.css)
 				) {
 				positionPrev = positionNow;
-				System.out.printf("matched: %s (%d-%d)\n", p.name, match.getCapture(0).start, match.getCapture(0).end);
+//				System.out.printf("matched: %s (%d-%d)\n", p.name, match.getCapture(0).start, match.getCapture(0).end);
 				Marker newMarker = new Marker();
 				newMarker.pattern = p;
 				newMarker.match = match;
@@ -152,7 +152,7 @@ public class Scanner implements Iterable<Marker> {
 					bestLength = newLength;
 				}
 				positionNow = match.getCapture(0).end;
-				System.out.printf("  new position: %d\n", positionNow);
+//				System.out.printf("  new position: %d\n", positionNow);
 			}
 		}
 		if (m != null) {
