@@ -4,12 +4,7 @@ package com.redcareditor.mate;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Position;
-import org.eclipse.swt.custom.StyledText;
-
 import com.redcareditor.mate.document.MateDocument;
-import com.redcareditor.mate.document.MateTextFactory;
 import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.MateTextRange;
 import com.redcareditor.onig.Match;
@@ -19,7 +14,6 @@ public class Scope implements Comparable<Scope>{
 	private MateText mateText;
 	
 	private MateDocument document;
-	private MateTextFactory factory;
 	
 	private MateTextRange range;
 	private MateTextRange innerRange;
@@ -33,10 +27,6 @@ public class Scope implements Comparable<Scope>{
 	public Match openMatch;
 	public Match closeMatch;
 	
-//	public Position startPos;
-//	public Position innerStartPos;
-//	public Position innerEndPos;
-//	public Position endPos;
 	
 	public Rx closingRegex;
 	public String beginMatchString;
@@ -53,23 +43,22 @@ public class Scope implements Comparable<Scope>{
 		this.name = name;
 		this.children = new TreeSet<Scope>();
 		this.document = mt.getMateDocument();
-		this.factory = mt.getTextLocationFactory();
 		
-		this.range = factory.getTextRange();
-		this.innerRange = factory.getTextRange();
+		this.range = document.getTextRange();
+		this.innerRange = document.getTextRange();
 	}
 	
 	public void clearAfter(int lineIx, int something) {
 		// TODO: port this method
 	}
-
+	
 	public Scope scopeAt(int line, int lineOffset) {
-		TextLocation loc = new TextLocation(line, lineOffset);
+		MateTextLocation location = document.getTextLocation(line, lineOffset);
 		
-		if (startLoc().compareTo(loc) <= 0 || parent == null) {
-			if (isOpen || endLoc().compareTo(loc) >= 0) {
+		if (getStart().compareTo(location) <= 0 || parent == null) {
+			if (isOpen || getEnd().compareTo(location) >= 0) {
 				for (Scope child : children) {
-					if (child.containsLoc(loc)) {
+					if (child.contains(location)) {
 						return child.scopeAt(line, lineOffset);
 					}
 				}
@@ -82,14 +71,10 @@ public class Scope implements Comparable<Scope>{
 	}
 	
 	public int compareTo(Scope o) {
-		if(startLoc().compareTo(o.startLoc()) == 0){
-			return endLoc().compareTo(o.endLoc());
+		if(getStart().compareTo(o.getStart()) == 0){
+			return getEnd().compareTo(o.getEnd());
 		}
-		return startLoc().compareTo(o.startLoc());
-	}
-	
-	private boolean containsLoc(TextLocation loc) {
-		return startLoc().compareTo(loc) <= 0 && endLoc().compareTo(loc) > 0;
+		return getStart().compareTo(o.getStart());
 	}
 
 	public Scope containingDoubleScope(int lineIx) {
@@ -120,15 +105,9 @@ public class Scope implements Comparable<Scope>{
 		children.remove(child);
 	}
 
-	private int comparePositions(Position a, Position b) {
-		return 0;
-	}
-
-	public Scope firstChildAfter(TextLocation loc) {
-//		stdout.printf("\"%s\".first_child_after(%d, %d)\n", name, loc.line, loc.line_offset);
-		
+	public Scope firstChildAfter(MateTextLocation location) {
 		for (Scope child : children) {
-			if (child.startLoc().compareTo(loc) >= 0) {
+			if (child.getStart().compareTo(location) >= 0) {
 				return child;
 			}
 		}
@@ -136,59 +115,27 @@ public class Scope implements Comparable<Scope>{
 	}
 	
 	public void setStartPos(int line, int lineOffset, boolean hasLeftGravity) {
-		MateTextLocation start = factory.getTextLocation(line, lineOffset);
+		MateTextLocation start = document.getTextLocation(line, lineOffset);
 		this.range.setStart(start);
+		document.addTextLocation(start);
 	}
 
 	public void setInnerStartPos(int line, int lineOffset, boolean hasLeftGravity) {
-		MateTextLocation innerStart = factory.getTextLocation(line, lineOffset);
+		MateTextLocation innerStart = document.getTextLocation(line, lineOffset);
 		this.innerRange.setStart(innerStart);
+		document.addTextLocation(innerStart);
 	}
 
 	public void setInnerEndPos(int line, int lineOffset, boolean c) {
-		MateTextLocation innerEnd = factory.getTextLocation(line, lineOffset);
+		MateTextLocation innerEnd = document.getTextLocation(line, lineOffset);
 		this.innerRange.setEnd(innerEnd);
+		document.addTextLocation(innerEnd);
 	}
 
 	public void setEndPos(int line, int lineOffset, boolean c) {
-		MateTextLocation end = factory.getTextLocation(line, lineOffset);
+		MateTextLocation end = document.getTextLocation(line, lineOffset);
 		this.range.setEnd(end);
-	}
-
-	public TextLocation startLoc() {
-		return new TextLocation(startLine(), startLineOffset());
-	}
-
-	public TextLocation innerEndLoc() {
-		return new TextLocation(endLine(), innerEndLineOffset());
-	}
-	
-	public TextLocation endLoc() {
-		return new TextLocation(endLine(), endLineOffset());
-	}
-	
-	public int startLine() {
-		return range.getStart().getLine();
-	}
-
-	public int endLine() {
-		return range.getEnd().getLine();
-	}
-
-	public int startLineOffset() {
-		return range.getStart().getLineOffset();
-	}
-
-	public int innerEndLineOffset() {
-		return innerRange.getEnd().getLineOffset();
-	}
-	
-	public int endLineOffset() {
-		return range.getEnd().getLineOffset();
-	}
-	
-	public MateTextRange getTextRange(){
-		return range;
+		document.addTextLocation(end);
 	}
 	
 	public int getLength(){
@@ -203,13 +150,13 @@ public class Scope implements Comparable<Scope>{
 		return range.getEnd();
 	}
 	
-//	public int startOffset() {
-//		return this.startPos.offset;
-//	}
-//	
-//	public int endOffset() {
-//		return this.endPos.offset;
-//	}
+	public MateTextLocation getInnerEnd(){
+		return innerRange.getEnd();
+	}
+	
+	public boolean contains(MateTextLocation location){
+		return range.conatains(location);
+	}
 	
 	public String pretty(int indent) {
 		prettyString = new StringBuilder("");
@@ -238,8 +185,8 @@ public class Scope implements Comparable<Scope>{
 //		else {
 			prettyString.append(String.format(
 					"%d,%d",
-					startLine(), 
-					startLineOffset()));
+					getStart().getLine(), 
+					getStart().getLineOffset()));
 //		}
 		prettyString.append(")-(");
 //		if (endPos == null) {
@@ -248,8 +195,8 @@ public class Scope implements Comparable<Scope>{
 //		else {
 			prettyString.append(String.format(
 					"%d,%d",
-					endLine(), 
-					endLineOffset()));
+					getEnd().getLine(), 
+					getEnd().getLineOffset()));
 //		}
 		prettyString.append(")");
 		prettyString.append((isOpen ? " open" : " closed"));

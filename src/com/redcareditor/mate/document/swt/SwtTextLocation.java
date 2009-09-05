@@ -36,5 +36,4 @@ public class SwtTextLocation extends Position implements MateTextLocation {
 	private static int computeOffset(int line, int offset, StyledText text) {
 		return text.getOffsetAtLine(line) + offset;
 	}
-
 }
