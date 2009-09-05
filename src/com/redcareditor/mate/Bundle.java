@@ -75,7 +75,7 @@ public class Bundle {
 		for (String grammarFileName : syntaxDir.list()) {
 			if (isTmBundlefile(grammarFileName)) {
 				String grammarFilePath = syntaxDir.getPath() + "/" + grammarFileName;
-				Grammar grammar = new Grammar(grammarFileName, grammarFilePath);
+				Grammar grammar = new Grammar(grammarFilePath);
 				bundle.getGrammars().add(grammar);
 			}
 		}

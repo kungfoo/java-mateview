@@ -31,14 +31,10 @@ public class Grammar {
 	/* these are here for lookup speed purposes */
 	private static Map<String, Grammar> grammarsByScopeNames = new HashMap<String, Grammar>();
 	
-	public Grammar(String name, String plistFile){
-		this(Dict.parseFile(plistFile));
-		this.name = name;
-	}
-	
-	public Grammar(Dict plist) {
+	public Grammar(String plistFile){
+		this.plist = Dict.parseFile(plistFile);
 		propertyLoader = new PlistPropertyLoader(plist, this);
-		this.plist = plist;
+		initForReference();
 	}
 
 	public void initForReference() {
