@@ -7,8 +7,10 @@ import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.mate.document.swt.SwtMateDocument;
@@ -157,11 +159,9 @@ public class MateText extends Composite {
 		return null;
 	}
 	
-
 	public boolean setThemeByName(String name) {
 		for (Theme theme : ThemeManager.themes) {
 			if (theme.name.equals(name)) {
-//				theme.initForUse();
 				this.colourer.setTheme(theme);
 				return true;
 			}
@@ -169,6 +169,10 @@ public class MateText extends Composite {
 		return false;
 	}
 	
+	public boolean setFont(String name, int size) {
+		viewer.getTextWidget().setFont(new Font(Display.getCurrent(), name, size, 0));
+		return true;
+	}
 }
 
 

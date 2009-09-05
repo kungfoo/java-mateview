@@ -4,21 +4,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.redcareditor.mate.ScopeMatcher;
 import com.redcareditor.plist.Dict;
 import com.redcareditor.plist.PlistPropertyLoader;
 
 public class ThemeSetting {
 	public String name;
-	public String scope;
+	public String scopeSelector;
 	public Map<String, String> settings;
-	public List<ScopeSelector> matchers;
+	public List<ScopeMatcher> matchers;
 	
 	private PlistPropertyLoader propertyLoader;
 	
 	public ThemeSetting(Dict dict){
 		propertyLoader = new PlistPropertyLoader(dict, this);
 		propertyLoader.loadStringProperty("name");
-		propertyLoader.loadStringProperty("scope");
+		this.scopeSelector = dict.getString("scope");
 		
 		loadSettings(dict);
 		compileScopeMatchers();
@@ -32,7 +33,8 @@ public class ThemeSetting {
 		}
 	}
 
-	private void compileScopeMatchers() {
-		// TODO: after dinner.
+	public void compileScopeMatchers() {
+		//stdout.printf("  compiling '%s'\n", selector);
+		this.matchers = ScopeMatcher.compile(scopeSelector);
 	}
 }

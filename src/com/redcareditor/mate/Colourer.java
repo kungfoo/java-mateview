@@ -6,6 +6,7 @@ import org.eclipse.swt.custom.LineBackgroundEvent;
 import org.eclipse.swt.custom.LineBackgroundListener;
 import org.eclipse.swt.custom.LineStyleEvent;
 import org.eclipse.swt.custom.LineStyleListener;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
@@ -19,24 +20,45 @@ public class Colourer {
 		this.mateText = mt;
 		this.mateText.getControl().addLineStyleListener(new LineStyleListener() {
 			public void lineGetStyle(LineStyleEvent event) {
-				
+				colourLine(event);
 			}
 		});
 		this.mateText.getControl().addLineBackgroundListener(new LineBackgroundListener() {
 			public void lineGetBackground(LineBackgroundEvent event) {
-				
+				colourLineBackground(event);
 			}
 		});
 	}
 
 	public void setTheme(Theme theme) {
 		this.theme = theme;
+		theme.initForUse();
 		System.out.printf("setTheme(%s) globalBackgroundColour() = %s\n", theme.name, globalBackgroundColour());
 		mateText.getControl().setBackground(getColour(globalBackgroundColour()));
 	}
 	
 	public Theme getTheme() {
 		return this.theme;
+	}
+	
+	private void colourLine(LineStyleEvent event) {
+		if (this.theme == null)
+			return;
+	}
+	
+	private void colourLineBackground(LineBackgroundEvent event) {
+		if (this.theme == null)
+			return;
+		StyledText styledText = mateText.getControl();
+		int eventLine = styledText.getLineAtOffset(event.lineOffset);
+		int caretLine = styledText.getLineAtOffset(styledText.getCaretOffset());
+//		System.out.printf("lineBack event.line= %d, caretLine = %d\n", 
+//				eventLine, 
+//				caretLine);
+		if (eventLine == caretLine)
+			event.lineBackground = getColour(globalLineBackgroundColour());
+		else
+			event.lineBackground = getColour(globalBackgroundColour());
 	}
 	
 	private Color getColour(String colour) {
@@ -51,6 +73,15 @@ public class Colourer {
 		if (bgColour != null && bgColour != "") {
 			bgColour = Colourer.mergeColour("#FFFFFF", bgColour);
 			return bgColour;
+		}
+		return null;
+	}
+
+	private String globalLineBackgroundColour() {
+		String colour = theme.globalSettings.get("lineHighlight");
+		if (colour != null && colour != "") {
+			colour = Colourer.mergeColour("#FFFFFF", colour);
+			return colour;
 		}
 		return null;
 	}
