@@ -1,23 +1,20 @@
 package com.redcareditor.mate;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.redcareditor.plist.Dict;
-
 public class GrammarTest {
-	private Dict ruby;
-	private Grammar g;
+	private static Grammar g;
 
-	@Before
-	public void setUp() {
-		ruby = Dict.parseFile("input/Bundles/Apache.tmbundle/Syntaxes/Apache.plist");
-		g = new Grammar(ruby);
-		g.initForUse();
+	@BeforeClass
+	public static void setUp() {
+		String filename = "input/Bundles/Apache.tmbundle/Syntaxes/Apache.plist";
+		g = new Grammar("Apache", filename);
 	}
 
 	@Test

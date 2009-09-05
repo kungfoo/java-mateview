@@ -35,7 +35,6 @@ public class Parser {
 	private String modifyText;
 	
 	public Parser(Grammar g, MateText m) {
-		g.initForUse();
 		grammar = g;
 		mateText = m;
 		styledText = m.getTextWidget();

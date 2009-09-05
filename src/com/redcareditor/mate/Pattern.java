@@ -95,7 +95,6 @@ public class Pattern {
 					}
 				} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
 //					System.out.printf("importing toplevel patterns from %s\n", ng.name);
-					ng.initForUse();
 					includePatterns.add(p);
 					patternsToInclude.addAll(ng.patterns);
 				} else {

@@ -26,7 +26,7 @@ public class DictTest {
 	public void testFileTypes() {
 		String[] check = { "rb", "rbx", "rjs", "Rakefile", "rake", "cgi",
 				"fcgi", "gemspec", "irbrc", "capfile" };
-		String[] types = dict.getStrings("fileTypes");
+		String[] types = dict.getStrings("fileTypes").toArray(new String[0]);
 
 		assertArrayEquals(check, types);
 	}
