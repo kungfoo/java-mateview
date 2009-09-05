@@ -3,10 +3,10 @@ package com.redcareditor.mate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.LineBackgroundEvent;
-import org.eclipse.swt.custom.LineBackgroundListener;
 import org.eclipse.swt.custom.LineStyleEvent;
 import org.eclipse.swt.custom.LineStyleListener;
 import org.eclipse.swt.custom.StyleRange;
@@ -14,10 +14,8 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
-import com.redcareditor.mate.document.MateTextLocation;
-import com.redcareditor.mate.document.swt.SwtMateDocument;
-import com.redcareditor.mate.document.swt.SwtTextLocation;
 import com.redcareditor.theme.Theme;
+import com.redcareditor.theme.ThemeSetting;
 
 public class Colourer {
 	private Theme theme;
@@ -27,7 +25,13 @@ public class Colourer {
 	
 	public Colourer(MateText mt) {
 		mateText = mt;
-		
+
+		this.mateText.getControl().addLineStyleListener(new LineStyleListener() {
+			public void lineGetStyle(LineStyleEvent event) {
+				colourLine(event);
+			}
+		});
+
 		mateText.getControl().addCaretListener(new CaretListener() {
 			public void caretMoved(CaretEvent e) {
 				updateHighlightedLine(mateText.getControl().getLineAtOffset(e.caretOffset));
@@ -66,7 +70,7 @@ public class Colourer {
 		System.out.printf("got to colour %d scopes\n", scopes.size());
 		ArrayList<StyleRange> styleRanges = new ArrayList<StyleRange>();
 		for (Scope scope : scopes) {
-			System.out.printf("  %s\n", scope.name);
+//			System.out.printf("  %s\n", scope.name);
 			if (scope.parent == null) {
 				continue;
 			}
@@ -74,15 +78,101 @@ public class Colourer {
 				(scope.pattern instanceof SinglePattern || ((DoublePattern) scope.pattern).contentName == null)) {
 				continue;
 			}
-			styleRanges.add(getStyleRangeForScope(scope, true));
+			styleRanges.add(getStyleRangeForScope(scope, false));
 			if (scope.pattern instanceof DoublePattern && ((DoublePattern) scope.pattern).contentName != null && scope.isCapture == false)
 				styleRanges.add(getStyleRangeForScope(scope, true));
 		}
-		event.styles = (StyleRange[]) styleRanges.toArray();
+//		StyleRange[] styleRangeArray = new StyleRange[styleRanges.size()];
+		event.styles = (StyleRange[]) styleRanges.toArray(new StyleRange[0]);
 	}
 	
 	private StyleRange getStyleRangeForScope(Scope scope, boolean inner) {
 		StyleRange styleRange = new StyleRange();
+		// TODO: allow for multiple settings that set different 
+		// parts of the style.
+		ThemeSetting setting = null;
+		ThemeSetting excludeSetting = null;
+		if (scope.parent != null) 
+			excludeSetting = scope.parent.themeSetting;
+		setting = theme.settingsForScope(scope, inner, null);//exclude_setting);
+
+		if (inner) {
+			styleRange.start = scope.getInnerStart().getOffset();
+			styleRange.length = scope.getInnerEnd().getOffset() - styleRange.start;
+		}
+		else {
+			styleRange.start = scope.getStart().getOffset();
+			styleRange.length = scope.getEnd().getOffset() - styleRange.start;
+			System.out.printf("colour %s (%d, %d)\n", scope.name, styleRange.start, styleRange.length);
+		}
+		if (setting != null)
+			setStyleRangeProperties(scope, setting, styleRange);
+		
+		return styleRange;
+	}
+	
+	private void setStyleRangeProperties(Scope scope, ThemeSetting setting, StyleRange styleRange) {
+		String fontStyle = setting.settings.get("fontStyle");
+		if (fontStyle == "italic") {
+			styleRange.fontStyle = SWT.ITALIC;
+		}
+		else
+			styleRange.fontStyle = SWT.NORMAL;
+
+		if (fontStyle == "underline")
+			styleRange.fontStyle = SWT.UNDERLINE_SINGLE;
+		else
+			styleRange.fontStyle = SWT.NORMAL; 
+		
+		String background = setting.settings.get("background");
+//		stdout.printf("        scope background:        %s\n", background);
+		String mergedBgColour;
+		String parentBg = theme.globalSettings.get("background");
+//		stdout.printf("        global background: %s\n", parent_bg);
+		// TODO: wasn't this a better way of creating the background colours?
+//		var parent_bg = scope.nearest_background_colour();
+//		if (parent_bg == null) {
+//		}
+//		else {
+//			stdout.printf("        parent background: %s\n", parent_bg);
+//		}
+		if (background != null && background != "") {
+//			if (parent_bg != null) {
+//				merged_bg_colour = parent_bg;
+//			}
+//			else {
+			mergedBgColour = Colourer.mergeColour(parentBg, background);
+//			}
+			if (mergedBgColour != null) {
+				scope.bgColour = mergedBgColour;
+				styleRange.background = getColour(mergedBgColour);
+//				stdout.printf("       tag.background = %s\n", merged_bg_colour);
+			}
+		}
+		else {
+			mergedBgColour = parentBg;
+		}
+//		stdout.printf("        merged_bg_colour:  %s\n", merged_bg_colour);
+		String foreground = setting.settings.get("foreground");
+//		stdout.printf("        scope foreground:        %s\n", foreground);
+		String parentFg = scope.nearestForegroundColour();
+		if (parentFg == null) {
+			parentFg = theme.globalSettings.get("foreground");
+//			stdout.printf("        global foreground:        %s\n", parent_fg);
+		}
+		if (foreground != null && foreground != "") {
+			String mergedFgColour;
+			if (parentFg != null && !scope.isCapture)
+				mergedFgColour = Colourer.mergeColour(parentFg, foreground);
+			else
+				mergedFgColour = foreground;
+			if (mergedFgColour != null) {
+				scope.fgColour = mergedFgColour;
+				styleRange.foreground = getColour(mergedFgColour);
+			}
+//			stdout.printf("       merged_fg_colour: %s\n", merged_fg_colour);
+		}
+//		stdout.printf("\n");
 	}
 	
 	private void colourLineBackground(LineBackgroundEvent event) {
