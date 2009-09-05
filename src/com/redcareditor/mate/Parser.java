@@ -10,6 +10,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 
+import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Range;
 import com.redcareditor.onig.Rx;
@@ -19,6 +20,7 @@ public class Parser {
 	public Colourer colourer;
 	public MateText mateText;
 	public StyledText styledText;
+	public MateDocument document;
 	
 	public int parsed_upto;	
 	public int lookAhead;
@@ -49,6 +51,7 @@ public class Parser {
 		attachListeners();
 		parsedUpto = 0;
 		alwaysParseAll = false;
+		document = m.getMateDocument();
 	}
 	
 	public void makeRoot() {
@@ -147,22 +150,33 @@ public class Parser {
 		}
 	}
 	
+	private Scope scopeBeforeStartOfLine(int lineIx) {
+		Scope startScope = this.root.scopeAt(lineIx, 0);
+		if (startScope.pattern instanceof SinglePattern) {
+			startScope = startScope.containingDoubleScope(lineIx);
+		}
+
+		return startScope;
+	}
+
+	private Scope scopeAfterEndOfLine(int lineIx, int lineLength) {
+		Scope endScope = this.root.scopeAt(lineIx, lineLength - 1);
+		if (endScope.pattern instanceof SinglePattern ) {
+			endScope = endScope.containingDoubleScope(lineIx);
+		}
+
+		return endScope;
+	}
+	
 	private boolean parseLine(int lineIx) {
 		String line = styledText.getLine(lineIx) + "\n";
 		int length = line.length();
 		System.out.printf("p%d, ", lineIx);
 		if (lineIx > this.parsedUpto)
 			this.parsedUpto = lineIx;
-		Scope startScope = this.root.scopeAt(lineIx, 0);
-		if (startScope != null) {
-//			System.out.printf("startScope is: %s\n", startScope.name);
-			startScope = startScope.containingDoubleScope(lineIx);
-		}
+		Scope startScope = scopeBeforeStartOfLine(lineIx);
+		Scope endScope1  = scopeAfterEndOfLine(lineIx, length);
 		System.out.printf("startScope is: %s\n", startScope.name);
-		Scope endScope1 = this.root.scopeAt(lineIx, Integer.MAX_VALUE);
-//		System.out.printf("endScope1: %s\n", endScope1.name);
-		if (endScope1 != null)
-			endScope1 = endScope1.containingDoubleScope(lineIx);
 		System.out.printf("endScope1: %s\n", endScope1.name);
 		Scanner scanner = new Scanner(startScope, line);
 		ArrayList<Scope> allScopes = new ArrayList<Scope>();
@@ -171,10 +185,10 @@ public class Parser {
 		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
 		for (Marker m : scanner) {
-			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, scanner.position);
+			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, length, scanner.position);
 			if (expectedScope != null)
-				System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.startLoc().line, 
-					           expectedScope.startLoc().lineOffset);
+				System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.getStart().getLine(), 
+					           expectedScope.getStart().getLineOffset());
 			else
 				System.out.printf("no expected scope\n");
 			System.out.printf("  scope: %s (%d, %d) (line length: %d)\n", 
@@ -198,9 +212,7 @@ public class Parser {
 			scanner.position = m.match.getCapture(0).end;
 		}
 		clearLine(lineIx, startScope, allScopes, closedScopes, removedScopes);
-		Scope endScope2 = this.root.scopeAt(lineIx, Integer.MAX_VALUE);
-		if (endScope2 != null)
-			endScope2 = endScope2.containingDoubleScope(lineIx);
+		Scope endScope2 = scopeAfterEndOfLine(lineIx, length);
 		// System.out.printf("end_scope2: %s\n", endScope2.name);
 		// System.out.printf("%s\n", this.root.pretty(0));
 		if (colourer != null) {
@@ -216,13 +228,15 @@ public class Parser {
 		return (endScope1 != endScope2);
 	}
 
-	public Scope getExpectedScope(Scope currentScope, int line, int lineOffset) {
+	public Scope getExpectedScope(Scope currentScope, int line, int lineLength, int lineOffset) {
 		System.out.printf("get_expected_scope(%s, %d, %d)\n", currentScope.name, line, lineOffset);
-		Scope expectedScope = currentScope.firstChildAfter(new TextLocation(line, lineOffset));
+		if (lineOffset == lineLength)
+			return null;
+		Scope expectedScope = currentScope.firstChildAfter(document.getTextLocation(line, lineOffset));
 //		System.out.printf("first_child_after: %s\n", expectedScope.name);
 		assert(expectedScope != currentScope);
 		if (expectedScope != null) {
-			if (expectedScope.startLine() != line)
+			if (expectedScope.getStart().getLine() != line)
 				expectedScope = null;
 			while (expectedScope != null && expectedScope.isCapture) {
 				expectedScope = expectedScope.parent;
@@ -247,8 +261,8 @@ public class Parser {
 //				scanner.current_scope.end_match_string, end_match_string);
 //		  
 		if (//scanner.getCurrentScope().endPos != null &&
-				scanner.getCurrentScope().endLoc().equals(new TextLocation(lineIx, m.match.getCapture(0).end)) &&
-				scanner.getCurrentScope().innerEndLoc().equals(new TextLocation(lineIx, m.from)) &&
+				scanner.getCurrentScope().getEnd().equals(document.getTextLocation(lineIx, m.match.getCapture(0).end)) &&
+				scanner.getCurrentScope().getInnerEnd().equals(document.getTextLocation(lineIx, m.from)) &&
 				scanner.getCurrentScope().endMatchString == endMatchString) {
 				// we have already parsed this line and this scope ends here
 
@@ -256,7 +270,7 @@ public class Parser {
 			// tracking arrays
 			for (Scope child : scanner.getCurrentScope().children) {
 				if (child.isCapture && 
-						child.startLine() == lineIx) {
+						child.getStart().getLine() == lineIx) {
 					if (!closedScopes.contains(child))
 						closedScopes.add(child);
 					if (!allScopes.contains(child))

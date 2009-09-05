@@ -8,9 +8,9 @@ require 'jdom'
 require 'rbconfig'
 
 if Config::CONFIG["host_os"] =~ /darwin/
-  require 'swt-osx'
+  require 'osx/swt'
 else
-  require 'swt-linux'
+  require 'linux/swt'
 end
 
 require 'org.eclipse.core.commands'
@@ -30,7 +30,6 @@ unless defined?(JavaMateView)
     import com.redcareditor.mate.MateText
     import com.redcareditor.mate.Grammar
     import com.redcareditor.mate.Bundle
-    import com.redcareditor.mate.TextLocation
     import com.redcareditor.theme.Theme
     import com.redcareditor.theme.ThemeManager
   end

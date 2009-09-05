@@ -22,6 +22,7 @@ public class SwtTextLocation extends Position implements MateTextLocation {
 	}
 
 	public int getLine() {
+//		System.out.printf("getLine() (getOffset() = %d)\n", getOffset());
 		return document.styledText.getLineAtOffset(getOffset());
 	}
 
@@ -36,5 +37,4 @@ public class SwtTextLocation extends Position implements MateTextLocation {
 	private static int computeOffset(int line, int offset, StyledText text) {
 		return text.getOffsetAtLine(line) + offset;
 	}
-
 }
