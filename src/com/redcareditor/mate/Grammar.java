@@ -28,6 +28,12 @@ public class Grammar {
 	public Rx foldingStartMarker;
 	public Rx foldingStopMarker;
 
+	
+	public Grammar(String name, String plistFile){
+		this(Dict.parseFile(plistFile));
+		this.name = name;
+	}
+	
 	public Grammar(Dict plist) {
 		propertyLoader = new PlistPropertyLoader(plist, this);
 		this.plist = plist;
