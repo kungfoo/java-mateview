@@ -7,21 +7,45 @@ import java.util.List;
 import com.redcareditor.plist.Dict;
 
 public class Bundle {
-	public String name;
-	public List<Grammar> grammars;
-	public static List<Bundle> bundles;
+	private String name;
+	private List<Grammar> grammars;
+	private static List<Bundle> bundles;
 
 	public Bundle(String name) {
-		this.name = name;
-		this.grammars = new ArrayList<Grammar>();
+		this.setName(name);
+		this.setGrammars(new ArrayList<Grammar>());
 	}
 
 	public static Bundle getBundleByName(String findName) {
-		for (Bundle b : bundles) {
-			if (b.name.equals(findName))
+		for (Bundle b : getBundles()) {
+			if (b.getName().equals(findName))
 				return b;
 		}
 		return null;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setGrammars(List<Grammar> grammars) {
+		this.grammars = grammars;
+	}
+
+	public List<Grammar> getGrammars() {
+		return grammars;
+	}
+
+	public static void setBundles(List<Bundle> bundles) {
+		Bundle.bundles = bundles;
+	}
+
+	public static List<Bundle> getBundles() {
+		return bundles;
 	}
 
 	/**
@@ -41,21 +65,21 @@ public class Bundle {
 	}
 
 	public static void loadBundles(String textmateDir) {
-		if (bundles != null) {
+		if (getBundles() != null) {
 			return;
 		}
-		bundles = new ArrayList<Bundle>();
+		setBundles(new ArrayList<Bundle>());
 		for (String bundleDir : bundleDirs(textmateDir)) {
 			Bundle bundle = new Bundle(bundleDir.split("\\.")[0]);
-			bundles.add(bundle);
+			getBundles().add(bundle);
 			File syntaxDir = new File(textmateDir + "/Bundles/" + bundleDir + "/Syntaxes");
 			if (syntaxDir.exists()) {
 				loadSyntax(bundle, syntaxDir);
 			}
 		}
 
-		for (Bundle b : bundles) {
-			for (Grammar g : b.grammars) {
+		for (Bundle b : getBundles()) {
+			for (Grammar g : b.getGrammars()) {
 				g.initForReference();
 			}
 		}
@@ -68,7 +92,7 @@ public class Bundle {
 				if (plist != null) {
 					Grammar grammar = new Grammar(plist);
 					grammar.fileName = syntaxFileName;
-					bundle.grammars.add(grammar);
+					bundle.getGrammars().add(grammar);
 				}
 			}
 		}

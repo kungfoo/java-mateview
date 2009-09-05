@@ -112,8 +112,8 @@ public class Grammar {
 	}
 
 	public static Grammar findByScopeName(String scope) {
-		for (Bundle b : Bundle.bundles)
-			for (Grammar g : b.grammars)
+		for (Bundle b : Bundle.getBundles())
+			for (Grammar g : b.getGrammars())
 				if (g.scopeName.equals(scope))
 					return g;
 		return null;
