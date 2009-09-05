@@ -6,15 +6,13 @@ import com.redcareditor.mate.document.MateTextRange;
 public class SwtTextRange implements MateTextRange {
 	private SwtTextLocation start;
 	private SwtTextLocation end;
-	
 	private SwtMateDocument document;
-	
+
 	public SwtTextRange(SwtMateDocument document) {
 		this.document = document;
 	}
-	
-	public SwtTextRange(MateTextLocation start, MateTextLocation end,
-			SwtMateDocument document) {
+
+	public SwtTextRange(MateTextLocation start, MateTextLocation end, SwtMateDocument document) {
 		super();
 		this.start = sanatize(start);
 		this.end = sanatize(end);
@@ -26,22 +24,22 @@ public class SwtTextRange implements MateTextRange {
 	}
 
 	public MateTextLocation getStart() {
-		if(start != null){
+		if (start != null) {
 			return start;
-		}else{
+		} else {
 			return document.getTextLocation(0, 0);
 		}
 	}
-	
+
 	public void setStart(MateTextLocation location) {
 		start = sanatize(location);
 	}
-	
+
 	public MateTextLocation getEnd() {
-		if(end != null){
+		if (end != null) {
 			return end;
-		}else{// Return end of Document if not set
-			int lastLine = document.getLineCount()-1;
+		} else {// Return end of Document if not set
+			int lastLine = document.getLineCount() - 1;
 			int lastLineOffset = document.styledText.getCharCount() - document.styledText.getOffsetAtLine(lastLine);
 			return document.getTextLocation(lastLine, lastLineOffset);
 		}
@@ -50,14 +48,11 @@ public class SwtTextRange implements MateTextRange {
 	public void setEnd(MateTextLocation location) {
 		end = sanatize(location);
 	}
-	
-	private SwtTextLocation sanatize(MateTextLocation location){
-		if(location instanceof SwtTextLocation){
+
+	private SwtTextLocation sanatize(MateTextLocation location) {
+		if (location instanceof SwtTextLocation) {
 			return (SwtTextLocation) location;
 		}
-		
-		return (SwtTextLocation) document.getTextLocation(
-				location.getLine(), 
-				location.getLineOffset());
+		return (SwtTextLocation) document.getTextLocation(location.getLine(), location.getLineOffset());
 	}
 }
