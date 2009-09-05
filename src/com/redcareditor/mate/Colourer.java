@@ -5,16 +5,12 @@ import java.util.List;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.LineBackgroundEvent;
-import org.eclipse.swt.custom.LineBackgroundListener;
 import org.eclipse.swt.custom.LineStyleEvent;
-import org.eclipse.swt.custom.LineStyleListener;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
-import com.redcareditor.mate.document.MateTextLocation;
-import com.redcareditor.mate.document.swt.SwtMateDocument;
-import com.redcareditor.mate.document.swt.SwtTextLocation;
 import com.redcareditor.theme.Theme;
 
 public class Colourer {
@@ -22,21 +18,23 @@ public class Colourer {
 	private MateText mateText;
 	
 	private int highlightedLine = 0;
+	private StyledText control;
 	
 	public Colourer(MateText mt) {
 		mateText = mt;
 		
-		mateText.getControl().addCaretListener(new CaretListener() {
+		control = mateText.getControl();
+		control.addCaretListener(new CaretListener() {
 			public void caretMoved(CaretEvent e) {
-				updateHighlightedLine(mateText.getControl().getLineAtOffset(e.caretOffset));
+				updateHighlightedLine(control.getLineAtOffset(e.caretOffset));
 			}
 		});
 	}
 	
 	private void updateHighlightedLine(int line){
 		if (caretLineHasChanged(line)){
-			mateText.getControl().setLineBackground(line, 1, getColour(globalLineBackgroundColour()));
-			mateText.getControl().setLineBackground(highlightedLine, 1, getColour(globalBackgroundColour()));
+			control.setLineBackground(line, 1, getColour(globalLineBackgroundColour()));
+			control.setLineBackground(highlightedLine, 1, getColour(globalBackgroundColour()));
 			highlightedLine = line;
 		}
 	}
@@ -48,32 +46,11 @@ public class Colourer {
 	public void setTheme(Theme theme) {
 		this.theme = theme;
 		theme.initForUse();
-		System.out.printf("setTheme(%s) globalBackgroundColour() = %s\n", theme.name, globalBackgroundColour());
-		mateText.getControl().setBackground(getColour(globalBackgroundColour()));
+		control.setBackground(getColour(globalBackgroundColour()));
 	}
 	
 	public Theme getTheme() {
 		return theme;
-	}
-	
-	private void colourLine(LineStyleEvent event) {
-		if (theme == null)
-			return;
-	}
-	
-	private void colourLineBackground(LineBackgroundEvent event) {
-		if (theme == null)
-			return;
-		StyledText styledText = mateText.getControl();
-		int eventLine = styledText.getLineAtOffset(event.lineOffset);
-		int caretLine = styledText.getLineAtOffset(styledText.getCaretOffset());
-//		System.out.printf("lineBack event.line= %d, caretLine = %d\n", 
-//				eventLine, 
-//				caretLine);
-		if (eventLine == caretLine)
-			event.lineBackground = getColour(globalLineBackgroundColour());
-		else
-			event.lineBackground = getColour(globalBackgroundColour());
 	}
 	
 	private Color getColour(String colour) {
