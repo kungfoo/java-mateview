@@ -23,24 +23,9 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	public SwtMateDocument(MateText mateText) {
 		this.mateText = mateText;
 		this.styledText = mateText.getTextWidget();
-//		this.positionUpdater = new DefaultPositionUpdater(Document.DEFAULT_CATEGORY);
-//		this.mateText.getDocument().addPositionUpdater(this.positionUpdater);
-		this.mateText.getDocument().addDocumentListener(new IDocumentListener() {
-			public void documentAboutToBeChanged(DocumentEvent event) {
-				System.out.printf("DocumentEvent caught in documentAboutToBeChanged\n");
-			}
-			public void documentChanged(DocumentEvent event) {
-				documentChangedCallback(event);
-			}
-		});
 	}
 
-	public void documentChangedCallback(DocumentEvent event) {
-		System.out.printf("DocumentEvent caught in documentChanged: '%s'\n", event.getText());
-	}
-	
 	public void replace(int start, int length, String text) {
-		System.out.printf("calling replace on SwtMateDocument(%d, %d, '%s');\n", start, length, text);
 		try {
 			this.mateText.getDocument().replace(start, length, text);
 			SwtTextLocation startLocation = new SwtTextLocation(start, this);

@@ -24,11 +24,19 @@ describe JavaMateView, "when reparsing after changes" do
     result
   end
   
+  def it_should_match_clean_reparse
+    @mt.parser.root.pretty(0).should == @mt.clean_reparse
+  end
+  
+  def it_should_match_clean_reparse_debug
+    @mt.parser.root.pretty(0).should == @mt.clean_reparse
+  end
+  
   describe "when parsing Ruby" do
     before(:each) do
       @mt.set_grammar_by_name("Ruby")
     end
-    
+  #   
     it "reparses lines with only whitespace changes" do
       @st.text = strip(<<-END)
       class Red < Car
@@ -36,15 +44,50 @@ describe JavaMateView, "when reparsing after changes" do
         end
       end
       END
-      puts "((()))"
       1.times { @mt.type(1, 9, " ") }
-      puts "&&&&&*"
-      t1 = @mt.parser.root.pretty(0)
-      t2 = @mt.clean_reparse
-      puts "**** text"
-      p @st.text
-      t1.should == t2
+      it_should_match_clean_reparse
     end
+    
+    it "reparses lines with only whitespace changes, even when they have scope openers" do
+      @st.text = strip(<<-END)
+      puts "hello"
+      foo=<<HI
+        Here.foo
+        Here.foo
+      HI
+      puts "hello"
+      END
+      5.times { @mt.type(1, 8, " ") }
+      it_should_match_clean_reparse
+    end
+    
+    it "reparses flat SinglePatterns that have no changes to scopes" do
+      @st.text = "1 + 2 + Redcar"
+      puts "((((()))))"
+      @mt.type(0, 1, " ")
+      puts "**********"
+      it_should_match_clean_reparse
+    end
+            
+    it "reparses flat SinglePatterns that have changes to scopes" do
+      @st.text = "1 + 2 + Redcar"
+      @mt.type(0, 4, "2")
+      @mt.type(0, 12, "o")
+      it_should_match_clean_reparse
+    end
+    
+    it "reparses when blank lines inserted" do
+      @st.text = strip(<<-END)
+      class Red < Car
+        def foo
+        end
+      end
+      END
+      @mt.type(1, 0, "\n")
+      @mt.type(1, 0, "\n")
+      it_should_match_clean_reparse
+    end
+
   end
 end
 

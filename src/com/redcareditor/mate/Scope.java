@@ -78,22 +78,56 @@ public class Scope implements Comparable<Scope>{
 	}
 
 	public Scope containingDoubleScope(int lineIx) {
-		// TODO: port this method
-		return this;
+		Scope scope = this;
+		while ((scope.pattern instanceof SinglePattern || 
+			      scope.isCapture || 
+			      (scope.getStart().getLine() == lineIx && scope.getStart().getLineOffset() == 0)) && 
+					 scope.parent != null) {
+			scope = scope.parent;
+		}
+		return scope;
 	}
 	
 	public boolean surfaceIdenticalTo(Scope other) {
-		// TODO: port me
+		if (surfaceIdenticalToModuloEnding(other) &&
+				getEnd().equals(other.getEnd()) &&
+				getInnerEnd().equals(other.getInnerEnd()) &&
+				beginMatchString == other.beginMatchString) {
+			return true;
+		}
 		return false;
 	}
 
 	public boolean surfaceIdenticalToModuloEnding(Scope other) {
-		// TODO: port me
+		// stdout.printf("%s == %s and %s == %s and %s == %s and %s == %s and %s == %s",
+		// 			  name, other.name, pattern.name, other.pattern.name, start_loc().to_s(),
+		// 			  other.start_loc().to_s(), inner_start_loc().to_s(), other.inner_start_loc().to_s(),
+		// 			  begin_match_string, other.begin_match_string);
+		if (name == other.name &&
+				pattern == other.pattern &&
+				getStart().equals(other.getStart()) &&
+				getInnerStart().equals(other.getInnerStart()) &&
+				beginMatchString == other.beginMatchString) {
+			return true;
+		}
 		return false;
 	}
 
 	public boolean overlapsWith(Scope other) {
-		// TODO: port me
+		// sd1    +---
+		// sd2  +---
+		if (getStart().compareTo(other.getStart()) >= 0) {
+			if (getStart().compareTo(other.getEnd()) < 0) {
+				return true;
+			}
+			return false;
+		}
+
+		// sd1 +---
+		// sd2   +---
+		if (getEnd().compareTo(other.getStart()) > 0) {
+			return true;
+		}
 		return false;
 	}
 
@@ -163,7 +197,11 @@ public class Scope implements Comparable<Scope>{
 	public MateTextLocation getEnd(){
 		return range.getEnd();
 	}
-	
+
+	public MateTextLocation getInnerStart(){
+		return innerRange.getStart();
+	}
+		
 	public MateTextLocation getInnerEnd(){
 		return innerRange.getEnd();
 	}
