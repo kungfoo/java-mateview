@@ -3,16 +3,16 @@ package com.redcareditor.mate.document.swt;
 import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.MateTextRange;
 
-public class SwtTextRange implements MateTextRange {
-	private SwtTextLocation start;
-	private SwtTextLocation end;
+public class SwtMateTextRange implements MateTextRange {
+	private SwtMateTextLocation start;
+	private SwtMateTextLocation end;
 	private SwtMateDocument document;
 
-	public SwtTextRange(SwtMateDocument document) {
+	public SwtMateTextRange(SwtMateDocument document) {
 		this.document = document;
 	}
 
-	public SwtTextRange(MateTextLocation start, MateTextLocation end, SwtMateDocument document) {
+	public SwtMateTextRange(MateTextLocation start, MateTextLocation end, SwtMateDocument document) {
 		super();
 		this.start = sanatize(start);
 		this.end = sanatize(end);
@@ -49,11 +49,11 @@ public class SwtTextRange implements MateTextRange {
 		end = sanatize(location);
 	}
 
-	private SwtTextLocation sanatize(MateTextLocation location) {
-		if (location instanceof SwtTextLocation) {
-			return (SwtTextLocation) location;
+	private SwtMateTextLocation sanatize(MateTextLocation location) {
+		if (location instanceof SwtMateTextLocation) {
+			return (SwtMateTextLocation) location;
 		}
-		return (SwtTextLocation) document.getTextLocation(location.getLine(), location.getLineOffset());
+		return (SwtMateTextLocation) document.getTextLocation(location.getLine(), location.getLineOffset());
 	}
 
 	public boolean conatains(MateTextLocation location) {

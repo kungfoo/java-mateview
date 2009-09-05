@@ -12,8 +12,12 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
+import com.redcareditor.mate.colouring.Colourer;
+import com.redcareditor.mate.colouring.swt.SwtColourer;
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.mate.document.swt.SwtMateDocument;
+import com.redcareditor.mate.undo.MateTextUndoManager;
+import com.redcareditor.mate.undo.swt.SwtMateTextUndoManager;
 import com.redcareditor.onig.NullRx;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.theme.Theme;
@@ -38,8 +42,8 @@ public class MateText extends Composite {
 		viewer = new SourceViewer(this, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		viewer.setDocument(document);
 		setLayout(new FillLayout());
-		this.colourer = new Colourer(this);
-		undoManager = new MateTextUndoManager(this);
+		this.colourer = new SwtColourer(this);
+		undoManager = new SwtMateTextUndoManager(this);
 		mateDocument = new SwtMateDocument(this);
 	}
 	

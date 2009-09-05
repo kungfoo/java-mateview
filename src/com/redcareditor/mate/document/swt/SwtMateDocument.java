@@ -28,8 +28,8 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	public void replace(int start, int length, String text) {
 		try {
 			this.mateText.getDocument().replace(start, length, text);
-			SwtTextLocation startLocation = new SwtTextLocation(start, this);
-			SwtTextLocation endLocation = new SwtTextLocation(start + length, this);
+			SwtMateTextLocation startLocation = new SwtMateTextLocation(start, this);
+			SwtMateTextLocation endLocation = new SwtMateTextLocation(start + length, this);
 			this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
 			this.mateText.parser.processChanges();
 		}
@@ -42,7 +42,7 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 //		SwtTextLocation position = new SwtTextLocation(location, this);
 
 		try {
-			mateText.getDocument().addPosition((SwtTextLocation) location);
+			mateText.getDocument().addPosition((SwtMateTextLocation) location);
 			return true;
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
@@ -73,14 +73,14 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	}
 
 	public MateTextLocation getTextLocation(int line, int offset) {
-		return new SwtTextLocation(line, offset, this);
+		return new SwtMateTextLocation(line, offset, this);
 	}
 
 	public MateTextRange getTextRange(MateTextLocation start, MateTextLocation end) {
-		return new SwtTextRange(start, end, this);
+		return new SwtMateTextRange(start, end, this);
 	}
 
 	public MateTextRange getTextRange() {
-		return new SwtTextRange(this);
+		return new SwtMateTextRange(this);
 	}
 }
