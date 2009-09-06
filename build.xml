@@ -62,7 +62,6 @@
 	</target>
 
 	<target name="prepare" depends="clean,debug">
-    <echo message="Using platform directory: ${platform}"/>
 		<mkdir dir="${build.prod.dir}" />
 		<mkdir dir="${build.test.dir}" />
     <copy todir="${build.prod.dir}">
