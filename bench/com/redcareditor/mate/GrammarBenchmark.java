@@ -28,8 +28,7 @@ public class GrammarBenchmark {
 		singlePatterns = new ArrayList<SinglePattern>();
 		readFile();
 		
-		Dict d = Dict.parseFile("input/Ruby.plist");
-		grammar = new Grammar(d);
+		grammar = new Grammar("input/Ruby.plist");
 		grammar.initForUse();
 
 		for (Pattern p : grammar.allPatterns) {

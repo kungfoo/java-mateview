@@ -31,17 +31,13 @@ public class Grammar {
 	/* these are here for lookup speed purposes */
 	private static Map<String, Grammar> grammarsByScopeNames = new HashMap<String, Grammar>();
 	
-	public Grammar(String name, String plistFile){
-		this(Dict.parseFile(plistFile));
-		this.name = name;
-	}
-	
-	public Grammar(Dict plist) {
+	public Grammar(String plistFile){
+		this.plist = Dict.parseFile(plistFile);
 		propertyLoader = new PlistPropertyLoader(plist, this);
-		this.plist = plist;
+		initForReference();
 	}
 
-	public void initForReference() {
+	private void initForReference() {
 		String[] properties = new String[] { "name", "keyEquivalent", "scopeName", "comment" };
 		for (String property : properties) {
 			propertyLoader.loadStringProperty(property);
@@ -53,9 +49,9 @@ public class Grammar {
 	}
 
 	public void initForUse() {
-		System.out.printf("initForUse: %s\n", this.name);
 		if (loaded())
 			return;
+		System.out.printf("initForUse: %s\n", this.name);
 		
 		initForReference();
 		propertyLoader.loadRegexProperty("foldingStartMarker");

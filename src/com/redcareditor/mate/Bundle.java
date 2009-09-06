@@ -63,19 +63,13 @@ public class Bundle {
 				loadGrammar(bundle, grammarDirectory);
 			}
 		}
-
-		for (Bundle b : getBundles()) {
-			for (Grammar g : b.getGrammars()) {
-				g.initForReference();
-			}
-		}
 	}
 
 	private static void loadGrammar(Bundle bundle, File syntaxDir) {
 		for (String grammarFileName : syntaxDir.list()) {
 			if (isTmBundlefile(grammarFileName)) {
 				String grammarFilePath = syntaxDir.getPath() + "/" + grammarFileName;
-				Grammar grammar = new Grammar(grammarFileName, grammarFilePath);
+				Grammar grammar = new Grammar(grammarFilePath);
 				bundle.getGrammars().add(grammar);
 			}
 		}

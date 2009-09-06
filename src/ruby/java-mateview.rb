@@ -7,12 +7,16 @@ require 'jdom'
 
 require 'rbconfig'
 
-if Config::CONFIG["host_os"] =~ /darwin/
-  require 'swt-osx'
-else
-  require 'swt-linux'
+swt_lib = case Config::CONFIG["host_os"]
+  when /darwin/i
+    'osx/swt'
+  when /linux/i
+    'linux/swt'
+  when /windows/i
+    'windows/swt'
 end
 
+require swt_lib
 require 'org.eclipse.core.commands'
 require 'org.eclipse.core.runtime_3.5.0.v20090525'
 require 'org.eclipse.equinox.common'
