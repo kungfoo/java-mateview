@@ -2,18 +2,21 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Position;
-import org.eclipse.swt.custom.StyledText;
-
+import com.redcareditor.mate.document.MateDocument;
+import com.redcareditor.mate.document.MateTextLocation;
+import com.redcareditor.mate.document.MateTextRange;
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Rx;
+import com.redcareditor.theme.ThemeSetting;
 
-public class Scope {
-	public MateText mateText;
-	private StyledText styledText;
+public class Scope implements Comparable<Scope>{
+	private MateText mateText;
+	
+	private MateDocument document;
+	
+	private MateTextRange range;
+	private MateTextRange innerRange;
 	
 	public String name;
 	public Pattern pattern;
@@ -24,211 +27,252 @@ public class Scope {
 	public Match openMatch;
 	public Match closeMatch;
 	
-	public Position startPos;
-	public Position innerStartPos;
-	public Position innerEndPos;
-	public Position endPos;
-	
 	public Rx closingRegex;
 	public String beginMatchString;
 	public String endMatchString;
 	
 	public Scope parent;
-	public List<Scope> children;
+	public ArrayList<Scope> children;
+	
+	public String bgColour;
+	public String fgColour;
 	
 	StringBuilder prettyString;
 	int indent;
 	
+	public ThemeSetting themeSetting;
+	
 	public Scope(MateText mt, String name) {
 		this.mateText = mt;
-		this.styledText = mt.getTextWidget();
 		this.name = name;
 		this.children = new ArrayList<Scope>();
+		this.document = mt.getMateDocument();
+		
+		this.range = document.getTextRange();
+		this.innerRange = document.getTextRange();
 	}
 	
 	public void clearAfter(int lineIx, int something) {
 		// TODO: port this method
 	}
-
+	
 	public Scope scopeAt(int line, int lineOffset) {
-//		System.out.printf("scopeAt(%d, %d) isOpen:%s\n", line, lineOffset, isOpen);
-		TextLocation loc = new TextLocation(line, lineOffset);
-		TextLocation start = startLoc();
-		if (TextLocation.lte(start, loc) || parent == null) {
-			if (isOpen || TextLocation.gte(endLoc(), loc)) {
-				if (children.size() == 0) {
-					return this;
-				}
+		MateTextLocation location = document.getTextLocation(line, lineOffset);
+		
+		if (getStart().compareTo(location) <= 0 || parent == null) {
+			if (isOpen || getEnd().compareTo(location) >= 0) {
 				for (Scope child : children) {
-					if (child.containsLoc(loc)) {
+					if (child.contains(location)) {
 						return child.scopeAt(line, lineOffset);
 					}
 				}
 				return this;
 			}
-			else {
-				return null;
-			}
+			
 		}
-		else {
-			return null;
-		}
+
+		return null;
 	}
 	
-	private boolean containsLoc(TextLocation loc) {
-		if (TextLocation.lte(startLoc(), loc) && TextLocation.gt(endLoc(), loc))
-			return true;
-		else 
-			return false;
+	public int compareTo(Scope o) {
+		if(getStart().compareTo(o.getStart()) == 0){
+			return getEnd().compareTo(o.getEnd());
+		}
+		return getStart().compareTo(o.getStart());
 	}
 
 	public Scope containingDoubleScope(int lineIx) {
-		// TODO: port this method
-		return this;
+		Scope scope = this;
+		while ((scope.pattern instanceof SinglePattern || 
+			      scope.isCapture || 
+			      (scope.getStart().getLine() == lineIx && scope.getStart().getLineOffset() == 0)) && 
+					 scope.parent != null) {
+			scope = scope.parent;
+		}
+		return scope;
 	}
 	
 	public boolean surfaceIdenticalTo(Scope other) {
-		// TODO: port me
+		if (surfaceIdenticalToModuloEnding(other) &&
+				getEnd().equals(other.getEnd()) &&
+				getInnerEnd().equals(other.getInnerEnd()) &&
+				beginMatchString == other.beginMatchString) {
+			return true;
+		}
 		return false;
 	}
 
 	public boolean surfaceIdenticalToModuloEnding(Scope other) {
-		// TODO: port me
+		// stdout.printf("%s == %s and %s == %s and %s == %s and %s == %s and %s == %s",
+		// 			  name, other.name, pattern.name, other.pattern.name, start_loc().to_s(),
+		// 			  other.start_loc().to_s(), inner_start_loc().to_s(), other.inner_start_loc().to_s(),
+		// 			  begin_match_string, other.begin_match_string);
+		if (name == other.name &&
+				pattern == other.pattern &&
+				getStart().equals(other.getStart()) &&
+				getInnerStart().equals(other.getInnerStart()) &&
+				beginMatchString == other.beginMatchString) {
+			return true;
+		}
 		return false;
 	}
 
+	public ArrayList<Scope> scopesOnLine(int lineIx) {
+		ArrayList<Scope> scopes = new ArrayList<Scope>();
+		if (getStart().getLine() <= lineIx && getEnd().getLine() >= lineIx)
+			scopes.add(this);
+		childScopesOnLine(lineIx, scopes);
+		return scopes;
+	}
+	
+	public void childScopesOnLine(int lineIx, ArrayList<Scope> scopes) {
+		for (Scope child : children) {
+			if (child.getStart().getLine() <= lineIx && child.getEnd().getLine() >= lineIx) {
+				scopes.add(child);
+				child.childScopesOnLine(lineIx, scopes);
+			}
+		}
+	}
+	
 	public boolean overlapsWith(Scope other) {
-		// TODO: port me
+		// sd1    +---
+		// sd2  +---
+		if (getStart().compareTo(other.getStart()) >= 0) {
+			if (getStart().compareTo(other.getEnd()) < 0) {
+				return true;
+			}
+			return false;
+		}
+
+		// sd1 +---
+		// sd2   +---
+		if (getEnd().compareTo(other.getStart()) > 0) {
+			return true;
+		}
 		return false;
 	}
 
 	public void addChild(Scope newChild) {
-		// TODO: should insert in the correct position
 		if (children.size() == 0){
 			children.add(newChild);
 			return;
 		}
-			
-		if (children.get(0).startOffset() > newChild.startOffset()){
+
+		if (children.get(0).getStart().getOffset() > newChild.getStart().getOffset()){
 			children.add(0, newChild);
 			return;
 		}
-		
+
 		int insertIx = 0;
 		int ix = 1;
 		for (Scope child : children) {
-			if (child.startOffset() <= newChild.startOffset()) {
+			if (child.getStart().getOffset() <= newChild.getStart().getOffset()) {
 				insertIx = ix;
 			}
 			ix++;
 		}
 		children.add(insertIx, newChild);
+//		children.add(newChild);
 	}
 	
 	public void removeChild(Scope child) {
 		children.remove(child);
 	}
 
-	private int comparePositions(Position a, Position b) {
-		return 0;
-	}
-
-	public Scope firstChildAfter(TextLocation loc) {
-//		stdout.printf("\"%s\".first_child_after(%d, %d)\n", name, loc.line, loc.line_offset);
-		if (children.size() == 0)
-			return null;
-		
+	public Scope firstChildAfter(MateTextLocation location) {
 		for (Scope child : children) {
-			if (TextLocation.gte(child.startLoc(), loc)) {
+			if (child.getStart().compareTo(location) >= 0) {
 				return child;
 			}
 		}
 		return null;
 	}
-
-	private Position makePosition(int line, int lineOffset) {
-		Position pos = new Position(styledText.getOffsetAtLine(line) + lineOffset, 0);
-		try {
-			mateText.getDocument().addPosition(pos);
+	
+	public ArrayList<Scope> deleteAnyOnLineNotIn(int lineIx, ArrayList<Scope> scopes) {
+		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
+		for (Scope child : children) {
+			int childStartLine = child.getStart().getLine();
+			if (childStartLine == lineIx && !scopes.contains(child)) {
+				System.out.printf("deleteAnyOnLineNotIn removing: %s\n", child.pattern.name);
+				removedScopes.add(child);
+			}
 		}
-		catch(BadLocationException e) {
-			System.out.printf("BadLocationException in Scope (%d, %d)\n", line, lineOffset);
-			e.printStackTrace();
-		}
-		return pos;
+		children.removeAll(removedScopes);
+		return removedScopes;
 	}
 	
 	public void setStartPos(int line, int lineOffset, boolean hasLeftGravity) {
-		this.startPos = makePosition(line, lineOffset);
+		MateTextLocation start = document.getTextLocation(line, lineOffset);
+		this.range.setStart(start);
+		document.addTextLocation(start);
 	}
 
 	public void setInnerStartPos(int line, int lineOffset, boolean hasLeftGravity) {
-		this.innerStartPos = makePosition(line, lineOffset);
+		MateTextLocation innerStart = document.getTextLocation(line, lineOffset);
+		this.innerRange.setStart(innerStart);
+		document.addTextLocation(innerStart);
 	}
 
 	public void setInnerEndPos(int line, int lineOffset, boolean c) {
-		this.innerEndPos = makePosition(line, lineOffset);
+		MateTextLocation innerEnd = document.getTextLocation(line, lineOffset);
+		this.innerRange.setEnd(innerEnd);
+		document.addTextLocation(innerEnd);
 	}
 
 	public void setEndPos(int line, int lineOffset, boolean c) {
-		this.endPos = makePosition(line, lineOffset);
+		MateTextLocation end = document.getTextLocation(line, lineOffset);
+		this.range.setEnd(end);
+		document.addTextLocation(end);
+	}
+	
+	public int getLength(){
+		return range.getLength();
+	}
+	
+	public MateTextLocation getStart() {
+		return range.getStart();
+	}
+	
+	public MateTextLocation getEnd(){
+		return range.getEnd();
 	}
 
-	public TextLocation startLoc() {
-		return new TextLocation(startLine(), startLineOffset());
+	public MateTextLocation getInnerStart(){
+		return innerRange.getStart();
+	}
+		
+	public MateTextLocation getInnerEnd(){
+		return innerRange.getEnd();
+	}
+		
+	public boolean contains(MateTextLocation location){
+		return range.conatains(location);
 	}
 
-	public TextLocation innerEndLoc() {
-		return new TextLocation(endLine(), innerEndLineOffset());
-	}
-	
-	public TextLocation endLoc() {
-		return new TextLocation(endLine(), endLineOffset());
-	}
-	
-	public int startLine() {
-		if (startPos == null)
-			return 0;
-		else
-			return styledText.getLineAtOffset(startPos.offset);
-	}
-
-	public int endLine() {
-		if (endPos == null)
-			return styledText.getLineCount() - 1;
-		else
-			return styledText.getLineAtOffset(endPos.offset);
-	}
-
-	public int startLineOffset() {
-		if (startPos == null)
-			return 0;
-		else
-			return startPos.offset - styledText.getOffsetAtLine(startLine());
+	public String hierarchyNames(boolean inner) {
+		String selfName;
+		// stdout.printf("'%s'.hierarchy_names(%s)\n", name, inner ? "true" : "false");
+		if (pattern instanceof DoublePattern &&
+				((DoublePattern) pattern).contentName != null &&
+				inner) {
+			selfName = name + " " + ((DoublePattern) pattern).contentName;
+		}
+		else {
+			selfName = name;
+		}
+		if (parent != null) {
+			boolean next_inner;
+			if (isCapture)
+				next_inner = false;
+			else
+				next_inner = true;
+			return parent.hierarchyNames(next_inner) + " " + selfName;
+		}
+		else {
+			return selfName;
+		}
 	}
 
-	public int innerEndLineOffset() {
-		if (innerEndPos == null)
-			return styledText.getCharCount();
-		else
-			return innerEndPos.offset - styledText.getOffsetAtLine(endLine());
-	}
-	
-	public int endLineOffset() {
-		if (endPos == null)
-			return styledText.getCharCount() - styledText.getOffsetAtLine(endLine());
-		else
-			return endPos.offset - styledText.getOffsetAtLine(endLine());
-	}
-	
-	public int startOffset() {
-		return this.startPos.offset;
-	}
-	
-	public int endOffset() {
-		return this.endPos.offset;
-	}
-	
 	public String pretty(int indent) {
 		prettyString = new StringBuilder("");
 		this.indent = indent;
@@ -249,26 +293,17 @@ public class Scope {
 				((DoublePattern) this.pattern).contentName != null) 
 			prettyString.append(" " + ((DoublePattern) this.pattern).contentName);
 		prettyString.append(" (");
-		// TODO: port these sections once Positions are figured out
-//		if (startPos == null) {
-//			prettyString.append("inf");
-//		}
-//		else {
-			prettyString.append(String.format(
-					"%d,%d",
-					startLine(), 
-					startLineOffset()));
-//		}
+		prettyString.append(String.format(
+				"%d,%d",
+				getStart().getLine(), 
+				getStart().getLineOffset()));
+//		prettyString.append(getStart().getOffset());
 		prettyString.append(")-(");
-//		if (endPos == null) {
-//			prettyString.append("inf");
-//		}
-//		else {
-			prettyString.append(String.format(
-					"%d,%d",
-					endLine(), 
-					endLineOffset()));
-//		}
+		prettyString.append(String.format(
+				"%d,%d",
+				getEnd().getLine(), 
+				getEnd().getLineOffset()));
+//		prettyString.append(getEnd().getOffset());
 		prettyString.append(")");
 		prettyString.append((isOpen ? " open" : " closed"));
 		prettyString.append("\n");
@@ -279,5 +314,38 @@ public class Scope {
 		}
 		
 		return prettyString.toString();
+	}
+	
+
+	public String nearestBackgroundColour() {
+		if (parent != null) {
+			return parent.nearestBackgroundColour1();
+		}
+		return null;
+	}
+
+	public String nearestBackgroundColour1() {
+		if (bgColour != null)
+			return bgColour;
+		if (parent != null) {
+			return parent.nearestBackgroundColour1();
+		}
+		return null;
+	}
+
+	public String nearestForegroundColour() {
+		if (parent != null) {
+			return parent.nearestForegroundColour1();
+		}
+		return null;
+	}
+
+	public String nearestForegroundColour1() {
+		if (fgColour != null)
+			return fgColour;
+		if (parent != null) {
+			return parent.nearestForegroundColour1();
+		}
+		return null;
 	}
 }

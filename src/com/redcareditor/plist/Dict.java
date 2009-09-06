@@ -87,12 +87,7 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 	@SuppressWarnings("unchecked")
 	public Dict[] getDictionaries(String key) {
 		List<Dict> dictionaries = (List<Dict>) value.get(key).value;
-		Dict[] result = new Dict[dictionaries.size()];
-		int i = 0;
-		for (Dict dict : dictionaries) {
-			result[i++] = dict;
-		}
-		return result;
+		return dictionaries.toArray(new Dict[0]);
 	}
 
 	public List<PlistNode<?>> getArray(String key) {

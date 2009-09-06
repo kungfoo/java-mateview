@@ -28,25 +28,30 @@ public class Grammar {
 	public Rx foldingStartMarker;
 	public Rx foldingStopMarker;
 
-	public Grammar(Dict plist) {
+	/* these are here for lookup speed purposes */
+	private static Map<String, Grammar> grammarsByScopeNames = new HashMap<String, Grammar>();
+	
+	public Grammar(String plistFile){
+		this.plist = Dict.parseFile(plistFile);
 		propertyLoader = new PlistPropertyLoader(plist, this);
-		this.plist = plist;
+		initForReference();
 	}
 
-	public void initForReference() {
+	private void initForReference() {
 		String[] properties = new String[] { "name", "keyEquivalent", "scopeName", "comment" };
 		for (String property : properties) {
 			propertyLoader.loadStringProperty(property);
 		}
+		grammarsByScopeNames.put(scopeName, this);
 		propertyLoader.loadRegexProperty("firstLineMatch");
 		if (plist.containsElement("fileTypes"))
 			fileTypes = plist.getStrings("fileTypes");
 	}
 
 	public void initForUse() {
-		System.out.printf("initForUse: %s\n", this.name);
 		if (loaded())
 			return;
+		System.out.printf("initForUse: %s\n", this.name);
 		
 		initForReference();
 		propertyLoader.loadRegexProperty("foldingStartMarker");
@@ -112,11 +117,7 @@ public class Grammar {
 	}
 
 	public static Grammar findByScopeName(String scope) {
-		for (Bundle b : Bundle.bundles)
-			for (Grammar g : b.grammars)
-				if (g.scopeName.equals(scope))
-					return g;
-		return null;
+		return grammarsByScopeNames.get(scope);
 	}
 
 	private boolean loaded() {

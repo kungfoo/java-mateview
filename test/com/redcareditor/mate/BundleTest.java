@@ -18,7 +18,7 @@ public class BundleTest {
 		for (String bundleName : bundleNames) {
 			containsBundleNamed(bundleName);
 		}
-		assertEquals(9, Bundle.bundles.size());
+		assertEquals(9, Bundle.getBundles().size());
 	}
 
 	private void containsBundleNamed(String bundleName) {
@@ -27,7 +27,7 @@ public class BundleTest {
 
 	@Test
 	public void shouldHaveCreatedCorrectGrammars() {
-		assertEquals(1, Bundle.getBundleByName("Apache").grammars.size());
-		assertEquals(1, Bundle.getBundleByName("Ruby").grammars.size());
+		assertEquals(1, Bundle.getBundleByName("Apache").getGrammars().size());
+		assertEquals(1, Bundle.getBundleByName("Ruby").getGrammars().size());
 	}
 }
