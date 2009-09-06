@@ -40,7 +40,7 @@
 		
 		<fileset dir="${lib.dir}">
 			<include name="*.jar" />
-			<exclude name="swt-linux.jar" />
+			<include name="${platform}/*.jar" />
 		</fileset>
 	</path>
 
