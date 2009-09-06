@@ -61,7 +61,7 @@
 	</target>
 
 
-	<target name="prepare" depends="clean">
+	<target name="prepare" depends="clean,debug">
 		<mkdir dir="${build.prod.dir}" />
 		<mkdir dir="${build.test.dir}" />
 	</target>
