@@ -31,7 +31,7 @@ public class ColourUtil {
 			new_r = (pre_r*(255-opacity) + post_r*opacity)/255;
 			new_g = (pre_g*(255-opacity) + post_g*opacity)/255;
 			new_b = (pre_b*(255-opacity) + post_b*opacity)/255;
-			new_colour = String.format("#%.2x%.2x%.2x", new_r, new_g, new_b);
+			new_colour = String.format("#%02x%02x%02x", new_r, new_g, new_b);
 			// stdout.printf("%s/%s/%s - %d,%d,%d\n", parent_colour, colour, new_colour, new_r, new_g, new_b);
 			return new_colour;
 		}
