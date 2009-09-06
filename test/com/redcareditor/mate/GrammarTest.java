@@ -107,34 +107,25 @@ public class GrammarTest {
   @Test
   public void shouldMarkDisabledPatternsAsDisabled() {
     Bundle.loadBundles("input/");
-    Bundle htmlBundle = null;
-    for (Bundle b : Bundle.bundles) {
-      if ("HTML".equals(b.name)) {
-        htmlBundle = b; break;
+    Bundle htmlBundle = Bundle.getBundleByName("HTML");
+
+    Grammar html = null;
+    for (Grammar g : htmlBundle.getGrammars()) {
+      if ("HTML".equals(g.name)) {
+        html = g; break;
       }
     }
 
-    if (htmlBundle != null) {
-      Grammar html = null;
-      for (Grammar g : htmlBundle.grammars) {
-        if ("HTML".equals(g.name)) {
-          html = g; break;
+    if (html != null) {
+      html.initForUse();
+      Pattern smarty = find(html.allPatterns, new Predicate() {
+        public boolean match(Pattern p) {
+          return "source.smarty.embedded.html".equals(p.name);
         }
-      }
-
-      if (html != null) {
-        html.initForUse();
-        Pattern smarty = find(html.allPatterns, new Predicate() {
-          public boolean match(Pattern p) {
-            return "source.smarty.embedded.html".equals(p.name);
-          }
-        });
-        assertTrue(smarty.disabled);
-      } else {
-        fail("Unable to find HTML grammar in HTML bundle.");
-      }
+      });
+      assertTrue(smarty.disabled);
     } else {
-      fail("Unable to find HTML bundle.");
+      fail("Unable to find HTML grammar in HTML bundle.");
     }
   }
 
