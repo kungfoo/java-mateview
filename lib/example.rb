@@ -27,21 +27,11 @@ class MateExample < Jface::ApplicationWindow
     
     file_menu = Jface::MenuManager.new("File")
     main_menu.add file_menu
-    #file_menu.add exit_action
+    exit_action = ExitAction.new
+    exit_action.window = self
+    exit_action.text = "Exit@Ctrl+Q"
+    file_menu.add exit_action
     return main_menu
-  end
-  
-  class ExitAction < Jface::Action
-    attr_accessor :window
-    
-    def initialize(window)
-      @window = window
-      text = "Exit@Cmd+Q"
-    end
-    
-    def run
-      window.close
-    end
   end
   
   def self.run
@@ -55,6 +45,14 @@ class MateExample < Jface::ApplicationWindow
     window.addMenuBar
     window.open
     Swt::Widgets::Display.getCurrent.dispose
+  end
+  
+  class ExitAction < Jface::Action
+    attr_accessor :window
+    
+    def run
+      window.close
+    end
   end
 end
 
