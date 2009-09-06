@@ -9,7 +9,7 @@ public class ThemeManagerTest {
 	@Test
 	public void shouldLoadThemes() {
 		ThemeManager.loadThemes("input/");
-		assertEquals(1, ThemeManager.themes.size());
+		assertEquals(2, ThemeManager.themes.size());
 		assertEquals("Railscasts", ThemeManager.themes.get(0).name);
 	}
 }
