@@ -28,15 +28,22 @@ public class SwtMateTextLocation extends Position implements MateTextLocation {
 
 	public int getLine() {
 //		System.out.printf("getLine() (getOffset() = %d, charCount() = %d)\n", getOffset(), document.styledText.getCharCount());
+		
 		return document.styledText.getLineAtOffset(getOffset());
 	}
 
 	public int getLineOffset() {
-		return offset - document.styledText.getOffsetAtLine(getLine());
+		return getOffset() - document.styledText.getOffsetAtLine(getLine());
 	}
 
 	public int compareTo(MateTextLocation o) {
 		return comperator.compare(this, o);
+	}
+	
+	@Override
+	public int getOffset() {
+		
+		return this.offset < document.styledText.getCharCount() ? this.offset : document.styledText.getCharCount();
 	}
 	
 	private static int computeOffset(int line, int offset, StyledText text){
