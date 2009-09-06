@@ -7,10 +7,13 @@ require 'jdom'
 
 require 'rbconfig'
 
-if Config::CONFIG["host_os"] =~ /darwin/
-  require 'osx/swt'
-else
-  require 'linux/swt'
+case Config::CONFIG["host_os"]
+  when /darwin/i
+    require 'osx/swt'
+  when /linux/i
+    require 'linux/swt'
+  when /windows/i
+    require 'windows/swt'
 end
 
 require 'org.eclipse.core.commands'
