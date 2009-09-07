@@ -28,7 +28,7 @@ public class SwtColourer implements Colourer {
 
 	private int highlightedLine = 0;
 	private StyledText control;
-	
+
 	/* cached swt colors */
 	private Color globalLineBackground;
 	private Color globalBackground;
@@ -38,7 +38,7 @@ public class SwtColourer implements Colourer {
 		mateText = mt;
 
 		control = mateText.getControl();
-		
+
 		this.control.addLineStyleListener(new LineStyleListener() {
 			public void lineGetStyle(LineStyleEvent event) {
 				colourLine(event);
@@ -64,8 +64,11 @@ public class SwtColourer implements Colourer {
 		return line != highlightedLine;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.redcareditor.mate.Colourer#setTheme(com.redcareditor.theme.Theme)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.redcareditor.mate.Colourer#setTheme(com.redcareditor.theme.Theme)
 	 */
 	public void setTheme(Theme theme) {
 		this.theme = theme;
@@ -83,29 +86,34 @@ public class SwtColourer implements Colourer {
 		mateText.setGutterForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
 	}
 
-  private void initCachedColours() {
-    globalBackground = ColourUtil.getColour(globalColour("background"));
-    globalForeground = ColourUtil.getColour(globalColour("foreground"));
-    globalLineBackground = ColourUtil.getColour(ColourUtil.mergeColour(globalColour("background"),
-                                                                       globalColour("lineHighlight")));
-  }
+	private void initCachedColours() {
+		globalBackground = ColourUtil.getColour(globalColour("background"));
+		globalForeground = ColourUtil.getColour(globalColour("foreground"));
+		globalLineBackground = ColourUtil.getColour(ColourUtil.mergeColour(globalColour("background"), globalColour("lineHighlight")));
+	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.redcareditor.mate.Colourer#getTheme()
 	 */
 	public Theme getTheme() {
 		return theme;
 	}
 
-  private String globalColour(String name) {
-    String colour = theme.globalSettings.get(name);
-    if (colour != null && !colour.isEmpty()) {
-      return colour;
-    } else {
-      return "#FFFFFF";
-    }
-  }
-	
+	private String globalColour(String name) {
+		String colour = theme.globalSettings.get(name);
+		if (isColorDefined(colour)) {
+			return colour;
+		} else {
+			return "#FFFFFF";
+		}
+	}
+
+	private boolean isColorDefined(String colour) {
+		return colour != null && colour.length() != 0;
+	}
+
 	private void colourLine(LineStyleEvent event) {
 		if (theme == null)
 			return;
@@ -114,95 +122,93 @@ public class SwtColourer implements Colourer {
 		System.out.printf("got to colour %d scopes\n", scopes.size());
 		ArrayList<StyleRange> styleRanges = new ArrayList<StyleRange>();
 		for (Scope scope : scopes) {
-//			System.out.printf("  %s\n", scope.name);
+			// System.out.printf("  %s\n", scope.name);
 			if (scope.parent == null) {
 				continue;
 			}
-			if (scope.name == null && scope.pattern != null &&
-				(scope.pattern instanceof SinglePattern || ((DoublePattern) scope.pattern).contentName == null)) {
+			if (scope.name == null && scope.pattern != null
+					&& (scope.pattern instanceof SinglePattern || ((DoublePattern) scope.pattern).contentName == null)) {
 				continue;
 			}
 			styleRanges.add(getStyleRangeForScope(scope, false));
 			if (scope.pattern instanceof DoublePattern && ((DoublePattern) scope.pattern).contentName != null && scope.isCapture == false)
 				styleRanges.add(getStyleRangeForScope(scope, true));
 		}
-//		StyleRange[] styleRangeArray = new StyleRange[styleRanges.size()];
+		// StyleRange[] styleRangeArray = new StyleRange[styleRanges.size()];
 		event.styles = (StyleRange[]) styleRanges.toArray(new StyleRange[0]);
 	}
-	
+
 	private StyleRange getStyleRangeForScope(Scope scope, boolean inner) {
 		StyleRange styleRange = new StyleRange();
-		// TODO: allow for multiple settings that set different 
+		// TODO: allow for multiple settings that set different
 		// parts of the style.
 		ThemeSetting setting = null;
 		ThemeSetting excludeSetting = null;
-		if (scope.parent != null) 
+		if (scope.parent != null)
 			excludeSetting = scope.parent.themeSetting;
-		setting = theme.settingsForScope(scope, inner, null);//exclude_setting);
+		setting = theme.settingsForScope(scope, inner, null);// exclude_setting);
 
 		if (inner) {
 			styleRange.start = scope.getInnerStart().getOffset();
 			styleRange.length = scope.getInnerEnd().getOffset() - styleRange.start;
-		}
-		else {
+		} else {
 			styleRange.start = scope.getStart().getOffset();
 			styleRange.length = scope.getEnd().getOffset() - styleRange.start;
 		}
 		System.out.printf("colour %s (%d, %d)\n", scope.name, styleRange.start, styleRange.length);
 		if (setting != null)
 			setStyleRangeProperties(scope, setting, styleRange);
-		
+
 		return styleRange;
 	}
-	
+
 	private void setStyleRangeProperties(Scope scope, ThemeSetting setting, StyleRange styleRange) {
 		String fontStyle = setting.settings.get("fontStyle");
 		if (fontStyle == "italic") {
 			styleRange.fontStyle = SWT.ITALIC;
-		}
-		else
+		} else
 			styleRange.fontStyle = SWT.NORMAL;
 
 		if (fontStyle == "underline")
 			styleRange.fontStyle = SWT.UNDERLINE_SINGLE;
 		else
-			styleRange.fontStyle = SWT.NORMAL; 
-		
+			styleRange.fontStyle = SWT.NORMAL;
+
 		String background = setting.settings.get("background");
 		System.out.printf("        scope background:        %s\n", background);
 		String mergedBgColour;
 		String parentBg = theme.globalSettings.get("background");
 		System.out.printf("        global background: %s\n", parentBg);
 		// TODO: wasn't this a better way of creating the background colours?
-//		var parent_bg = scope.nearest_background_colour();
-//		if (parent_bg == null) {
-//		}
-//		else {
-//			stdout.printf("        parent background: %s\n", parent_bg);
-//		}
+		// var parent_bg = scope.nearest_background_colour();
+		// if (parent_bg == null) {
+		// }
+		// else {
+		// stdout.printf("        parent background: %s\n", parent_bg);
+		// }
 		if (background != null && background != "") {
-//			if (parent_bg != null) {
-//				merged_bg_colour = parent_bg;
-//			}
-//			else {
+			// if (parent_bg != null) {
+			// merged_bg_colour = parent_bg;
+			// }
+			// else {
 			mergedBgColour = ColourUtil.mergeColour(parentBg, background);
-//			}
+			// }
 			if (mergedBgColour != null) {
 				scope.bgColour = mergedBgColour;
 				styleRange.background = ColourUtil.getColour(mergedBgColour);
 				System.out.printf("       tag.background = %s\n", mergedBgColour);
 			}
-		}
-		else {
+		} else {
 			mergedBgColour = parentBg;
 		}
-//		stdout.printf("        merged_bg_colour:  %s\n", merged_bg_colour);
+		// stdout.printf("        merged_bg_colour:  %s\n", merged_bg_colour);
 		String foreground = setting.settings.get("foreground");
-//		stdout.printf("        scope foreground:        %s\n", foreground);
+		// stdout.printf("        scope foreground:        %s\n", foreground);
 		String parentFg = scope.nearestForegroundColour();
 		if (parentFg == null) {
 			parentFg = theme.globalSettings.get("foreground");
-//			stdout.printf("        global foreground:        %s\n", parent_fg);
+			// stdout.printf("        global foreground:        %s\n",
+			// parent_fg);
 		}
 		if (foreground != null && foreground != "") {
 			String mergedFgColour;
@@ -214,26 +220,34 @@ public class SwtColourer implements Colourer {
 				scope.fgColour = mergedFgColour;
 				styleRange.foreground = ColourUtil.getColour(mergedFgColour);
 			}
-//			stdout.printf("       merged_fg_colour: %s\n", merged_fg_colour);
+			// stdout.printf("       merged_fg_colour: %s\n", merged_fg_colour);
 		}
-//		stdout.printf("\n");
+		// stdout.printf("\n");
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.redcareditor.mate.Colourer#uncolourScopes(java.util.List)
 	 */
 	public void uncolourScopes(List<Scope> scopes) {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see com.redcareditor.mate.Colourer#uncolourScope(com.redcareditor.mate.Scope, boolean)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.redcareditor.mate.Colourer#uncolourScope(com.redcareditor.mate.Scope,
+	 * boolean)
 	 */
 	public void uncolourScope(Scope scope, boolean something) {
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.redcareditor.mate.Colourer#colourLineWithScopes(java.util.List)
 	 */
 	public void colourLineWithScopes(List<Scope> scopes) {
