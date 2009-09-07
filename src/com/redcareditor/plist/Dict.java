@@ -23,7 +23,7 @@ import com.redcareditor.onig.Rx;
 public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 
   public static class EntityResolver implements org.xml.sax.EntityResolver {
-    @Override
+//    @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
       if (systemId.equals("http://www.apple.com/DTDs/PropertyList-1.0.dtd")) {
         InputStream is = EntityResolver.class.getClassLoader().getResourceAsStream("PropertyList-1.0.dtd");
@@ -37,12 +37,12 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 		SAXBuilder builder;
 		Document document;
 		builder = new SAXBuilder();
-    builder.setEntityResolver(new EntityResolver());
+//		builder.setEntityResolver(new EntityResolver());
 		try {
 			document = builder.build(new File(filename));
 			return new Dict(document.getRootElement().getChild("dict"));
 		} catch (JDOMException e) {
-    	e.printStackTrace();
+			e.printStackTrace();
 		} catch (IOException e) {
 			System.out.println("The file " + filename + " was not found!");
 			e.printStackTrace();
