@@ -3,6 +3,13 @@ require 'net/http'
 
 JRUBY_VERSION = '1.3.1'
 
+jruby_command = case Config::CONFIG["host_os"]
+  when /darwin/i
+    'jruby -J-XstartOnFirstThread '
+  else
+    'jruby '
+end
+
 task :default => 'jruby:test'
 
 namespace :java do
@@ -35,7 +42,7 @@ namespace :jruby do
   desc "Run ruby tests against a freshly compiled build"
   task :test => ['java:test'] do
     puts "Running RSpec Tests"
-    sh %+jruby -S spec spec/+
+    sh %+#{jruby_command} -S spec spec/+
   end
 end
 
