@@ -11,7 +11,7 @@ import org.junit.Test;
  */
 public class ColourUtilTest {
   @Test
-  public void shouldHandleTwilightColors() {
-    assertEquals("#FFFFFF", ColourUtil.mergeColour("#FFFFFF", "#FFFFFF08"));
+  public void shouldMergeColoursAccordingToTransparencyRules() {
+    assertEquals("#080808", ColourUtil.mergeColour("#000000", "#FFFFFF08"));
   }
 }
