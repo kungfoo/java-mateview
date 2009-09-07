@@ -9,7 +9,11 @@ require 'rbconfig'
 
 swt_lib = case Config::CONFIG["host_os"]
   when /darwin/i
-    'osx/swt'
+    if Config::CONFIG["host_cpu"] == "x86_64"
+      'osx64/swt'
+    else
+      'osx/swt'
+    end
   when /linux/i
     'linux/swt'
   when /windows/i

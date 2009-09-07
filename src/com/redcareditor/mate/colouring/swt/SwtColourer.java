@@ -83,11 +83,12 @@ public class SwtColourer implements Colourer {
 		mateText.setGutterForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
 	}
 
-	private void initCachedColours() {
-		globalLineBackground = ColourUtil.getColour(globalColour("lineHighlight"));
-		globalBackground = ColourUtil.getColour(globalColour("background"));
-		globalForeground = ColourUtil.getColour(globalColour("foreground"));
-	}
+  private void initCachedColours() {
+    globalBackground = ColourUtil.getColour(globalColour("background"));
+    globalForeground = ColourUtil.getColour(globalColour("foreground"));
+    globalLineBackground = ColourUtil.getColour(ColourUtil.mergeColour(globalColour("background"),
+                                                                       globalColour("lineHighlight")));
+  }
 
 	/* (non-Javadoc)
 	 * @see com.redcareditor.mate.Colourer#getTheme()
@@ -96,14 +97,14 @@ public class SwtColourer implements Colourer {
 		return theme;
 	}
 
-	private String globalColour(String name) {
-		String colour = theme.globalSettings.get(name);
-		if (colour != null && colour != "") {
-			colour = ColourUtil.mergeColour("#FFFFFF", colour);
-			return colour;
-		}
-		return null;
-	}
+  private String globalColour(String name) {
+    String colour = theme.globalSettings.get(name);
+    if (colour != null && !colour.isEmpty()) {
+      return colour;
+    } else {
+      return "#FFFFFF";
+    }
+  }
 	
 	private void colourLine(LineStyleEvent event) {
 		if (theme == null)
