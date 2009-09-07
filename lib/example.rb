@@ -13,6 +13,8 @@ class MateExample < Jface::ApplicationWindow
     @contents.layout = Swt::Layout::FillLayout.new
     @mate_text = JavaMateView::MateText.new(@contents)
     @mate_text.set_grammar_by_name "Ruby"
+    @mate_text.set_theme_by_name "Railscasts"
+    @mate_text.set_font "Monaco", 15
     return @contents
   end
   

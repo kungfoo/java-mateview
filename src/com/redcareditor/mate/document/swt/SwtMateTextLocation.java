@@ -6,23 +6,28 @@ import org.eclipse.swt.custom.StyledText;
 import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.MateTextLocationComparator;
 
-public class SwtTextLocation extends Position implements MateTextLocation {
+public class SwtMateTextLocation extends Position implements MateTextLocation {
 
 	private static final MateTextLocationComparator comperator = new MateTextLocationComparator();
 	private SwtMateDocument document;
 
-	public SwtTextLocation(int line, int lineOffset, SwtMateDocument document) {
+	public SwtMateTextLocation(int offset, SwtMateDocument document) {
+		super(offset);
+		this.document = document;
+	}
+
+	public SwtMateTextLocation(int line, int lineOffset, SwtMateDocument document) {
 		super(computeOffset(line, lineOffset, document.styledText));
 		this.document = document;
 	}
 
-	public SwtTextLocation(MateTextLocation location, SwtMateDocument document) {
+	public SwtMateTextLocation(MateTextLocation location, SwtMateDocument document) {
 		super(computeOffset(location.getLine(), location.getLineOffset(), document.styledText));
 		this.document = document;
 	}
 
 	public int getLine() {
-//		System.out.printf("getLine() (getOffset() = %d)\n", getOffset());
+//		System.out.printf("getLine() (getOffset() = %d, charCount() = %d)\n", getOffset(), document.styledText.getCharCount());
 		return document.styledText.getLineAtOffset(getOffset());
 	}
 

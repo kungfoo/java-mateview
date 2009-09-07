@@ -1,4 +1,4 @@
-package com.redcareditor.mate;
+package com.redcareditor.mate.undo.swt;
 
 import java.util.Stack;
 
@@ -7,20 +7,23 @@ import org.eclipse.swt.custom.ExtendedModifyEvent;
 import org.eclipse.swt.custom.ExtendedModifyListener;
 import org.eclipse.swt.custom.StyledText;
 
+import com.redcareditor.mate.MateText;
+import com.redcareditor.mate.undo.MateTextUndoManager;
+
 /**
  * this class can be attached to {@link MateText} widgets to provide undo/redo.<br>
  * It will plug into the event handling of the text editing widget of
  * {@link MateText} which is currently a {@link StyledText} inside a
  * {@link SourceViewer}.
  */
-public class MateTextUndoManager implements ExtendedModifyListener {
+public class SwtMateTextUndoManager implements ExtendedModifyListener, MateTextUndoManager {
 	// TODO: maybe these stacks needs limits, if we want unlimited undo/redo,
 	// there you go...
 	private Stack<UndoRedoStep> undoStack;
 	private Stack<UndoRedoStep> redoStack;
 	private StyledText styledText;
 
-	public MateTextUndoManager(MateText matetext) {
+	public SwtMateTextUndoManager(MateText matetext) {
 		styledText = matetext.getTextWidget();
 		undoStack = new Stack<UndoRedoStep>();
 		redoStack = new Stack<UndoRedoStep>();
@@ -42,18 +45,27 @@ public class MateTextUndoManager implements ExtendedModifyListener {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see com.redcareditor.mate.MateTexUndoManager#undo()
+	 */
 	public void undo() {
 		if (!undoStack.isEmpty()) {
 			undoStack.pop().undo();
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see com.redcareditor.mate.MateTexUndoManager#redo()
+	 */
 	public void redo() {
 		if (!redoStack.isEmpty()) {
 			redoStack.pop().redo();
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see com.redcareditor.mate.MateTexUndoManager#isDirty()
+	 */
 	public boolean isDirty() {
 		return !undoStack.empty();
 	}

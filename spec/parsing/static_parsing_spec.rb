@@ -3,7 +3,7 @@ require 'spec/spec_helper'
 
 describe JavaMateView do
   before(:each) do
-    @display = Swt::Widgets::Display.new
+    $display ||= Swt::Widgets::Display.new
     @shell = Swt::Widgets::Shell.new(@display)
     @mt = JavaMateView::MateText.new(@shell)
     @st = @mt.get_text_widget
@@ -12,7 +12,7 @@ describe JavaMateView do
   after(:each) do
     @mt.get_text_widget.dispose
     @shell.dispose
-    @display.dispose
+    $display.dispose
   end
   
   describe "when parsing Ruby from scratch" do

@@ -9,14 +9,14 @@ class JavaMateView::MateText
   
   def type(line, line_offset, char)
     line_start = get_text_widget.get_offset_at_line(line)
-    getDocument.replace(line_start + line_offset, 3, char)
+    getMateDocument.replace(line_start + line_offset, 0, char)
   end
-    # 
-    # def backspace(line, pos)
-    #   delete(get_iter_at_line_offset(line, pos-1),
-    #          get_iter_at_line_offset(line, pos))
-    # end
-    # 
+      
+  def backspace(line, line_offset)
+    line_start = get_text_widget.get_offset_at_line(line)
+    getMateDocument.replace(line_start + line_offset - 1, 1, "")
+  end
+      
   def clean_reparse
     shell = Swt::Widgets::Shell.new($display)
     mt = JavaMateView::MateText.new(shell)
