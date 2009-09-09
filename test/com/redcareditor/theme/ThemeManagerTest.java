@@ -10,6 +10,10 @@ public class ThemeManagerTest {
 	public void shouldLoadThemes() {
 		ThemeManager.loadThemes("input/");
 		assertEquals(2, ThemeManager.themes.size());
+	}
+
+	@Test
+	public void shouldContainTwoRightThemes() {
 		String [] expectedThemeNames = {"Railscasts", "Twilight"};
 		for(String theme : expectedThemeNames){
 			boolean found = false;
@@ -19,7 +23,7 @@ public class ThemeManagerTest {
 					break;
 				}
 			}
-			assertTrue("Could not find theme " + theme, found);
+			assertTrue(String.format("Could not find theme '%s', which sould be loaded by now", theme), found);
 		}
 	}
 }
