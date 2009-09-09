@@ -10,6 +10,16 @@ public class ThemeManagerTest {
 	public void shouldLoadThemes() {
 		ThemeManager.loadThemes("input/");
 		assertEquals(2, ThemeManager.themes.size());
-		assertEquals("Railscasts", ThemeManager.themes.get(0).name);
+		String [] expectedThemeNames = {"Railscasts", "Twilight"};
+		for(String theme : expectedThemeNames){
+			boolean found = false;
+			for(Theme t : ThemeManager.themes){
+				if(t.name.equals(theme)){
+					found = true;
+					break;
+				}
+			}
+			assertTrue("Could not find theme " + theme, found);
+		}
 	}
 }
