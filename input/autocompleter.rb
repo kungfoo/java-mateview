@@ -40,7 +40,6 @@ class Redcar::EditView
     
     def connect_changed_signal
       @buf.signal_connect("changed") do |document, iter, text, length|
-        # TODO: this IS kinda ugly, but the signal will also get fired while we're completing...
         unless @completion_flagged
           @completion_state.any_key
         end
