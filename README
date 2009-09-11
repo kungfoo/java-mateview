@@ -18,6 +18,11 @@ or
 Running the RSpec parsing specs
 -------------------------------
 
+Compile the java code and run the specs:
+
+    rake jruby:test
+
+If you want to run it manually, without compiling:
 On OSX:
 
     jruby -J-XstartOnFirstThread -S spec spec
