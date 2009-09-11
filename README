@@ -7,25 +7,23 @@ Requirements
 
 * jruby-1.3.1 installed and set up on your path
 * rspec gem installed via gem install rspec
+* make sure that JAVA_HOME points to a 1.6 type JDK (this is especially true on OSX Leopard)
 
 Running the Ant-based unit-tests
 --------------------------------
-
+    ant
+or
     rake java:test
 
 Running the RSpec parsing specs
 -------------------------------
 
-Make sure that the 'spec' command refers to the jruby
-spec binary.
-
-
 On OSX:
 
-    jruby -J-XstartOnFirstThread $(which spec) spec
+    jruby -J-XstartOnFirstThread -S spec spec
     
 On Linux:
 
-    spec spec/
+    jruby -S spec spec/
     
 
