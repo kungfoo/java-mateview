@@ -4,6 +4,7 @@
 	<property name="src.dir" location="src" />
 	<property name="test.dir" location="test" />
 	<property name="lib.dir" location="lib" />
+	<property name="resources.dir" location="resources" />
 	<property name="build.prod.dir" location="${build.dir}" />
 	<property name="build.test.dir" location="${build.dir}/test" />
 	<property name="test.report.dir" location="${build.dir}/test-reports" />
@@ -60,10 +61,14 @@
 		<echo message="|   |-- ${echo.path}"/>
 	</target>
 
-
 	<target name="prepare" depends="clean,debug">
 		<mkdir dir="${build.prod.dir}" />
 		<mkdir dir="${build.test.dir}" />
+    <copy todir="${build.prod.dir}">
+      <fileset dir="${resources.dir}">
+        <include name="*" />
+      </fileset>
+    </copy>
 	</target>
 
 	<target name="compile" depends="prepare">

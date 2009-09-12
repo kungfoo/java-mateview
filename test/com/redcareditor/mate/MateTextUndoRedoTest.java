@@ -52,31 +52,31 @@ public class MateTextUndoRedoTest {
 	private void checkTextIsEmpty() {
 		assertEquals("", text.getText());
 	}
-//	
-//	@Test
-//	public void testDoubleEntryUndoRedo(){
-//		String string1 = "I entered this some time ago\n";
-//		String string2 = "I entered this just now!";
-//		text.replaceTextRange(0, 0, string1);
-//		mateText.undo();
-//		checkTextIsEmpty();
-//		
-//		text.replaceTextRange(0, 0, string1);
-//		text.replaceTextRange(string1.length(), 0, string2);
-//		
-//		String combined = string1 + string2;
-//		assertEquals(combined, text.getText());
-//		mateText.undo();
-//		assertEquals(string1, text.getText());
-//		mateText.redo();
-//		assertEquals(combined, text.getText());
-//		mateText.undo();
-//		assertEquals(string1, text.getText());
-//		mateText.undo();
-//		checkTextIsEmpty();
-//		checkNotDirty();
-//		mateText.redo();
-//		mateText.redo();
-//		assertEquals(combined, text.getText());
-//	}
+
+	@Test
+	public void testDoubleEntryUndoRedo(){
+		String string1 = "I entered this some time ago\n";
+		String string2 = "I entered this just now!";
+		text.replaceTextRange(0, 0, string1);
+		mateText.undo();
+		checkTextIsEmpty();
+
+		text.replaceTextRange(0, 0, string1);
+		text.replaceTextRange(string1.length(), 0, string2);
+
+		String combined = string1 + string2;
+		assertEquals(combined, text.getText());
+		mateText.undo();
+		assertEquals(string1, text.getText());
+		mateText.redo();
+		assertEquals(combined, text.getText());
+		mateText.undo();
+		assertEquals(string1, text.getText());
+		mateText.undo();
+		checkTextIsEmpty();
+		checkNotDirty();
+		mateText.redo();
+		mateText.redo();
+		assertEquals(combined, text.getText());
+	}
 }
