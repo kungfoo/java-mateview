@@ -70,6 +70,17 @@
       </fileset>
     </copy>
 	</target>
+	
+	<target name="jar" depends="compile">
+		<delete dir="release"/>
+		<mkdir dir="release"/>
+		<jar destfile="release/java-mateview.jar" basedir="${build.prod.dir}">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Class-Path" value=". lib vendor" />
+			</manifest>
+		</jar>
+	</target>
 
 	<target name="compile" depends="prepare">
 		<javac srcdir="${src.dir}" destdir="${build.prod.dir}" debug="true">
