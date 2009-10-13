@@ -57,20 +57,20 @@ public class Grammar {
 		propertyLoader.loadRegexProperty("foldingStartMarker");
 		propertyLoader.loadRegexProperty("foldingStopMarker");
 		
-		this.allPatterns = new ArrayList<Pattern>();
+		allPatterns = new ArrayList<Pattern>();
 		loadPatterns();
 		loadRepository();
 		replaceIncludePatterns();
 	}
 
 	private void loadPatterns() {
-		this.patterns = new ArrayList<Pattern>();
-		Dict[] dictPatterns = plist.getDictionaries("patterns");
-		for (Dict p : dictPatterns) {
-			Pattern pattern = Pattern.createPattern(allPatterns, p);
+		patterns = new ArrayList<Pattern>();
+		Dict[] patternsDict = plist.getDictionaries("patterns");
+		for (Dict patternDict : patternsDict) {
+			Pattern pattern = Pattern.createPattern(allPatterns, patternDict);
 			if (pattern != null) {
 				pattern.grammar = this;
-				this.patterns.add(pattern);
+				patterns.add(pattern);
 			}
 		}
 	}
@@ -78,23 +78,19 @@ public class Grammar {
 	private void loadRepository() {
 		repository = new HashMap<String, List<Pattern>>();
 		Dict plistRepo = plist.getDictionary("repository");
-		Dict plistRepoEntry;
 		for (String key : plistRepo.keys()) {
-//			System.out.printf("loading repository entry: %s\n", key);
 			List<Pattern> repoArray = new ArrayList<Pattern>();
-			plistRepoEntry = plistRepo.getDictionary(key);
+			Dict plistRepoEntry = plistRepo.getDictionary(key);
 			if (plistRepoEntry.containsElement("begin") || plistRepoEntry.containsElement("match")) {
-//				System.out.printf("    contains begin or match\n");
-				Pattern pattern = Pattern.createPattern(this.allPatterns, plistRepoEntry);
+				Pattern pattern = Pattern.createPattern(allPatterns, plistRepoEntry);
 				if (pattern != null) {
 					pattern.grammar = this;
 					repoArray.add(pattern);
 				}
 			}
 			else if (plistRepoEntry.containsElement("patterns")) {
-//				System.out.printf("    contains patterns\n");
 				for (PlistNode<?> plistPattern : plistRepoEntry.getArray("patterns")) {
-					Pattern pattern = Pattern.createPattern(this.allPatterns, (Dict) plistPattern);
+					Pattern pattern = Pattern.createPattern(allPatterns, (Dict) plistPattern);
 					if (pattern != null) {
 						pattern.grammar = this;
 						repoArray.add(pattern);
