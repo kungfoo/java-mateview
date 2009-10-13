@@ -23,7 +23,7 @@ public class DoublePattern extends Pattern {
 
 	public DoublePattern() {}
 	
-	public DoublePattern(List<Pattern> grammarPatterns, Dict dict) {
+	public DoublePattern(Dict dict) {
 		name = dict.getString("name");
 //		System.out.printf("new DoublePattern name: %s\n", name);
 		try {
@@ -33,22 +33,18 @@ public class DoublePattern extends Pattern {
 			begin = Rx.createRx(dict.getString("begin"));
 
 			loadCaptures(dict);
-			loadPatterns(grammarPatterns, dict);
-			grammarPatterns.add(this);
+			loadPatterns(dict);
 		}
 		catch(ValueException e) {
 			System.out.printf("joni.exception.ValueException: %s in %s\n", e.getMessage(), dict.getString("begin"));
 		}
 	}
 
-	private void loadPatterns(List<Pattern> grammarPatterns, Dict dict) {
+	private void loadPatterns(Dict dict) {
 		patterns = new ArrayList<Pattern>();
 		if (dict.containsElement("patterns")) {
 			for (PlistNode<?> plistPattern : dict.getArray("patterns")) {
-				Pattern subPattern = Pattern.createPattern(grammarPatterns, (Dict) plistPattern);
-				if (subPattern != null) {
-					patterns.add(subPattern);
-				}
+				grammar.createAndAddPattern(patterns, (Dict) plistPattern);
 			}
 		}
 	}

@@ -13,9 +13,9 @@ public class Pattern {
 	public String name;
 	public boolean disabled;
 
-	public static Pattern createPattern(List<Pattern> allPatterns, Dict dict) {
+	public static Pattern createPattern(Dict dict) {
 		if (dict.containsElement("match")) {
-			return new SinglePattern(allPatterns, dict);
+			return new SinglePattern(dict);
 		}
 
 		if (dict.containsElement("include")) {
@@ -23,7 +23,7 @@ public class Pattern {
 		}
 
 		if (dict.containsElement("begin")) {
-			return new DoublePattern(allPatterns, dict);
+			return new DoublePattern(dict);
 		}
 		
 		return null;

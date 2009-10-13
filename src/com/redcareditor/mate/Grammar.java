@@ -67,11 +67,7 @@ public class Grammar {
 		patterns = new ArrayList<Pattern>();
 		Dict[] patternsDict = plist.getDictionaries("patterns");
 		for (Dict patternDict : patternsDict) {
-			Pattern pattern = Pattern.createPattern(allPatterns, patternDict);
-			if (pattern != null) {
-				pattern.grammar = this;
-				patterns.add(pattern);
-			}
+			createAndAddPattern(patterns, patternDict);
 		}
 	}
 
@@ -82,23 +78,25 @@ public class Grammar {
 			List<Pattern> repoArray = new ArrayList<Pattern>();
 			Dict plistRepoEntry = plistRepo.getDictionary(key);
 			if (plistRepoEntry.containsElement("begin") || plistRepoEntry.containsElement("match")) {
-				Pattern pattern = Pattern.createPattern(allPatterns, plistRepoEntry);
-				if (pattern != null) {
-					pattern.grammar = this;
-					repoArray.add(pattern);
-				}
+				createAndAddPattern(repoArray, plistRepoEntry);
 			}
 			else if (plistRepoEntry.containsElement("patterns")) {
 				for (PlistNode<?> plistPattern : plistRepoEntry.getArray("patterns")) {
-					Pattern pattern = Pattern.createPattern(allPatterns, (Dict) plistPattern);
-					if (pattern != null) {
-						pattern.grammar = this;
-						repoArray.add(pattern);
-					}
+					createAndAddPattern(repoArray, (Dict) plistPattern);
 				}
 			}
 			repository.put(key, repoArray);
 		}
+	}
+
+	public Pattern createAndAddPattern(List<Pattern> repoArray, Dict plistRepoEntry) {
+		Pattern pattern = Pattern.createPattern(plistRepoEntry);
+		allPatterns.add(pattern);
+		if (pattern != null) {
+			pattern.grammar = this;
+			repoArray.add(pattern);
+		}
+		return pattern;
 	}
 
 	private void replaceIncludePatterns() {
