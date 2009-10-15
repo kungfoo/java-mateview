@@ -35,7 +35,7 @@ On Linux:
 
 
 Contributing
-------------
+-------------
 
 Just so you know: You're free to use whatever IDE or editor to code on java-mateview.
 You can use the rake tasks to compile your code and run the tests easily.
