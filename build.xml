@@ -72,14 +72,17 @@
 	</target>
 	
 	<target name="jar" depends="compile">
+		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpathref="project.classpath" />
 		<delete dir="release"/>
 		<mkdir dir="release"/>
-		<jar destfile="release/java-mateview.jar" basedir="${build.prod.dir}">
+		<jarjar destfile="release/java-mateview.jar" basedir="${build.prod.dir}">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="Class-Path" value=". lib vendor" />
 			</manifest>
-		</jar>
+			<!-- also add the libs to the jar -->
+			<zipfileset dir="${lib.dir}" includes="*.jar" />
+		</jarjar>
 	</target>
 
 	<target name="compile" depends="prepare">
