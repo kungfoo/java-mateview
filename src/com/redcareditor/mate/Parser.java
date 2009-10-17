@@ -170,7 +170,7 @@ public class Parser {
 	private boolean parseLine(int lineIx) {
 		String line = styledText.getLine(lineIx) + "\n";
 		int length = line.length();
-		System.out.printf("p%d, ", lineIx);
+//		System.out.printf("p%d, ", lineIx);
 		if (lineIx > this.parsedUpto)
 			this.parsedUpto = lineIx;
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
