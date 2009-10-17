@@ -8,3 +8,4 @@ module JavaMateView
   import com.redcareditor.theme.Theme
   import com.redcareditor.theme.ThemeManager
 end
+
