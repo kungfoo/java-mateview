@@ -29,7 +29,7 @@ public abstract class Pattern {
 		if (dict.containsElement("begin")) {
 			return new DoublePattern(grammar, dict);
 		}
-		
+
 		return null;
 	}
 
@@ -66,22 +66,22 @@ public abstract class Pattern {
 					List<Pattern> repositoryEntryPatterns = grammar.repository.get(reponame);
 					if (repositoryEntryPatterns != null) {
 						anyIncluded = true;
-//						System.out.printf("repository %s with size %d\n", reponame, repositoryEntryPatterns.size());
+						// System.out.printf("repository %s with size %d\n",
+						// reponame, repositoryEntryPatterns.size());
 						patternsToInclude.addAll(repositoryEntryPatterns);
 					} else {
-						System.out.printf("warning: couldn't find repository key '%s' in grammar '%s'\n", reponame,
-								grammar.name);
+						System.out.printf("warning: couldn't find repository key '%s' in grammar '%s'\n", reponame, grammar.name);
 					}
 				}
 			}
 			patterns.removeAll(includePatterns);
 			patterns.addAll(patternsToInclude);
-			
+
 			includePatterns.clear();
 			patternsToInclude.clear();
 		}
 	}
-	
+
 	public abstract void replaceRepositoryIncludes();
 
 	public static void replaceBaseAndSelfIncludes(List<Pattern> patterns, Grammar grammar) {
@@ -90,9 +90,9 @@ public abstract class Pattern {
 		boolean alreadySelf = false; // some patterns have $self twice
 		Grammar ng;
 		for (Pattern p : patterns) {
-//			System.out.printf("    considering %s\n", p.name);
+			// System.out.printf("    considering %s\n", p.name);
 			if (p instanceof IncludePattern) {
-//				System.out.printf("    replacing %s\n", p.name);
+				// System.out.printf("    replacing %s\n", p.name);
 				if (p.name.startsWith("$")) {
 					includePatterns.add(p);
 					if ((p.name.equals("$self") || p.name.equals("$base")) && !alreadySelf) {
@@ -100,7 +100,6 @@ public abstract class Pattern {
 						patternsToInclude.addAll(grammar.patterns);
 					}
 				} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
-//					System.out.printf("importing toplevel patterns from %s\n", ng.name);
 					ng.initForUse();
 					includePatterns.add(p);
 					patternsToInclude.addAll(ng.patterns);
@@ -122,8 +121,7 @@ public abstract class Pattern {
 			if (plistNode.value instanceof String) {
 				String strn = dict.getString("disabled");
 				intn = Integer.parseInt(strn);
-			}
-			else {
+			} else {
 				intn = dict.getInt("disabled");
 			}
 			switch (intn) {

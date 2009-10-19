@@ -8,4 +8,9 @@ public class IncludePattern extends Pattern {
 		name = dict.getString("include");
 //		System.out.printf("ip: %s\n", name);
 	}
+	
+	@Override
+	public void replaceRepositoryIncludes() {
+		
+	}
 }

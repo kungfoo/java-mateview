@@ -16,4 +16,9 @@ public class SinglePattern extends Pattern {
 		captures = makeCapturesFromPlist(dict.getDictionary("captures"));
 		setDisabled(dict);
 	}
+	
+	@Override
+	public void replaceRepositoryIncludes() {
+		// nothing to do
+	}
 }

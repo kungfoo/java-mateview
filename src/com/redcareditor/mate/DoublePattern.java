@@ -61,4 +61,9 @@ public class DoublePattern extends Pattern {
 			endCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("endCaptures"));
 		}
 	}
+	
+	@Override
+	public void replaceRepositoryIncludes() {
+		// Nothing to do for this type of pattern.
+	}
 }
