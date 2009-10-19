@@ -8,7 +8,7 @@ import java.util.Map;
 import com.redcareditor.plist.Dict;
 import com.redcareditor.plist.PlistNode;
 
-public class Pattern {
+public abstract class Pattern {
 	public Grammar grammar;
 	public String name;
 	public boolean disabled;
@@ -74,12 +74,15 @@ public class Pattern {
 					}
 				}
 			}
-			removePatterns(patterns, includePatterns);
-			addPatterns(patterns, patternsToInclude);
+			patterns.removeAll(includePatterns);
+			patterns.addAll(patternsToInclude);
+			
 			includePatterns.clear();
 			patternsToInclude.clear();
 		}
 	}
+	
+	public abstract void replaceRepositoryIncludes();
 
 	public static void replaceBaseAndSelfIncludes(List<Pattern> patterns, Grammar grammar) {
 		List<Pattern> includePatterns = new ArrayList<Pattern>();
@@ -110,18 +113,6 @@ public class Pattern {
 		}
 		patterns.removeAll(includePatterns);
 		patterns.addAll(patternsToInclude);
-	}
-
-	private static void removePatterns(List<Pattern> patlist, List<Pattern> ps) {
-		for (Pattern p : ps) {
-			patlist.remove(p);
-		}
-	}
-
-	private static void addPatterns(List<Pattern> patlist, List<Pattern> ps) {
-		for (Pattern p : ps) {
-			patlist.add(p);
-		}
 	}
 
 	public void setDisabled(Dict dict) {
