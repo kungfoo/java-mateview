@@ -44,6 +44,7 @@ public class DoublePattern extends Pattern {
 		patterns = new ArrayList<Pattern>();
 		if (dict.containsElement("patterns")) {
 			for (PlistNode<?> plistPattern : dict.getArray("patterns")) {
+				// FIXME: grammar is null here. The order of things is b0rked.
 				grammar.createAndAddPattern(patterns, (Dict) plistPattern);
 			}
 		}
