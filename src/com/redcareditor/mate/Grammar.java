@@ -100,11 +100,9 @@ public class Grammar {
 
 	private void replaceIncludePatterns() {
 		for (Pattern p : allPatterns) {
-//			System.out.printf("%s replaceIncludePattern for %s\n", this.name, p.name);
 			if (p instanceof DoublePattern) {
 				Pattern.replaceIncludePatterns(((DoublePattern) p).patterns, this);
 			}
-//			System.out.printf("%s replaceIncludePattern for %s [done]\n", this.name, p.name);
 		}
 		Pattern.replaceIncludePatterns(patterns, this);
 	}
