@@ -9,7 +9,8 @@ public class SinglePattern extends Pattern {
 	public Rx match;
 	public Map<Integer, String> captures;
 	
-	public SinglePattern(Dict dict) {
+	public SinglePattern(Grammar grammar, Dict dict) {
+		super(grammar);
 		name = dict.getString("name");
 		match = Rx.createRx(dict.getString("match"));
 		captures = makeCapturesFromPlist(dict.getDictionary("captures"));

@@ -13,17 +13,21 @@ public class Pattern {
 	public String name;
 	public boolean disabled;
 
-	public static Pattern createPattern(Dict dict) {
+	public Pattern(Grammar grammar) {
+		this.grammar = grammar;
+	}
+
+	public static Pattern createPattern(Grammar grammar, Dict dict) {
 		if (dict.containsElement("match")) {
-			return new SinglePattern(dict);
+			return new SinglePattern(grammar, dict);
 		}
 
 		if (dict.containsElement("include")) {
-			return new IncludePattern(dict);
+			return new IncludePattern(grammar, dict);
 		}
 
 		if (dict.containsElement("begin")) {
-			return new DoublePattern(dict);
+			return new DoublePattern(grammar, dict);
 		}
 		
 		return null;

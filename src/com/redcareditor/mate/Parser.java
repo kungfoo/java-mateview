@@ -60,11 +60,10 @@ public class Parser {
 //		this.root.setEndPos(lineIx, 
 //							styledText.getCharCount() - styledText.getOffsetAtLine(lineIx), false);
 //		System.out.printf("making root: %s\n", this.grammar.scopeName);
-		DoublePattern dp = new DoublePattern();
-		dp.name = this.grammar.name;
-		dp.patterns = this.grammar.patterns;
-		dp.grammar = this.grammar;
-		this.root.pattern = dp;
+		DoublePattern dp = new DoublePattern(grammar, null);
+		dp.name = grammar.name;
+		dp.patterns = grammar.patterns;
+		root.pattern = dp;
 	}
 	
 	public void attachListeners() {

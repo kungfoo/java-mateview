@@ -21,9 +21,9 @@ public class DoublePattern extends Pattern {
 	public Map<Integer, String> bothCaptures;
 	public List<Pattern> patterns;
 
-	public DoublePattern() {}
 	
-	public DoublePattern(Dict dict) {
+	public DoublePattern(Grammar grammar, Dict dict) {
+		super(grammar);
 		name = dict.getString("name");
 //		System.out.printf("new DoublePattern name: %s\n", name);
 		try {

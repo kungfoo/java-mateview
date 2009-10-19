@@ -90,10 +90,9 @@ public class Grammar {
 	}
 
 	public Pattern createAndAddPattern(List<Pattern> repoArray, Dict plistRepoEntry) {
-		Pattern pattern = Pattern.createPattern(plistRepoEntry);
+		Pattern pattern = Pattern.createPattern(this, plistRepoEntry);
 		allPatterns.add(pattern);
 		if (pattern != null) {
-			pattern.grammar = this;
 			repoArray.add(pattern);
 		}
 		return pattern;
