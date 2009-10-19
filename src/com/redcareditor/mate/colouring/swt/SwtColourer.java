@@ -111,7 +111,7 @@ public class SwtColourer implements Colourer {
 	}
 
 	private boolean isColorDefined(String colour) {
-		return colour != null && !colour.isEmpty();
+		return colour != null && !(colour.length() == 0);
 	}
 
 	private void colourLine(LineStyleEvent event) {
