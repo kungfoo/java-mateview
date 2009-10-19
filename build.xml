@@ -8,6 +8,7 @@
 	<property name="build.prod.dir" location="${build.dir}" />
 	<property name="build.test.dir" location="${build.dir}/test" />
 	<property name="test.report.dir" location="${build.dir}/test-reports" />
+	<property name="build.compiler" value="javac1.6"/>
 
 	<condition property="platform" value="osx">
 		<and>
@@ -80,8 +81,11 @@
 				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="Class-Path" value=". lib vendor" />
 			</manifest>
-			<!-- also add the libs to the jar -->
-			<zipfileset dir="${lib.dir}" includes="*.jar" />
+			<!--
+			Also add the libs to the jar, this can right now not be replaced with a wildcarded char...
+			I'll file a feature request with the jarjar guys!
+			-->
+			<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
 		</jarjar>
 	</target>
 
@@ -93,12 +97,6 @@
 
 	<target name="compile-tests" depends="compile">
 		<javac srcdir="${test.dir}" destdir="${build.test.dir}" debug="true">
-			<classpath refid="project.classpath" />
-		</javac>
-	</target>
-
-	<target name="compile-bench" depends="compile">
-		<javac srcdir="bench" destdir="${build.dir}" debug="false">
 			<classpath refid="project.classpath" />
 		</javac>
 	</target>
