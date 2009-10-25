@@ -82,7 +82,7 @@
 				<attribute name="Class-Path" value=". lib vendor" />
 			</manifest>
 			<!-- also pack up all the system independent runtime deps -->
-			<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
+			<!--<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>-->
 		</jarjar>
 	</target>
 
