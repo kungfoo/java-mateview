@@ -69,6 +69,7 @@ public class Parser {
 	}
 	
 	public void attachListeners() {
+//		System.out.printf("parser attach listeners\n");
 		mateText.getTextWidget().addVerifyListener(new VerifyListener() {
 			public void verifyText(VerifyEvent e) {
 				verifyEventCallback(e.start, e.end, e.text);
@@ -83,6 +84,7 @@ public class Parser {
 	}
 
 	public void verifyEventCallback(int start, int end, String text) {
+//		System.out.printf("verifyEventCallback(%s)\n", text);
 		modifyStart = start;
 		modifyEnd   = end;
 		modifyText  = text;
@@ -121,7 +123,7 @@ public class Parser {
 	// Parse from from_line to *at least* to_line. Will parse
 	// more if necessary. Returns the index of the last line
 	// parsed.
-	private int parseRange(int fromLine, int toLine) {
+	public int parseRange(int fromLine, int toLine) {
 //		System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
