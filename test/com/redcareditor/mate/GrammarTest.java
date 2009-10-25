@@ -8,8 +8,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.redcareditor.plist.Dict;
-
 public class GrammarTest {
 	private Grammar g;
 

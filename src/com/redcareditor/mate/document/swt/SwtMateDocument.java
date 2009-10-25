@@ -32,14 +32,13 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 			SwtMateTextLocation endLocation = new SwtMateTextLocation(start + length, this);
 			this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
 			this.mateText.parser.processChanges();
-		}
-		catch (BadLocationException e) {
+		} catch (BadLocationException e) {
 			// TODO: SwtMateDocument should throw it's own Exception here
 		}
 	}
-	
+
 	public boolean addTextLocation(MateTextLocation location) {
-//		SwtTextLocation position = new SwtTextLocation(location, this);
+		// SwtTextLocation position = new SwtTextLocation(location, this);
 
 		try {
 			mateText.getDocument().addPosition((SwtMateTextLocation) location);
@@ -47,10 +46,10 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-//		catch (BadPositionCategoryException e) {
-//			e.printStackTrace();
-//		}
+		}
+		// catch (BadPositionCategoryException e) {
+		// e.printStackTrace();
+		// }
 
 		return false;
 	}

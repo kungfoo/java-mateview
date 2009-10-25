@@ -2,15 +2,14 @@ package com.redcareditor.plist;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.redcareditor.onig.Rx;
 
@@ -22,25 +21,24 @@ import com.redcareditor.onig.Rx;
  */
 public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 
-  public static class EntityResolver implements org.xml.sax.EntityResolver {
-//    @Override
-    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-      if (systemId.equals("http://www.apple.com/DTDs/PropertyList-1.0.dtd")) {
-        InputStream is = EntityResolver.class.getClassLoader().getResourceAsStream("PropertyList-1.0.dtd");
-        return new InputSource(is);
-      }
-      return null;
-    }
-  }
+	private static SAXBuilder builder;
+
+	// NOTE: this method is not thread safe, if we ever go there, this needs to
+	// contain a mutex!
+	private static SAXBuilder getSAXBuilderInstance() {
+		if (builder == null) {
+			builder = new SAXBuilder(false);
+			builder.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
+		}
+		return builder;
+	}
 
 	public static Dict parseFile(String filename) {
-		SAXBuilder builder;
-		Document document;
-		builder = new SAXBuilder();
-//		builder.setEntityResolver(new EntityResolver());
 		try {
-			document = builder.build(new File(filename));
+			Document document = getSAXBuilderInstance().build(new File(filename));
 			return new Dict(document.getRootElement().getChild("dict"));
+
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -72,7 +70,7 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 	public Integer getInt(String key) {
 		return tryGettingValue(this, key);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public String[] getStrings(String key) {
 		List<PlistNode<String>> strings = (List<PlistNode<String>>) value.get(key).value;
@@ -93,26 +91,26 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 	public List<PlistNode<?>> getArray(String key) {
 		return tryGettingValue(this, key);
 	}
-	
+
 	public Dict getDictionary(String key) {
 		return (Dict) value.get(key);
 	}
-	
-	public Rx getRegExp(String key){
+
+	public Rx getRegExp(String key) {
 		return Rx.createRx(getString(key));
 	}
 
 	public boolean containsElement(String key) {
 		return value.containsKey(key);
 	}
-	
+
 	public Set<String> keys() {
 		return value.keySet();
 	}
-	              
+
 	@SuppressWarnings("unchecked")
-	private static <T> T tryGettingValue(Dict dict, String key){
-		if(dict.value.containsKey(key)){
+	private static <T> T tryGettingValue(Dict dict, String key) {
+		if (dict.value.containsKey(key)) {
 			return (T) dict.value.get(key).value;
 		} else {
 			return null;

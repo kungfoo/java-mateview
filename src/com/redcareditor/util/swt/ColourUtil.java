@@ -39,10 +39,7 @@ public class ColourUtil {
 	}
 
 	private static int char_to_hex(Character ch) {
-		if (Character.isDigit(ch)) {
-			return Character.digit(ch, 10);
-		}
-		return 0;
+		return Character.digit(ch, 16);
 	}
 
 	private static int hex_to_int(char ch1, char ch2) {
