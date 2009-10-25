@@ -56,6 +56,7 @@ public class Bundle {
 		}
 		bundles = new ArrayList<Bundle>();
 		for (String bundleDir : bundleDirs(textmateDir)) {
+			System.out.printf("loading %s\n", bundleDir);
 			Bundle bundle = new Bundle(bundleDir.split("\\.")[0]);
 			getBundles().add(bundle);
 			File grammarDirectory = new File(textmateDir + "/Bundles/" + bundleDir + "/Syntaxes");
