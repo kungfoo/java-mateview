@@ -108,6 +108,8 @@ public class SwtColourer implements Colourer {
 	private void colourLine(LineStyleEvent event) {
 		if (theme == null)
 			return;
+		if (!mateText.shouldColour())
+			return;
 		int eventLine = mateText.getControl().getLineAtOffset(event.lineOffset);
 		System.out.printf("colourLine(%d)\n", eventLine);
 		ArrayList<Scope> scopes = mateText.parser.root.scopesOnLine(eventLine);

@@ -89,6 +89,10 @@ public class MateText extends Composite {
 		return viewer.getTextWidget();
 	}
 
+	public boolean shouldColour() {
+		return parser.shouldColour();
+	}
+	
 	// Sets the grammar explicitly by name.
 	// TODO: restore the uncolouring stuff
 	public boolean setGrammarByName(String name) {

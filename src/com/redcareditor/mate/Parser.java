@@ -49,6 +49,7 @@ public class Parser {
 		attachListeners();
 		parsedUpto = 0;
 		alwaysParseAll = false;
+		modifyStart = -1;
 		document = m.getMateDocument();
 	}
 	
@@ -86,12 +87,19 @@ public class Parser {
 		modifyEnd   = end;
 		modifyText  = text;
 	}
+
+	public boolean shouldColour() {
+		return (modifyStart == -1);
+	}
 	
 	public void modifyEventCallback() {
 		// TODO: this isn't quite right...
 		changes.add(styledText.getLineAtOffset(modifyStart), 
 				styledText.getLineAtOffset(modifyStart + modifyText.length()));
 //		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
+		modifyStart = -1;
+		modifyEnd   = -1;
+		modifyText  = null;
 		processChanges();
 	}
 
@@ -104,8 +112,7 @@ public class Parser {
 				int rangeEnd = Math.min(lastVisibleLine + lookAhead, range.end);
 				thisParsedUpto = parseRange(range.start, rangeEnd);
 			}
-			System.out.printf("redraw range: %d - %d\n", styledText.getOffsetAtLine(range.start), styledText.getOffsetAtLine(range.end));
-			styledText.redrawRange(styledText.getOffsetAtLine(range.start), styledText.getOffsetAtLine(range.end), false);
+			styledText.redrawRange(styledText.getOffsetAtLine(range.start), styledText.getOffsetAtLine(range.end) - styledText.getOffsetAtLine(range.start), false);
 		}
 //		System.out.printf("%s\n", root.pretty(0));
 		changes.ranges.clear();
