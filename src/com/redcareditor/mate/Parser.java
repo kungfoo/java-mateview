@@ -104,6 +104,8 @@ public class Parser {
 				int rangeEnd = Math.min(lastVisibleLine + lookAhead, range.end);
 				thisParsedUpto = parseRange(range.start, rangeEnd);
 			}
+			System.out.printf("redraw range: %d - %d\n", styledText.getOffsetAtLine(range.start), styledText.getOffsetAtLine(range.end));
+			styledText.redrawRange(styledText.getOffsetAtLine(range.start), styledText.getOffsetAtLine(range.end), false);
 		}
 //		System.out.printf("%s\n", root.pretty(0));
 		changes.ranges.clear();
