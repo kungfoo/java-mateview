@@ -105,13 +105,10 @@ public class MateText extends Composite {
 					// int parsed_upto = 150;
 					Theme theme;
 					// if (this.parser != null) {
-					// theme = this.parser.colourer.theme;
-					// this.parser.colourer.uncolour_scope(this.parser.root,
-					// true);
-					// parsed_upto = this.parser.parsed_upto;
-					// this.parser.close();
+					// 	this.parser.close();
 					// }
 					this.parser = new Parser(grammar, this);
+					this.parser.parseRange(0, getControl().getLineCount()-1);
 					// this.parser.last_visible_line_changed(parsed_upto);
 					// GLib.Signal.emit_by_name(this, "grammar_changed",
 					// gr.name);
