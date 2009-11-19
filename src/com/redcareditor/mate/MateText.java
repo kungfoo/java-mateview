@@ -37,7 +37,6 @@ public class MateText extends Composite {
 
 	private MateTextUndoManager undoManager;
 
-
 	public MateText(Composite parent) {
 		super(parent, SWT.NONE);
 		document = new Document();

@@ -9,7 +9,6 @@ class MateExample < Jface::ApplicationWindow
   end
   
   def createContents(parent)
-    p :createC
     @contents = Swt::Widgets::Composite.new(parent, Swt::SWT::NONE)
     @contents.layout = Swt::Layout::FillLayout.new
     @mate_text = JavaMateView::MateText.new(@contents)
@@ -24,7 +23,6 @@ class MateExample < Jface::ApplicationWindow
   end
   
   def createMenuManager
-    p :createM
     main_menu = Jface::MenuManager.new
     
     file_menu = Jface::MenuManager.new("Tests")
@@ -37,7 +35,7 @@ class MateExample < Jface::ApplicationWindow
     
     replace2_action = ReplaceContents2.new
     replace2_action.window = self
-    replace2_action.text = "Contents SQL"
+    replace2_action.text = "Contents HTML"
     file_menu.add replace2_action
     
     set_ruby_action = SetRuby.new
@@ -72,7 +70,8 @@ class MateExample < Jface::ApplicationWindow
     attr_accessor :window
 
     def run
-      @window.mate_text.getDocument.set(source*3)
+      p @window.mate_text.getMateDocument
+      @window.mate_text.getMateDocument.set(source*3)
     end
     
     def source
@@ -121,14 +120,6 @@ HTML
     window.addMenuBar
     window.open
     Swt::Widgets::Display.getCurrent.dispose
-  end
-  
-  class ExitAction < Jface::Action
-    attr_accessor :window
-    
-    def run
-      window.close
-    end
   end
 end
 
