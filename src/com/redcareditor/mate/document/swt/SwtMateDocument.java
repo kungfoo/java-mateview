@@ -27,8 +27,12 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 
 	public void set(String text) {
 		this.mateText.getDocument().set(text);
+		reparseAll();
+	}
+
+	public void reparseAll() {
 		SwtMateTextLocation startLocation = new SwtMateTextLocation(0, this);
-		SwtMateTextLocation endLocation = new SwtMateTextLocation(0 + text.length(), this);
+		SwtMateTextLocation endLocation = new SwtMateTextLocation(0 + styledText.getCharCount(), this);
 		this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
 		this.mateText.parser.processChanges();
 	}

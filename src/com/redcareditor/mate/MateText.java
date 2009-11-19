@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Display;
 import com.redcareditor.mate.colouring.Colourer;
 import com.redcareditor.mate.colouring.swt.SwtColourer;
 import com.redcareditor.mate.document.MateDocument;
+import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.swt.SwtMateDocument;
 import com.redcareditor.mate.undo.MateTextUndoManager;
 import com.redcareditor.mate.undo.swt.SwtMateTextUndoManager;
@@ -107,7 +108,8 @@ public class MateText extends Composite {
 					// 	this.parser.close();
 					// }
 					this.parser = new Parser(grammar, this);
-					this.parser.parseRange(0, getControl().getLineCount()-1);
+					getMateDocument().reparseAll();
+					// this.parser.parseRange(0, getControl().getLineCount()-1);
 					// this.parser.last_visible_line_changed(parsed_upto);
 					// GLib.Signal.emit_by_name(this, "grammar_changed",
 					// gr.name);

@@ -70,7 +70,6 @@ class MateExample < Jface::ApplicationWindow
     attr_accessor :window
 
     def run
-      p @window.mate_text.getMateDocument
       @window.mate_text.getMateDocument.set(source*3)
     end
     
@@ -92,7 +91,7 @@ RUBY
     attr_accessor :window
 
     def run
-      @window.mate_text.getDocument.set(source*3)
+      @window.mate_text.getMateDocument.set(source*3)
     end
     
     def source
