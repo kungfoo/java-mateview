@@ -3,6 +3,8 @@ package com.redcareditor.mate.colouring.swt;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.text.JFaceTextUtil;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
@@ -78,9 +80,14 @@ public class SwtColourer implements Colourer {
 	}
 
 	private void setMateTextColors() {
+		System.out.printf("setting globalBackground: %s\n", globalBackground);
 		control.setBackground(globalBackground);
 		control.setForeground(globalForeground);
 		int currentLine = control.getLineAtOffset(control.getCaretOffset());
+		int startLine = JFaceTextUtil.getPartialTopIndex(control);
+		int endLine = JFaceTextUtil.getPartialBottomIndex(control);
+		for (int i = startLine; i <= endLine; i ++)
+			control.setLineBackground(i, 1, globalBackground);
 		control.setLineBackground(currentLine, 1, globalLineBackground);
 		mateText.setGutterBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		mateText.setGutterForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
