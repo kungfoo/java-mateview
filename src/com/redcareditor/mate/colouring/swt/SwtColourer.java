@@ -15,7 +15,10 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Caret;
 import org.eclipse.swt.widgets.Display;
 
@@ -91,17 +94,40 @@ public class SwtColourer implements Colourer {
 		int height = bounds.height;
 		caret = new Caret(control, SWT.NONE);
 		Display display = Display.getCurrent();
+		// System.out.printf("caret colour: %s %d %d\n", globalColour("caret"), width, height);
+		String caretColourString = globalColour("caret");
+		Color caretColour = ColourUtil.getColour(caretColourString);
 		Color white = display.getSystemColor(SWT.COLOR_WHITE);
 		Color black = display.getSystemColor(SWT.COLOR_BLACK);
-
-		Image image = new Image(display, width, height);
-		GC gc = new GC(image);
-		gc.setBackground(white);
-		gc.fillRectangle(0, 0, width, height);
-		gc.setForeground(white);
-		gc.drawLine(0, 0, width, height);
-		gc.dispose();
-		caret.setLocation(10, 10);
+		String backgroundColourString = globalColour("background");
+		int red = Integer.parseInt(backgroundColourString.substring(1, 3), 16) ^ 
+					Integer.parseInt(caretColourString.substring(1, 3), 16);
+		int green = Integer.parseInt(backgroundColourString.substring(3, 5), 16) ^ 
+						Integer.parseInt(caretColourString.substring(3, 5), 16);
+		int blue = Integer.parseInt(backgroundColourString.substring(5, 7), 16) ^
+						Integer.parseInt(caretColourString.substring(5, 7), 16);
+		// System.out.printf("r, g, b: %d, %d, %d\n", red, green, blue);
+		PaletteData palette = new PaletteData (
+			new RGB [] {
+				new RGB (0, 0, 0),
+				new RGB (red, green, blue),
+				new RGB (0xFF, 0xFF, 0xFF),
+			});
+		// System.out.printf("depth: %d\n", Display.getCurrent().getDepth());
+		ImageData maskData = new ImageData (1, height, 2, palette);
+		for (int y=0; y < height; y++)
+			maskData.setPixel(0, y, 1);
+		Image image = new Image (display, maskData);
+		// Image image = new Image(display, 1, height);
+		// GC gc = new GC(image);
+		// gc.setAntialias(SWT.OFF);
+		// gc.setBackground(white);
+		// gc.fillRectangle(0, 0, 1, height);
+		// gc.setForeground(caretColour);
+		// gc.drawLine(0, 0, 0, height);
+		// System.out.printf("alpha: %d\n", gc.getAlpha());
+		// gc.dispose();
+		// caret.setLocation(10, 10);
 		caret.setImage(image);
 		control.setCaret(caret);
 	}
