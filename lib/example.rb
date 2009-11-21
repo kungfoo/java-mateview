@@ -47,7 +47,33 @@ class MateExample < Jface::ApplicationWindow
     set_html_action.window = self
     set_html_action.text = "Set HTML Grammar"
     file_menu.add set_html_action
+    
+    set_mc_action = SetMacClassic.new
+    set_mc_action.window = self
+    set_mc_action.text = "Set Mac Classic"
+    file_menu.add set_mc_action
+    
+    set_twilight_action = SetTwilight.new
+    set_twilight_action.window = self
+    set_twilight_action.text = "Set Twilight"
+    file_menu.add set_twilight_action
     return main_menu
+  end
+  
+  class SetMacClassic < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.set_theme_by_name("Mac Classic")
+    end
+  end
+  
+  class SetTwilight < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.set_theme_by_name("Twilight")
+    end
   end
   
   class SetRuby < Jface::Action
