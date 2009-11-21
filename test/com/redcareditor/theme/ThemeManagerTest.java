@@ -9,12 +9,12 @@ public class ThemeManagerTest {
 	@Test
 	public void shouldLoadThemes() {
 		ThemeManager.loadThemes("input/");
-		assertEquals(2, ThemeManager.themes.size());
+		assertEquals(3, ThemeManager.themes.size());
 	}
 
 	@Test
 	public void shouldContainTwoRightThemes() {
-		String [] expectedThemeNames = {"Railscasts", "Twilight"};
+		String [] expectedThemeNames = {"Mac Classic", "Railscasts", "Twilight"};
 		for(String theme : expectedThemeNames){
 			boolean found = false;
 			for(Theme t : ThemeManager.themes){
