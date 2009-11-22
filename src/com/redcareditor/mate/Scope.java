@@ -52,10 +52,6 @@ public class Scope implements Comparable<Scope>{
 		this.innerRange = document.getTextRange();
 	}
 	
-	public void clearAfter(int lineIx, int something) {
-		// TODO: port this method
-	}
-	
 	public Scope scopeAt(int line, int lineOffset) {
 		MateTextLocation location = document.getTextLocation(line, lineOffset);
 		

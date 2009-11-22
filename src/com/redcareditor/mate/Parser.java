@@ -11,6 +11,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ScrollBar;
 
 import org.eclipse.jface.text.IViewportListener;
@@ -40,13 +41,14 @@ public class Parser {
 	// temporary stores for the modifications to the mateText
 	private int modifyStart, modifyEnd;
 	private String modifyText;
+	public ParseThunk thunk;
 	
 	public Parser(Grammar g, MateText m) {
 		g.initForUse();
 		grammar = g;
 		mateText = m;
 		styledText = m.getTextWidget();
-		lookAhead = 100;
+		lookAhead = 20;
 		lastVisibleLine = 0;
 //		tags = new Sequence<TextTag>(null);
 		changes = new RangeSet();
@@ -146,24 +148,44 @@ public class Parser {
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
 		boolean scopeEverChanged = false;
-		int lineCount = styledText.getLineCount();
-		int endLine = Math.min(lastVisibleLine + 100, lineCount - 1);
-		while (lineIx <= toLine || scopeEverChanged && lineIx <= endLine) {
+		while (lineIx <= toLine) {
 			scopeChanged = parseLine(lineIx);
 			if (scopeChanged) {
-				// System.out.printf("scopeChanged on %d\n", lineIx);
 				scopeEverChanged = true;
-				root.clearAfter(lineIx, -1);
+				this.parsedUpto = lineIx;
+			}
+			lineIx++;
+		}
+		if (thunk != null) {
+			thunk.delayAndUpdate(lineIx);
+		}
+		else {
+			if (scopeEverChanged) {
+				thunk = new ParseThunk(this, lineIx);
+			}
+		}
+
+		return toLine;
+	}
+	
+	public void parseOnwards(int fromLine) {
+		// System.out.printf("parseOnwards(%d)\n", fromLine);
+		int lineIx = fromLine;
+		int lineCount = styledText.getLineCount();
+		int endLine = Math.min(lastVisibleLine + 100, lineCount - 1);
+		boolean scopeChanged = false;
+		boolean scopeEverChanged = true;
+		while (scopeEverChanged && lineIx < endLine) {
+			scopeChanged = parseLine(lineIx);
+			if (scopeChanged) {
+				scopeEverChanged = true;
 				this.parsedUpto = lineIx;
 			}
 			if (scopeEverChanged) {
 				redrawLine(lineIx);
 			}
 			lineIx++;
-			// stdout.printf("parse_line returned: %s\n", scope_changed ? "true" : "false");
-			// System.out.printf("pretty:\n%s\n", root.pretty(2));
 		}
-		return toLine;
 	}
 	
 	public void redrawLine(int lineIx) {
