@@ -1,5 +1,8 @@
 package com.redcareditor.mate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.CompositeRuler;
@@ -37,6 +40,7 @@ public class MateText extends Composite {
 	private SwtMateDocument mateDocument;
 
 	private MateTextUndoManager undoManager;
+	private List<IGrammarListener> grammarListeners;
 
 	public MateText(Composite parent) {
 		super(parent, SWT.NONE);
@@ -48,6 +52,7 @@ public class MateText extends Composite {
 		colourer = new SwtColourer(this);
 		undoManager = new SwtMateTextUndoManager(this);
 		mateDocument = new SwtMateDocument(this);
+		grammarListeners = new ArrayList<IGrammarListener>();
 	}
 
 	private CompositeRuler constructRuler() {
@@ -115,6 +120,9 @@ public class MateText extends Composite {
 					// gr.name);
 					// if (theme != null)
 					// this.parser.change_theme(theme);
+					for (IGrammarListener grammarListener : grammarListeners) {
+						grammarListener.grammarChanged(grammar.name);
+					}
 					return true;
 				}
 			}
@@ -193,5 +201,9 @@ public class MateText extends Composite {
 
 	public void setGutterForeground(Color color) {
 		lineNumbers.setForeground(color);
+	}
+	
+	public void addGrammarListener(IGrammarListener listener) {
+		grammarListeners.add(listener);
 	}
 }

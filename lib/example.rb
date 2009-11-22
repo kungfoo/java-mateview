@@ -7,11 +7,24 @@ class MateExample < Jface::ApplicationWindow
   def initialize
     super(nil)
   end
-  
+
+  # this is another way of making a listener
+  class MyListener
+    include com.redcareditor.mate.IGrammarListener
+    
+    def grammarChanged(new_name)
+      puts "listened for #{new_name} in #{self}"
+    end
+  end
+
   def createContents(parent)
     @contents = Swt::Widgets::Composite.new(parent, Swt::SWT::NONE)
     @contents.layout = Swt::Layout::FillLayout.new
     @mate_text = JavaMateView::MateText.new(@contents)
+    
+    @mate_text.add_grammar_listener do |new_name|
+      puts "listened for #{new_name} in #{self}"
+    end
     @mate_text.set_grammar_by_name "Ruby"
     @mate_text.set_theme_by_name "Mac Classic"
     @mate_text.set_font "Monaco", 15
