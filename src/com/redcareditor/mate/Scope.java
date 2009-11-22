@@ -193,7 +193,7 @@ public class Scope implements Comparable<Scope>{
 		for (Scope child : children) {
 			int childStartLine = child.getStart().getLine();
 			if (childStartLine == lineIx && !scopes.contains(child)) {
-				System.out.printf("deleteAnyOnLineNotIn removing: %s\n", child.pattern.name);
+				// System.out.printf("deleteAnyOnLineNotIn removing: %s\n", child.pattern.name);
 				removedScopes.add(child);
 			}
 		}

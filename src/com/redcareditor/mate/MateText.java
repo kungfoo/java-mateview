@@ -33,7 +33,7 @@ public class MateText extends Composite {
 	public Colourer colourer;
 
 	/* components plugged together */
-	private SourceViewer viewer;
+	public SourceViewer viewer;
 	private IDocument document;
 	private CompositeRuler gutter;
 	private LineNumberRulerColumn lineNumbers;

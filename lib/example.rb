@@ -70,6 +70,12 @@ class MateExample < Jface::ApplicationWindow
     set_twilight_action.window = self
     set_twilight_action.text = "Set Twilight"
     file_menu.add set_twilight_action
+    
+    set_scopes_action = PrintScopeTree.new
+    set_scopes_action.window = self
+    set_scopes_action.text = "Print Scope Tree"
+    file_menu.add set_scopes_action
+    
     return main_menu
   end
   
@@ -78,6 +84,14 @@ class MateExample < Jface::ApplicationWindow
     
     def run
       @window.mate_text.set_theme_by_name("Mac Classic")
+    end
+  end
+  
+  class PrintScopeTree < Jface::Action
+    attr_accessor :window
+    
+    def run
+      puts @window.mate_text.parser.root.pretty(0)
     end
   end
   
@@ -109,7 +123,7 @@ class MateExample < Jface::ApplicationWindow
     attr_accessor :window
 
     def run
-      @window.mate_text.getMateDocument.set(source*3)
+      @window.mate_text.getMateDocument.set(source*20)
     end
     
     def source
@@ -130,7 +144,7 @@ RUBY
     attr_accessor :window
 
     def run
-      @window.mate_text.getMateDocument.set(source*3)
+      @window.mate_text.getMateDocument.set(source*20)
     end
     
     def source

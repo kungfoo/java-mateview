@@ -19,8 +19,6 @@ describe JavaMateView, "when reparsing after changes" do
     lines.first =~ /^(\s*)/
     whitespace = $1 || ""
     result = lines.map{|line| line[(whitespace.length)..-1]}.join("\n")
-    p result
-    p result.length
     result
   end
   
@@ -36,7 +34,7 @@ describe JavaMateView, "when reparsing after changes" do
     before(:each) do
       @mt.set_grammar_by_name("Ruby")
     end
-  #   
+
     it "reparses lines with only whitespace changes" do
       @st.text = strip(<<-END)
       class Red < Car
@@ -119,6 +117,15 @@ describe JavaMateView, "when reparsing after changes" do
       puts "(((())))"
       4.times { |i| @mt.backspace(4, 10-i)}
       puts "********"
+      it_should_match_clean_reparse
+    end
+
+    it "removes an open scope correctly" do
+      @st.text = strip(<<-END)
+      def fo'o
+      end
+      END
+      @mt.backspace(0, 7)
       it_should_match_clean_reparse
     end
 
