@@ -174,18 +174,11 @@ public class Parser {
 		// System.out.printf("parseOnwards(%d)\n", fromLine);
 		int lineIx = fromLine;
 		int lineCount = styledText.getLineCount();
-		int endLine = Math.min(lastVisibleLine + 100, lineCount - 1);
-		boolean scopeChanged = false;
-		boolean scopeEverChanged = true;
-		while (scopeEverChanged && lineIx < endLine) {
-			scopeChanged = parseLine(lineIx);
-			if (scopeChanged) {
-				scopeEverChanged = true;
-				this.parsedUpto = lineIx;
-			}
-			if (scopeEverChanged) {
-				redrawLine(lineIx);
-			}
+		int lastLine = Math.min(lastVisibleLine + 100, lineCount - 1);
+		while (lineIx <= lastLine) {
+			parseLine(lineIx);
+			this.parsedUpto = lineIx;
+			redrawLine(lineIx);
 			lineIx++;
 		}
 	}
