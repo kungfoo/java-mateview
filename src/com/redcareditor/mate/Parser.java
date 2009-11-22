@@ -23,6 +23,8 @@ import com.redcareditor.onig.Range;
 import com.redcareditor.onig.Rx;
 
 public class Parser {
+	int LOOK_AHEAD = 100;
+	
 	public Grammar grammar;
 	public MateText mateText;
 	public StyledText styledText;
@@ -48,7 +50,7 @@ public class Parser {
 		grammar = g;
 		mateText = m;
 		styledText = m.getTextWidget();
-		lookAhead = 20;
+		lookAhead = LOOK_AHEAD;
 		lastVisibleLine = 0;
 //		tags = new Sequence<TextTag>(null);
 		changes = new RangeSet();
