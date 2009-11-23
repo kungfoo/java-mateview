@@ -53,10 +53,11 @@ public class MateText extends Composite {
 		undoManager = new SwtMateTextUndoManager(this);
 		mateDocument = new SwtMateDocument(this);
 		grammarListeners = new ArrayList<IGrammarListener>();
+		getTextWidget().setLeftMargin(5);
 	}
 
 	private CompositeRuler constructRuler() {
-		CompositeRuler ruler = new CompositeRuler();
+		CompositeRuler ruler = new CompositeRuler(0);
 		lineNumbers = new LineNumberRulerColumn();
 		ruler.addDecorator(0, lineNumbers);
 		return ruler;
