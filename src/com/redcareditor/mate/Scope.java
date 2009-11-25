@@ -52,6 +52,18 @@ public class Scope implements Comparable<Scope>{
 		this.innerRange = document.getTextRange();
 	}
 	
+	public void setMateText(MateText mateText) {
+		this.mateText = mateText;
+		this.document = mateText.getMateDocument();
+		this.range.setDocument(this.document);
+		if (this.innerRange != null) {
+			this.innerRange.setDocument(this.document);
+		}
+		
+		for (Scope child : children)
+			child.setMateText(mateText);
+	}
+	
 	public Scope scopeAt(int line, int lineOffset) {
 		MateTextLocation location = document.getTextLocation(line, lineOffset);
 		

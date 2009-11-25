@@ -9,6 +9,7 @@ public class ParseThunk implements Runnable {
 	public long timeCreated;
 	public long lastModificationTime;
 	public int parseFrom;
+	public boolean closed;
 	
 	private Parser parser;
 	
@@ -21,7 +22,13 @@ public class ParseThunk implements Runnable {
 		Display.getCurrent().timerExec(WAIT, this);
 	}
 	
+	public void stop() {
+		closed = true;
+	}
+	
 	public void run() {
+		if (closed)
+			return;
 		// System.out.printf("Run thunk. time: %s\n", System.currentTimeMillis());
 		if (lastModificationTime > System.currentTimeMillis() - DELAY_IF_MODIFIED_WITHIN) {
 			// System.out.printf("  Postponing thunk.\n", parseFrom);

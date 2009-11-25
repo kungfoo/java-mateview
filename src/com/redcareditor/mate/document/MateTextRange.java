@@ -4,6 +4,7 @@ public interface MateTextRange {
 
 	public MateTextLocation getStart();
 
+	public void setDocument(MateDocument document);
 	public void setStart(MateTextLocation location);
 
 	public MateTextLocation getEnd();

@@ -110,9 +110,9 @@ public class MateText extends Composite {
 				if (grammar.name.equals(name)) {
 					// int parsed_upto = 150;
 					Theme theme;
-					// if (this.parser != null) {
-					// 	this.parser.close();
-					// }
+					if (this.parser != null) {
+						this.parser.close();
+					}
 					this.parser = new Parser(grammar, this);
 					getMateDocument().reparseAll();
 					// this.parser.parseRange(0, getControl().getLineCount()-1);

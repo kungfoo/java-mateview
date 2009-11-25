@@ -36,6 +36,7 @@ public class Parser {
 	public int deactivationLevel;
 	public int parsedUpto;
 	public boolean alwaysParseAll;
+	public boolean enabled;
 	
 	public RangeSet changes;
 	public Scope root;
@@ -61,6 +62,20 @@ public class Parser {
 		alwaysParseAll = false;
 		modifyStart = -1;
 		document = m.getMateDocument();
+		enabled = true;
+	}
+	
+	public void close() {
+		if (thunk != null) {
+			thunk.stop();
+			thunk = null;
+		}
+		removeListeners();
+	}
+	
+	public void setRoot(Scope root) {
+		this.root = root;
+		root.setMateText(mateText);
 	}
 	
 	public void makeRoot() {
@@ -78,40 +93,46 @@ public class Parser {
 		this.root.pattern = dp;
 	}
 	
+	private VerifyListener verifyListener;
+	private ModifyListener modifyListener;
+	private IViewportListener viewportListener;
+	
 	public void attachListeners() {
 //		System.out.printf("parser attach listeners\n");
-		mateText.getTextWidget().addVerifyListener(new VerifyListener() {
+		verifyListener = new VerifyListener() {
 			public void verifyText(VerifyEvent e) {
 				verifyEventCallback(e.start, e.end, e.text);
 			}
-		});
-		
-		mateText.getTextWidget().addModifyListener(new ModifyListener() {
+		};
+		modifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				modifyEventCallback();
 			}
-		});
-		
-		mateText.viewer.addViewportListener(new IViewportListener() {
+		};
+		viewportListener = new IViewportListener() {
 			public void viewportChanged(int verticalOffset) {
 				viewportScrolledCallback();
 			}
-		});
+		};
+		
+		mateText.getTextWidget().addVerifyListener(verifyListener);
+		mateText.getTextWidget().addModifyListener(modifyListener);
+		mateText.viewer.addViewportListener(viewportListener);
+	}
+	
+	public void removeListeners() {
+		mateText.getTextWidget().removeVerifyListener(verifyListener);
+		mateText.getTextWidget().removeModifyListener(modifyListener);
+		mateText.viewer.removeViewportListener(viewportListener);
 	}
 
 	public void verifyEventCallback(int start, int end, String text) {
 //		System.out.printf("verifyEventCallback(%s)\n", text);
-		modifyStart = start;
-		modifyEnd   = end;
-		modifyText  = text;
-	}
-
-	public boolean shouldColour() {
-		return (modifyStart == -1);
-	}
-	
-	public void viewportScrolledCallback() {
-		lastVisibleLineChanged(JFaceTextUtil.getBottomIndex(mateText.getTextWidget()));
+		if (enabled) {
+			modifyStart = start;
+			modifyEnd   = end;
+			modifyText  = text;
+		}
 	}
 	
 	public void modifyEventCallback() {
@@ -125,6 +146,14 @@ public class Parser {
 		processChanges();
 	}
 
+	public boolean shouldColour() {
+		return (modifyStart == -1);
+	}
+	
+	public void viewportScrolledCallback() {
+		lastVisibleLineChanged(JFaceTextUtil.getBottomIndex(mateText.getTextWidget()));
+	}
+	
 	// Process all change ranges.
 	public void processChanges() {
 		int thisParsedUpto = -1;
@@ -146,7 +175,8 @@ public class Parser {
 	// more if necessary. Returns the index of the last line
 	// parsed.
 	public int parseRange(int fromLine, int toLine) {
-		// System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
+		System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
+		System.out.printf("grammar: %s\n", grammar.name);
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
 		boolean scopeEverChanged = false;
@@ -171,7 +201,10 @@ public class Parser {
 	}
 	
 	public void parseOnwards(int fromLine) {
-		// System.out.printf("parseOnwards(%d)\n", fromLine);
+		// The widget can be disposed between the Thunk being created and being
+		// executed.
+		if (styledText.isDisposed())
+			return;
 		int lineIx = fromLine;
 		int lineCount = styledText.getLineCount();
 		int lastLine = Math.min(lastVisibleLine + 100, lineCount - 1);
@@ -240,7 +273,7 @@ public class Parser {
 	private boolean parseLine(int lineIx) {
 		String line = styledText.getLine(lineIx) + "\n";
 		int length = line.length();
-		// System.out.printf("p%d, ", lineIx);
+		System.out.printf("p%d, ", lineIx);
 		if (lineIx > this.parsedUpto)
 			this.parsedUpto = lineIx;
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
