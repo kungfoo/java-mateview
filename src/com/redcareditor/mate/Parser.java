@@ -24,6 +24,7 @@ import com.redcareditor.onig.Rx;
 
 public class Parser {
 	int LOOK_AHEAD = 100;
+	public static int linesParsed = 0;
 	
 	public Grammar grammar;
 	public MateText mateText;
@@ -127,7 +128,7 @@ public class Parser {
 	}
 
 	public void verifyEventCallback(int start, int end, String text) {
-//		System.out.printf("verifyEventCallback(%s)\n", text);
+		System.out.printf("verifyEventCallback(%s)\n", text);
 		if (enabled) {
 			modifyStart = start;
 			modifyEnd   = end;
@@ -137,13 +138,16 @@ public class Parser {
 	
 	public void modifyEventCallback() {
 		// TODO: this isn't quite right...
-		changes.add(styledText.getLineAtOffset(modifyStart), 
-				styledText.getLineAtOffset(modifyStart + modifyText.length()));
-//		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
-		modifyStart = -1;
-		modifyEnd   = -1;
-		modifyText  = null;
-		processChanges();
+		System.out.printf("modifyEventCallback parser:%p\n", this);
+		// System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
+		if (enabled) {
+			changes.add(styledText.getLineAtOffset(modifyStart), 
+					styledText.getLineAtOffset(modifyStart + modifyText.length()));
+			modifyStart = -1;
+			modifyEnd   = -1;
+			modifyText  = null;
+			processChanges();
+		}
 	}
 
 	public boolean shouldColour() {
@@ -151,7 +155,9 @@ public class Parser {
 	}
 	
 	public void viewportScrolledCallback() {
-		lastVisibleLineChanged(JFaceTextUtil.getBottomIndex(mateText.getTextWidget()));
+		if (enabled) {
+			lastVisibleLineChanged(JFaceTextUtil.getBottomIndex(mateText.getTextWidget()));
+		}
 	}
 	
 	// Process all change ranges.
@@ -271,6 +277,7 @@ public class Parser {
 	}
 	
 	private boolean parseLine(int lineIx) {
+		Parser.linesParsed++;
 		String line = styledText.getLine(lineIx) + "\n";
 		int length = line.length();
 		System.out.printf("p%d, ", lineIx);

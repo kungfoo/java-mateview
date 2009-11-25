@@ -45,8 +45,10 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	public void reparseAll() {
 		SwtMateTextLocation startLocation = new SwtMateTextLocation(0, this);
 		SwtMateTextLocation endLocation = new SwtMateTextLocation(0 + styledText.getCharCount(), this);
-		this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
-		this.mateText.parser.processChanges();
+		if (this.mateText.parser.enabled) {
+			this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
+			this.mateText.parser.processChanges();
+		}
 	}
 
 	public void replace(int start, int length, String text) {
