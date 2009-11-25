@@ -74,6 +74,8 @@ public class Grammar {
 	private void loadRepository() {
 		repository = new HashMap<String, List<Pattern>>();
 		Dict plistRepo = plist.getDictionary("repository");
+		if (plistRepo == null)
+			return;
 		for (String key : plistRepo.keys()) {
 			List<Pattern> repoArray = new ArrayList<Pattern>();
 			Dict plistRepoEntry = plistRepo.getDictionary(key);

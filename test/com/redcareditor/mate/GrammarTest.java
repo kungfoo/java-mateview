@@ -24,6 +24,14 @@ public class GrammarTest {
 	}
 
 	@Test
+	public void shouldLoadJavaScriptInformation() {
+		Grammar jg = new Grammar("input/Bundles/JavaScript.tmbundle/Syntaxes/JavaScript.plist");
+		jg.initForUse();
+		assertEquals("JavaScript", jg.name);
+//		assertEquals("source.apache-config", g.scopeName);
+	}
+	
+	@Test
 	public void shouldLoadPatternsIntoMemory() {
 		assertTrue("allPatterns is not empty", g.allPatterns.size() > 0);
 		List<String> patternNames = patternNames(g.allPatterns);

@@ -14,11 +14,11 @@ public class BundleTest {
 
 	@Test
 	public void shouldHaveCreatedCorrectBundles() {
-		String[] bundleNames = new String[] { "Apache", "Ruby", "HTML", "CSS", "Perl" };
+		String[] bundleNames = new String[] { "Apache", "Ruby", "HTML", "CSS", "JavaScript", "Perl" };
 		for (String bundleName : bundleNames) {
 			containsBundleNamed(bundleName);
 		}
-		assertEquals(9, Bundle.getBundles().size());
+		assertEquals(10, Bundle.getBundles().size());
 	}
 
 	private void containsBundleNamed(String bundleName) {
