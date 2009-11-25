@@ -1,5 +1,8 @@
 package com.redcareditor.mate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.CompositeRuler;
@@ -16,6 +19,7 @@ import org.eclipse.swt.widgets.Display;
 import com.redcareditor.mate.colouring.Colourer;
 import com.redcareditor.mate.colouring.swt.SwtColourer;
 import com.redcareditor.mate.document.MateDocument;
+import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.swt.SwtMateDocument;
 import com.redcareditor.mate.undo.MateTextUndoManager;
 import com.redcareditor.mate.undo.swt.SwtMateTextUndoManager;
@@ -29,14 +33,14 @@ public class MateText extends Composite {
 	public Colourer colourer;
 
 	/* components plugged together */
-	private SourceViewer viewer;
+	public SourceViewer viewer;
 	private IDocument document;
 	private CompositeRuler gutter;
 	private LineNumberRulerColumn lineNumbers;
 	private SwtMateDocument mateDocument;
 
 	private MateTextUndoManager undoManager;
-
+	private List<IGrammarListener> grammarListeners;
 
 	public MateText(Composite parent) {
 		super(parent, SWT.NONE);
@@ -48,10 +52,12 @@ public class MateText extends Composite {
 		colourer = new SwtColourer(this);
 		undoManager = new SwtMateTextUndoManager(this);
 		mateDocument = new SwtMateDocument(this);
+		grammarListeners = new ArrayList<IGrammarListener>();
+		getTextWidget().setLeftMargin(5);
 	}
 
 	private CompositeRuler constructRuler() {
-		CompositeRuler ruler = new CompositeRuler();
+		CompositeRuler ruler = new CompositeRuler(0);
 		lineNumbers = new LineNumberRulerColumn();
 		ruler.addDecorator(0, lineNumbers);
 		return ruler;
@@ -89,6 +95,10 @@ public class MateText extends Composite {
 		return viewer.getTextWidget();
 	}
 
+	public boolean shouldColour() {
+		return parser.shouldColour();
+	}
+	
 	// Sets the grammar explicitly by name.
 	// TODO: restore the uncolouring stuff
 	public boolean setGrammarByName(String name) {
@@ -100,19 +110,20 @@ public class MateText extends Composite {
 				if (grammar.name.equals(name)) {
 					// int parsed_upto = 150;
 					Theme theme;
-					// if (this.parser != null) {
-					// theme = this.parser.colourer.theme;
-					// this.parser.colourer.uncolour_scope(this.parser.root,
-					// true);
-					// parsed_upto = this.parser.parsed_upto;
-					// this.parser.close();
-					// }
+					if (this.parser != null) {
+						this.parser.close();
+					}
 					this.parser = new Parser(grammar, this);
+					getMateDocument().reparseAll();
+					// this.parser.parseRange(0, getControl().getLineCount()-1);
 					// this.parser.last_visible_line_changed(parsed_upto);
 					// GLib.Signal.emit_by_name(this, "grammar_changed",
 					// gr.name);
 					// if (theme != null)
 					// this.parser.change_theme(theme);
+					for (IGrammarListener grammarListener : grammarListeners) {
+						grammarListener.grammarChanged(grammar.name);
+					}
 					return true;
 				}
 			}
@@ -191,5 +202,9 @@ public class MateText extends Composite {
 
 	public void setGutterForeground(Color color) {
 		lineNumbers.setForeground(color);
+	}
+	
+	public void addGrammarListener(IGrammarListener listener) {
+		grammarListeners.add(listener);
 	}
 }

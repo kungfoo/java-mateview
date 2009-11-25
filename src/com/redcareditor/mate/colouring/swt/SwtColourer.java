@@ -3,6 +3,8 @@ package com.redcareditor.mate.colouring.swt;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.text.JFaceTextUtil;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
@@ -11,6 +13,13 @@ import org.eclipse.swt.custom.LineStyleListener;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Caret;
 import org.eclipse.swt.widgets.Display;
 
 import com.redcareditor.mate.DoublePattern;
@@ -74,13 +83,63 @@ public class SwtColourer implements Colourer {
 		this.theme = theme;
 		theme.initForUse();
 		initCachedColours();
-		setMateTextColors();
+		setMateTextColours();
+		setCaretColour();
 	}
 
-	private void setMateTextColors() {
+	private void setCaretColour() {
+		Caret caret = control.getCaret();
+		Rectangle bounds = caret.getBounds();
+		int width = bounds.width;
+		int height = bounds.height;
+		caret = new Caret(control, SWT.NONE);
+		Display display = Display.getCurrent();
+		// System.out.printf("caret colour: %s %d %d\n", globalColour("caret"), width, height);
+		String caretColourString = globalColour("caret");
+		Color caretColour = ColourUtil.getColour(caretColourString);
+		Color white = display.getSystemColor(SWT.COLOR_WHITE);
+		Color black = display.getSystemColor(SWT.COLOR_BLACK);
+		String backgroundColourString = globalColour("background");
+		int red = Integer.parseInt(backgroundColourString.substring(1, 3), 16) ^ 
+					Integer.parseInt(caretColourString.substring(1, 3), 16);
+		int green = Integer.parseInt(backgroundColourString.substring(3, 5), 16) ^ 
+						Integer.parseInt(caretColourString.substring(3, 5), 16);
+		int blue = Integer.parseInt(backgroundColourString.substring(5, 7), 16) ^
+						Integer.parseInt(caretColourString.substring(5, 7), 16);
+		// System.out.printf("r, g, b: %d, %d, %d\n", red, green, blue);
+		PaletteData palette = new PaletteData (
+			new RGB [] {
+				new RGB (0, 0, 0),
+				new RGB (red, green, blue),
+				new RGB (0xFF, 0xFF, 0xFF),
+			});
+		// System.out.printf("depth: %d\n", Display.getCurrent().getDepth());
+		ImageData maskData = new ImageData (1, height, 2, palette);
+		for (int y=0; y < height; y++)
+			maskData.setPixel(0, y, 1);
+		Image image = new Image (display, maskData);
+		// Image image = new Image(display, 1, height);
+		// GC gc = new GC(image);
+		// gc.setAntialias(SWT.OFF);
+		// gc.setBackground(white);
+		// gc.fillRectangle(0, 0, 1, height);
+		// gc.setForeground(caretColour);
+		// gc.drawLine(0, 0, 0, height);
+		// System.out.printf("alpha: %d\n", gc.getAlpha());
+		// gc.dispose();
+		// caret.setLocation(10, 10);
+		caret.setImage(image);
+		control.setCaret(caret);
+	}
+
+	private void setMateTextColours() {
 		control.setBackground(globalBackground);
 		control.setForeground(globalForeground);
 		int currentLine = control.getLineAtOffset(control.getCaretOffset());
+		int startLine = JFaceTextUtil.getPartialTopIndex(control);
+		int endLine = JFaceTextUtil.getPartialBottomIndex(control);
+		for (int i = startLine; i <= endLine; i ++)
+			control.setLineBackground(i, 1, globalBackground);
 		control.setLineBackground(currentLine, 1, globalLineBackground);
 		mateText.setGutterBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		mateText.setGutterForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
@@ -117,13 +176,15 @@ public class SwtColourer implements Colourer {
 	private void colourLine(LineStyleEvent event) {
 		if (theme == null)
 			return;
+		if (!mateText.shouldColour())
+			return;
 		int eventLine = mateText.getControl().getLineAtOffset(event.lineOffset);
-		System.out.printf("colourLine(%d)\n", eventLine);
+		// System.out.printf("c%d, ", eventLine);
 		ArrayList<Scope> scopes = mateText.parser.root.scopesOnLine(eventLine);
 //		System.out.printf("got to colour %d scopes\n", scopes.size());
 		ArrayList<StyleRange> styleRanges = new ArrayList<StyleRange>();
 		for (Scope scope : scopes) {
-			// System.out.printf("  %s\n", scope.name);
+			// System.out.printf("	%s\n", scope.name);
 			if (scope.parent == null) {
 				continue;
 			}
@@ -176,16 +237,16 @@ public class SwtColourer implements Colourer {
 			styleRange.fontStyle = SWT.NORMAL;
 
 		String background = setting.settings.get("background");
-//		System.out.printf("        scope background:        %s\n", background);
+//		System.out.printf("		   scope background:		%s\n", background);
 		String mergedBgColour;
 		String parentBg = theme.globalSettings.get("background");
-//		System.out.printf("        global background: %s\n", parentBg);
+//		System.out.printf("		   global background: %s\n", parentBg);
 		// TODO: wasn't this a better way of creating the background colours?
 		// var parent_bg = scope.nearest_background_colour();
 		// if (parent_bg == null) {
 		// }
 		// else {
-		// stdout.printf("        parent background: %s\n", parent_bg);
+		// stdout.printf("		  parent background: %s\n", parent_bg);
 		// }
 		if (background != null && background != "") {
 			// if (parent_bg != null) {
@@ -197,18 +258,18 @@ public class SwtColourer implements Colourer {
 			if (mergedBgColour != null) {
 				scope.bgColour = mergedBgColour;
 				styleRange.background = ColourUtil.getColour(mergedBgColour);
-//				System.out.printf("       tag.background = %s\n", mergedBgColour);
+//				System.out.printf("		  tag.background = %s\n", mergedBgColour);
 			}
 		} else {
 			mergedBgColour = parentBg;
 		}
-		// stdout.printf("        merged_bg_colour:  %s\n", merged_bg_colour);
+		// stdout.printf("		  merged_bg_colour:	 %s\n", merged_bg_colour);
 		String foreground = setting.settings.get("foreground");
-		// stdout.printf("        scope foreground:        %s\n", foreground);
+		// stdout.printf("		  scope foreground:		   %s\n", foreground);
 		String parentFg = scope.nearestForegroundColour();
 		if (parentFg == null) {
 			parentFg = theme.globalSettings.get("foreground");
-			// stdout.printf("        global foreground:        %s\n",
+			// stdout.printf("		  global foreground:		%s\n",
 			// parent_fg);
 		}
 		if (foreground != null && foreground != "") {
@@ -221,7 +282,7 @@ public class SwtColourer implements Colourer {
 				scope.fgColour = mergedFgColour;
 				styleRange.foreground = ColourUtil.getColour(mergedFgColour);
 			}
-			// stdout.printf("       merged_fg_colour: %s\n", merged_fg_colour);
+			// stdout.printf("		 merged_fg_colour: %s\n", merged_fg_colour);
 		}
 		// stdout.printf("\n");
 	}

@@ -1,5 +1,6 @@
 package com.redcareditor.mate.document.swt;
 
+import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.MateTextRange;
 
@@ -17,6 +18,14 @@ public class SwtMateTextRange implements MateTextRange {
 		this.start = sanatize(start);
 		this.end = sanatize(end);
 		this.document = document;
+	}
+
+	public void setDocument(MateDocument document) {
+		this.document = (SwtMateDocument) document;
+		if (start != null)
+			start.setDocument(document);
+		if (end != null)
+			end.setDocument(document);
 	}
 
 	public int getLength() {

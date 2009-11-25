@@ -7,8 +7,15 @@ import java.util.Map;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ScrollBar;
+
+import org.eclipse.jface.text.IViewportListener;
+import org.eclipse.jface.text.JFaceTextUtil;
 
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.onig.Match;
@@ -16,6 +23,8 @@ import com.redcareditor.onig.Range;
 import com.redcareditor.onig.Rx;
 
 public class Parser {
+	int LOOK_AHEAD = 100;
+	
 	public Grammar grammar;
 	public MateText mateText;
 	public StyledText styledText;
@@ -27,6 +36,7 @@ public class Parser {
 	public int deactivationLevel;
 	public int parsedUpto;
 	public boolean alwaysParseAll;
+	public boolean enabled;
 	
 	public RangeSet changes;
 	public Scope root;
@@ -34,13 +44,14 @@ public class Parser {
 	// temporary stores for the modifications to the mateText
 	private int modifyStart, modifyEnd;
 	private String modifyText;
+	public ParseThunk thunk;
 	
 	public Parser(Grammar g, MateText m) {
 		g.initForUse();
 		grammar = g;
 		mateText = m;
 		styledText = m.getTextWidget();
-		lookAhead = 100;
+		lookAhead = LOOK_AHEAD;
 		lastVisibleLine = 0;
 //		tags = new Sequence<TextTag>(null);
 		changes = new RangeSet();
@@ -49,7 +60,22 @@ public class Parser {
 		attachListeners();
 		parsedUpto = 0;
 		alwaysParseAll = false;
+		modifyStart = -1;
 		document = m.getMateDocument();
+		enabled = true;
+	}
+	
+	public void close() {
+		if (thunk != null) {
+			thunk.stop();
+			thunk = null;
+		}
+		removeListeners();
+	}
+	
+	public void setRoot(Scope root) {
+		this.root = root;
+		root.setMateText(mateText);
 	}
 	
 	public void makeRoot() {
@@ -66,24 +92,46 @@ public class Parser {
 		root.pattern = dp;
 	}
 	
+	private VerifyListener verifyListener;
+	private ModifyListener modifyListener;
+	private IViewportListener viewportListener;
+	
 	public void attachListeners() {
-		mateText.getTextWidget().addVerifyListener(new VerifyListener() {
+//		System.out.printf("parser attach listeners\n");
+		verifyListener = new VerifyListener() {
 			public void verifyText(VerifyEvent e) {
 				verifyEventCallback(e.start, e.end, e.text);
 			}
-		});
-		
-		mateText.getTextWidget().addModifyListener(new ModifyListener() {
+		};
+		modifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				modifyEventCallback();
 			}
-		});
+		};
+		viewportListener = new IViewportListener() {
+			public void viewportChanged(int verticalOffset) {
+				viewportScrolledCallback();
+			}
+		};
+		
+		mateText.getTextWidget().addVerifyListener(verifyListener);
+		mateText.getTextWidget().addModifyListener(modifyListener);
+		mateText.viewer.addViewportListener(viewportListener);
+	}
+	
+	public void removeListeners() {
+		mateText.getTextWidget().removeVerifyListener(verifyListener);
+		mateText.getTextWidget().removeModifyListener(modifyListener);
+		mateText.viewer.removeViewportListener(viewportListener);
 	}
 
 	public void verifyEventCallback(int start, int end, String text) {
-		modifyStart = start;
-		modifyEnd   = end;
-		modifyText  = text;
+//		System.out.printf("verifyEventCallback(%s)\n", text);
+		if (enabled) {
+			modifyStart = start;
+			modifyEnd   = end;
+			modifyText  = text;
+		}
 	}
 	
 	public void modifyEventCallback() {
@@ -91,53 +139,106 @@ public class Parser {
 		changes.add(styledText.getLineAtOffset(modifyStart), 
 				styledText.getLineAtOffset(modifyStart + modifyText.length()));
 //		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
+		modifyStart = -1;
+		modifyEnd   = -1;
+		modifyText  = null;
 		processChanges();
 	}
 
+	public boolean shouldColour() {
+		return (modifyStart == -1);
+	}
+	
+	public void viewportScrolledCallback() {
+		lastVisibleLineChanged(JFaceTextUtil.getBottomIndex(mateText.getTextWidget()));
+	}
+	
 	// Process all change ranges.
 	public void processChanges() {
 		int thisParsedUpto = -1;
-//		System.out.printf("process_changes (lastVisibleLine: %d) (charCount = %d)\n", lastVisibleLine, styledText.getCharCount());
+		// System.out.printf("process_changes (lastVisibleLine: %d) (charCount = %d)\n", lastVisibleLine, styledText.getCharCount());
 		for (Range range : changes) {
 			if (range.end > thisParsedUpto && range.start <= lastVisibleLine + lookAhead) {
 				int rangeEnd = Math.min(lastVisibleLine + lookAhead, range.end);
 				thisParsedUpto = parseRange(range.start, rangeEnd);
 			}
-			System.out.printf("redraw range: %d - %d\n", styledText.getOffsetAtLine(range.start), styledText.getOffsetAtLine(range.end));
-			styledText.redrawRange(styledText.getOffsetAtLine(range.start), styledText.getOffsetAtLine(range.end), false);
+			int startOffset = styledText.getOffsetAtLine(range.start);
+			int endOffset = styledText.getOffsetAtLine(range.end);
+			styledText.redrawRange(startOffset, endOffset - startOffset, false);
 		}
-//		System.out.printf("%s\n", root.pretty(0));
+		//		System.out.printf("%s\n", root.pretty(0));
 		changes.ranges.clear();
 	}
 
 	// Parse from from_line to *at least* to_line. Will parse
 	// more if necessary. Returns the index of the last line
 	// parsed.
-	private int parseRange(int fromLine, int toLine) {
-//		System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
+	public int parseRange(int fromLine, int toLine) {
+		System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
+		System.out.printf("grammar: %s\n", grammar.name);
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
 		boolean scopeEverChanged = false;
-		int endLine = Math.min(lastVisibleLine + 100, styledText.getLineCount() - 1);
-		while (lineIx <= toLine || scopeEverChanged && lineIx <= endLine) {
-			scopeChanged = parseLine(lineIx++);
+		while (lineIx <= toLine) {
+			scopeChanged = parseLine(lineIx);
 			if (scopeChanged) {
 				scopeEverChanged = true;
-				// In the old scheme this wasn't necessary because 
-				// the scope_at used a simple scan from the front. The GSequences
-				// on the other hand can get confused if the later scopes
-				// are inconsistent with earler ones. So we have to clear everything.
-				// TODO: figure out a way to OPTIMIZE this again.
-				root.clearAfter(lineIx, -1);
-				removeColourAfter(lineIx, 0);
 				this.parsedUpto = lineIx;
 			}
-			// stdout.printf("parse_line returned: %s\n", scope_changed ? "true" : "false");
-			//stdout.printf("pretty:\n%s\n", root.pretty(2));
+			lineIx++;
 		}
+		if (thunk != null) {
+			thunk.delayAndUpdate(lineIx);
+		}
+		else {
+			if (scopeEverChanged) {
+				thunk = new ParseThunk(this, lineIx);
+			}
+		}
+
 		return toLine;
 	}
 	
+	public void parseOnwards(int fromLine) {
+		// The widget can be disposed between the Thunk being created and being
+		// executed.
+		if (styledText.isDisposed())
+			return;
+		int lineIx = fromLine;
+		int lineCount = styledText.getLineCount();
+		int lastLine = Math.min(lastVisibleLine + 100, lineCount - 1);
+		while (lineIx <= lastLine) {
+			parseLine(lineIx);
+			this.parsedUpto = lineIx;
+			redrawLine(lineIx);
+			lineIx++;
+		}
+	}
+	
+	public void redrawLine(int lineIx) {
+		// System.out.printf("redrawLine(%d)\n", lineIx);
+		int startOffset = styledText.getOffsetAtLine(lineIx);
+		int endOffset;
+		int lineCount = styledText.getLineCount();
+		if (lineIx + 1 < lineCount) {
+			endOffset = styledText.getOffsetAtLine(lineIx + 1) - 1;
+		}
+		else {
+			endOffset = styledText.getCharCount();
+		}
+		styledText.redrawRange(startOffset, endOffset - startOffset, false);
+	}
+	
+	public void lastVisibleLineChanged(int newLastVisibleLine) {
+		this.lastVisibleLine = newLastVisibleLine;
+		// System.out.printf("lastVisibleLineChanged(%d)\n", lastVisibleLine);
+		// System.out.printf("  parsedUpto: %d\n", parsed_upto);
+		if (lastVisibleLine + lookAhead >= parsedUpto) {
+			int endRange = Math.min(styledText.getLineCount() - 1, lastVisibleLine + lookAhead);
+			parseRange(parsedUpto, endRange);
+		}
+	}
+
 	public void sleep(int ms) {
 		try{
 		  //do what you want to do before sleeping
@@ -171,7 +272,7 @@ public class Parser {
 	private boolean parseLine(int lineIx) {
 		String line = styledText.getLine(lineIx) + "\n";
 		int length = line.length();
-//		System.out.printf("p%d, ", lineIx);
+		System.out.printf("p%d, ", lineIx);
 		if (lineIx > this.parsedUpto)
 			this.parsedUpto = lineIx;
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
@@ -243,9 +344,6 @@ public class Parser {
 			}
 		}
 		return expectedScope;
-	}
-	private void removeColourAfter(int lineIx, int something) {
-		// TODO: port this function
 	}
 
 	public void closeScope(Scanner scanner, Scope expectedScope, int lineIx, String line, 

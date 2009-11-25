@@ -8,4 +8,6 @@ public interface MateDocument extends MateTextFactory{
 	public int getLineLength(int line);
 	
 	public boolean addTextLocation(MateTextLocation location);
+	
+	public void reparseAll();
 }

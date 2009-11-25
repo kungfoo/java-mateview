@@ -52,8 +52,16 @@ public class Scope implements Comparable<Scope>{
 		this.innerRange = document.getTextRange();
 	}
 	
-	public void clearAfter(int lineIx, int something) {
-		// TODO: port this method
+	public void setMateText(MateText mateText) {
+		this.mateText = mateText;
+		this.document = mateText.getMateDocument();
+		this.range.setDocument(this.document);
+		if (this.innerRange != null) {
+			this.innerRange.setDocument(this.document);
+		}
+		
+		for (Scope child : children)
+			child.setMateText(mateText);
 	}
 	
 	public Scope scopeAt(int line, int lineOffset) {
@@ -193,7 +201,7 @@ public class Scope implements Comparable<Scope>{
 		for (Scope child : children) {
 			int childStartLine = child.getStart().getLine();
 			if (childStartLine == lineIx && !scopes.contains(child)) {
-				System.out.printf("deleteAnyOnLineNotIn removing: %s\n", child.pattern.name);
+				// System.out.printf("deleteAnyOnLineNotIn removing: %s\n", child.pattern.name);
 				removedScopes.add(child);
 			}
 		}
