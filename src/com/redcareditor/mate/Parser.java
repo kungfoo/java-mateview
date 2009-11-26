@@ -128,7 +128,7 @@ public class Parser {
 	}
 
 	public void verifyEventCallback(int start, int end, String text) {
-		System.out.printf("verifyEventCallback(%s)\n", text);
+		// System.out.printf("verifyEventCallback(%s)\n", text);
 		if (enabled) {
 			modifyStart = start;
 			modifyEnd   = end;
@@ -138,7 +138,7 @@ public class Parser {
 	
 	public void modifyEventCallback() {
 		// TODO: this isn't quite right...
-		System.out.printf("modifyEventCallback parser:%p\n", this);
+		// System.out.printf("modifyEventCallback parser:%p\n", this);
 		// System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
 		if (enabled) {
 			changes.add(styledText.getLineAtOffset(modifyStart), 
@@ -181,8 +181,8 @@ public class Parser {
 	// more if necessary. Returns the index of the last line
 	// parsed.
 	public int parseRange(int fromLine, int toLine) {
-		System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
-		System.out.printf("grammar: %s\n", grammar.name);
+		// System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
+		// System.out.printf("grammar: %s\n", grammar.name);
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
 		boolean scopeEverChanged = false;
@@ -280,7 +280,7 @@ public class Parser {
 		Parser.linesParsed++;
 		String line = styledText.getLine(lineIx) + "\n";
 		int length = line.length();
-		System.out.printf("p%d, ", lineIx);
+		// System.out.printf("p%d, ", lineIx);
 		if (lineIx > this.parsedUpto)
 			this.parsedUpto = lineIx;
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
