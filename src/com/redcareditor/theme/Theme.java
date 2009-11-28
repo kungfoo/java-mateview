@@ -52,7 +52,7 @@ public class Theme {
 		if (isInitialized)
 			return;
 		isInitialized = true;
-		System.out.printf("initializing theme for use: %s\n", name);
+		// System.out.printf("initializing theme for use: %s\n", name);
 		this.cachedSettingsForScopes = new HashMap<String, ThemeSetting>();
 		for (ThemeSetting setting : settings) {
 			setting.compileScopeMatchers();
@@ -77,16 +77,16 @@ public class Theme {
 	// (see 13.5 of Textmate manual)
 	public ThemeSetting findSetting(Scope scope, boolean inner, ThemeSetting excludeSetting) {
 		String scopeName = scope.hierarchyNames(inner);
-		//stdout.printf("  finding settings for '%s'\n", scope_name);
+		// System.out.printf("[Theme] finding settings for '%s'\n", scopeName);
 		Match current_m = null, m;
 		ThemeSetting current = null;
 		for (ThemeSetting setting : settings) {
 			if (setting == excludeSetting && excludeSetting != null) {
-//				stdout.printf("    setting '%s' excluded due to parent\n", exclude_setting.name);
+				// System.out.printf("[Theme] setting '%s' excluded due to parent\n", excludeSetting.name);
 			}
 			else {
 				if ((m = setting.match(scopeName)) != null) {
-//					stdout.printf("    setting '%s' matches selector '%s'\n", setting.name, setting.selector); 
+					// System.out.printf("[Theme] setting '%s' matches selector '%s'\n", setting.name, scopeName); 
 					if (current == null) {
 						current = setting;
 						current_m = m;
