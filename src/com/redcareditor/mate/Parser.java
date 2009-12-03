@@ -42,6 +42,10 @@ public class Parser {
 	public RangeSet changes;
 	public Scope root;
 	
+	public static String byteSubstring(String string, int byteOffsetStart, int byteOffsetEnd) {
+		return new String(string.getBytes(), byteOffsetStart, byteOffsetEnd - byteOffsetStart);
+	}
+	
 	// temporary stores for the modifications to the mateText
 	private int modifyStart, modifyEnd;
 	private String modifyText;
@@ -357,13 +361,8 @@ public class Parser {
 	public void closeScope(Scanner scanner, Scope expectedScope, int lineIx, String line, 
 			int length, Marker m, ArrayList<Scope> allScopes, 
 			ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes) {
-		// old bad way:
-		// String endMatchString = line.substring(m.from, m.match.getCapture(0).end);
+		String endMatchString = Parser.byteSubstring(line, m.from, m.match.getCapture(0).end);
 		
-		// new good way:
-		String endMatchString = new String(line.getBytes(), 
-										   m.from, 
-										   m.match.getCapture(0).end - m.from);
 		// stdout.printf("checking for already closed: %s, (%d,%d)-(%d,%d) (%d,%d)-(%d,%d) '%s' '%s'\n",
 //     scanner.current_scope.name,
 //			  scanner.current_scope.end_line(), scanner.current_scope.end_line_offset(),
@@ -424,7 +423,8 @@ public class Parser {
 		s.openMatch = m.match;
 		setStartPosSafely(s, m, lineIx, length, 0);
 		setInnerStartPosSafely(s, m, lineIx, length, 0);
-		s.beginMatchString = line.substring(m.from, m.match.getCapture(0).end);
+		s.beginMatchString = Parser.byteSubstring(line, m.from, m.match.getCapture(0).end);
+		
 //		var end_iter = buffer.end_iter();
 //		var end_line = end_iter.get_line();
 //		var end_line_index = end_iter.get_line_index();
@@ -578,16 +578,16 @@ public class Parser {
 			boolean found = false;
 			while ((match = rx.search(dp.endString, pos, (int) dp.endString.length())) != null) {
 				found = true;
-				src.append(dp.endString.substring(pos, match.getCapture(0).start));
-				String numstr = dp.endString.substring(match.getCapture(1).start, match.getCapture(1).end);
+				src.append(Parser.byteSubstring(dp.endString, pos, match.getCapture(0).start));
+				String numstr = Parser.byteSubstring(dp.endString, match.getCapture(1).start, match.getCapture(1).end);
 				int num = Integer.parseInt(numstr);
 				// System.out.printf("capture found: %d\n", num);
-				String capstr = line.substring(m.match.getCapture(num).start, m.match.getCapture(num).end);
+				String capstr = Parser.byteSubstring(line, m.match.getCapture(num).start, m.match.getCapture(num).end);
 				src.append(capstr);
 				pos = match.getCapture(1).end;
 			}
 			if (found)
-				src.append(dp.endString.substring(pos, dp.endString.length()));
+				src.append(Parser.byteSubstring(dp.endString, pos, dp.endString.length()));
 			else
 				src.append(dp.endString);
 //			stdout.printf("src: '%s'\n", src.str);
