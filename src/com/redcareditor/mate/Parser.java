@@ -357,7 +357,13 @@ public class Parser {
 	public void closeScope(Scanner scanner, Scope expectedScope, int lineIx, String line, 
 			int length, Marker m, ArrayList<Scope> allScopes, 
 			ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes) {
-		String endMatchString = line.substring(m.from, m.match.getCapture(0).end);
+		// old bad way:
+		// String endMatchString = line.substring(m.from, m.match.getCapture(0).end);
+		
+		// new good way:
+		String endMatchString = new String(line.getBytes(), 
+										   m.from, 
+										   m.match.getCapture(0).end - m.from);
 		// stdout.printf("checking for already closed: %s, (%d,%d)-(%d,%d) (%d,%d)-(%d,%d) '%s' '%s'\n",
 //     scanner.current_scope.name,
 //			  scanner.current_scope.end_line(), scanner.current_scope.end_line_offset(),
