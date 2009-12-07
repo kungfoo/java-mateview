@@ -414,8 +414,6 @@ public class Parser {
 		removedScopes.add(scanner.getCurrentScope()); // so it gets uncoloured
 		closedScopes.add(scanner.getCurrentScope());
 		scanner.setCurrentScope(scanner.getCurrentScope().parent);
-		// System.out.printf("setting scanner position to %d\n", m.match.getByteCapture(0).end);
-		// scanner.position = m.match.getByteCapture(0).end;
 		allScopes.add(scanner.getCurrentScope());
 	}
 
@@ -521,14 +519,13 @@ public class Parser {
 		closedScopes.add(newScope);
 	}
 
-	// TODO: please, give this method a meaningful name.
-	private boolean iDontKnowHowToNameThisFunctionButItsDuplicateCode(int lineIx, int length, int to) {
+	private boolean atEndOfNonFinalLine(int lineIx, int length, int to) {
 		return to == length && styledText.getLineCount() > lineIx+1;
 	}
 
 	public void setStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).start;
-		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) 
+		if (atEndOfNonFinalLine(lineIx, length, to)) 
 			scope.setStartPos(lineIx+1, 0, false);
 		else
 			scope.setStartPos(lineIx, Math.min(to, length), false);
@@ -536,7 +533,7 @@ public class Parser {
 
 	public void setInnerStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).start;
-		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) 
+		if (atEndOfNonFinalLine(lineIx, length, to)) 
 			scope.setInnerStartPos(lineIx+1, 0, false);
 		else
 			scope.setInnerStartPos(lineIx, Math.min(to, length), false);
@@ -544,7 +541,7 @@ public class Parser {
 
 	public void setInnerEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int from = m.match.getCapture(cap).start;
-		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, from)) {
+		if (atEndOfNonFinalLine(lineIx, length, from)) {
 			scope.setInnerEndPos(lineIx, length, true);
 		}
 		else {
@@ -554,7 +551,7 @@ public class Parser {
 	
 	public void setEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).end;
-		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) {
+		if (atEndOfNonFinalLine(lineIx, length, to)) {
 			scope.setEndPos(lineIx, length, true);
 		}
 		else {

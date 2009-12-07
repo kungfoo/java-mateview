@@ -255,11 +255,11 @@ YAML
     end
 
     it "should parse these C comments correctly" do
-      source = <<-C
+      source = <<-TEXT
 /* H
 */
 Gtk gtk_ (Gtk* self) {
-    C
+    TEXT
       @mt.set_grammar_by_name("C")
       @st.text = source
       @mt.parser.root.pretty(0).should_not include("invalid.illegal")
