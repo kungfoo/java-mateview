@@ -146,6 +146,12 @@ describe JavaMateView, "when reparsing after changes" do
       @mt.type(0, 30, " ")
       it_should_match_clean_reparse
     end
+    
+    it "should handle multibyte characters with aplomb" do
+      @st.text = "\"as\"as"
+      @mt.type(0, 1, "†")
+      it_should_match_clean_reparse
+    end
   end
 end
 

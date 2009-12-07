@@ -43,7 +43,11 @@ public class Parser {
 	public Scope root;
 	
 	public static String byteSubstring(String string, int byteOffsetStart, int byteOffsetEnd) {
-		return new String(string.getBytes(), byteOffsetStart, byteOffsetEnd - byteOffsetStart);
+		// System.out.printf("byteSubstring('%s', %d, %d)\n", string, byteOffsetStart, byteOffsetEnd);
+		// System.out.printf("  - length(): %d\n", string.length());
+		// System.out.printf("  - byte length: %d\n", string.getBytes().length);
+		// return new String(string.getBytes(), byteOffsetStart, byteOffsetEnd - byteOffsetStart);
+		return string.substring(byteOffsetStart, byteOffsetEnd);
 	}
 	
 	// temporary stores for the modifications to the mateText
@@ -304,25 +308,25 @@ public class Parser {
 //					           expectedScope.getStart().getLineOffset());
 //			else
 //				System.out.printf("no expected scope\n");
-//			System.out.printf("  scope: %s (%d, %d) (line length: %d)\n", 
-//								m.pattern.name, m.from, m.match.getCapture(0).end, length);
+			// System.out.printf("  scope: %s (%d, %d) (line length: %d)\n", 
+								// m.pattern.name, m.from, m.match.getCapture(0).end, length);
 			if (m.isCloseScope) {
-//				System.out.printf("     (closing)\n");
+				// System.out.printf("     (closing)\n");
 				closeScope(scanner, expectedScope, lineIx, line, length, m, 
 							allScopes, closedScopes, removedScopes);
 			}
 			else if (m.pattern instanceof DoublePattern) {
-//				System.out.printf("     (opening)\n");
+				// System.out.printf("     (opening)\n");
 				openScope(scanner, expectedScope, lineIx, line, length, m, 
 						   allScopes, closedScopes, removedScopes);
 			}
 			else {
-//				System.out.printf("     (single)\n");
+				// System.out.printf("     (single)\n");
 				singleScope(scanner, expectedScope, lineIx, line, length, m, 
 							 allScopes, closedScopes, removedScopes);
 			}
 			//System.out.printf("pretty:\n%s\n", root.pretty(2));
-			scanner.position = m.match.getCapture(0).end;
+			scanner.position = m.match.getByteCapture(0).end;
 		}
 		clearLine(lineIx, startScope, allScopes, closedScopes, removedScopes);
 		Scope endScope2 = scopeAfterEndOfLine(lineIx, length);
@@ -410,6 +414,8 @@ public class Parser {
 		removedScopes.add(scanner.getCurrentScope()); // so it gets uncoloured
 		closedScopes.add(scanner.getCurrentScope());
 		scanner.setCurrentScope(scanner.getCurrentScope().parent);
+		// System.out.printf("setting scanner position to %d\n", m.match.getByteCapture(0).end);
+		// scanner.position = m.match.getByteCapture(0).end;
 		allScopes.add(scanner.getCurrentScope());
 	}
 
@@ -481,7 +487,8 @@ public class Parser {
 		s.isOpen = false;
 		s.isCapture = false;
 //		System.out.printf("beginMatchString '%s' %d - %d\n",  new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from), m.from, m.match.getCapture(0).end);
-		s.beginMatchString = new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from); 
+		// s.beginMatchString = new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from); 
+		s.beginMatchString = line.substring(m.match.getCapture(0).start, m.match.getCapture(0).end);
 		s.parent = scanner.getCurrentScope();
 		Scope newScope = s;
 		if (expectedScope != null) {

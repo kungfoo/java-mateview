@@ -1,8 +1,12 @@
 package com.redcareditor.onig;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.jcodings.Encoding;
+import org.jcodings.specific.UTF8Encoding;
 
 import org.joni.Regex;
 import org.joni.Region;
@@ -11,6 +15,9 @@ public class Match implements Iterable<Range> {
 	private Regex regex;
 	private Region region;
 	private String text;
+	
+	private boolean charOffsetUpdated;
+	private Region charOffsets;
 
 	public Match() {}
 	
@@ -25,8 +32,18 @@ public class Match implements Iterable<Range> {
 		return region.numRegs;
 	}
 
-	public Range getCapture(int capture){
-		checkBounds(capture);
+	public Range getCapture(int capture) {
+		// checkBounds(capture);
+		updateCharOffset();
+		return new Range(
+				charOffsets.beg[capture],
+				charOffsets.end[capture]
+			);
+	}
+
+	public Range getByteCapture(int capture) {
+		// checkBounds(capture);
+		updateCharOffset();
 		return new Range(
 				region.beg[capture],
 				region.end[capture]
@@ -47,6 +64,62 @@ public class Match implements Iterable<Range> {
 		}
 		return result;
 	}
+	
+	
+	private static final class Pair implements Comparable {
+		int bytePos, charPos;
+		public int compareTo(Object o) {
+			return bytePos - ((Pair)o).bytePos;
+		}
+	}
+ 
+	private void updateCharOffset() {
+		if (charOffsetUpdated) return;
+ 
+		int numRegs = region == null ? 1 : region.numRegs;
+		if (charOffsets == null || charOffsets.numRegs < numRegs) 
+			charOffsets = new Region(numRegs);
+ 
+		Pair[] pairs = new Pair[numRegs * 2];
+		for (int i = 0; i < pairs.length; i++) pairs[i] = new Pair();
+ 
+		int numPos = 0;
+		for (int i = 0; i < numRegs; i++) {
+			if (region.beg[i] < 0) continue;
+			pairs[numPos++].bytePos = region.beg[i];
+			pairs[numPos++].bytePos = region.end[i];
+		}
+ 
+		Arrays.sort(pairs);
+ 
+		Encoding enc = UTF8Encoding.INSTANCE;
+		byte[] bytes = text.getBytes();
+		int p = 0;
+		int s = p;
+ 
+		int c = 0;
+		for (int i = 0; i < numPos; i++) {
+			int q = s + pairs[i].bytePos;
+			c += Match.strLength(enc, bytes, p, q);
+			pairs[i].charPos = c;
+			p = q;
+		}
+ 
+		Pair key = new Pair();
+		for (int i = 0; i < numRegs; i++) {
+			if (region.beg[i] < 0) {
+				charOffsets.beg[i] = charOffsets.end[i] = -1;
+				continue;
+			}
+			key.bytePos = region.beg[i];
+			charOffsets.beg[i] = pairs[Arrays.binarySearch(pairs, key)].charPos;
+			key.bytePos = region.end[i];
+			charOffsets.end[i] = pairs[Arrays.binarySearch(pairs, key)].charPos;
+		}
+
+		charOffsetUpdated = true;
+	}
+
 	
 	@Override
 	public String toString() {
@@ -74,5 +147,46 @@ public class Match implements Iterable<Range> {
 				throw new UnsupportedOperationException("no removing!");
 			}
 		};
+	}
+	
+	public static int searchNonAscii(byte[]bytes, int p, int end) {
+		while (p < end) {
+			if (!Encoding.isAscii(bytes[p])) return p;
+			p++;
+		}
+		return -1;
+	}
+
+	public static int length(Encoding enc, byte[]bytes, int p, int end) {
+		int n = enc.length(bytes, p, end);
+		if (n > 0 && end - p >= n) return n;
+		return end - p >= enc.minLength() ? enc.minLength() : end - p;
+	}
+
+	public static int strLength(Encoding enc, byte[] bytes, int p, int end) {
+		if (enc.isFixedWidth()) {
+			return (end - p + enc.minLength() - 1) / enc.minLength();
+		} else if (enc.isAsciiCompatible()) {
+			int c = 0;
+			while (p < end) {
+				if (Encoding.isAscii(bytes[p])) {
+					int q = searchNonAscii(bytes, p, end);
+					if (q == -1) return c + (end - p);
+					c += q - p;
+					p = q;
+				}
+				p += length(enc, bytes, p, end);
+				c++;
+			}
+			return c;
+		}
+		
+		int c;
+		for (c = 0; end > p; c++) p += length(enc, bytes, p, end);
+		return c;
+	}
+ 
+	public static int strLength(byte[] bytes) { 
+		return strLength(UTF8Encoding.INSTANCE, bytes, 0, bytes.length);
 	}
 }
