@@ -79,17 +79,26 @@ public class Match implements Iterable<Range> {
 		int numRegs = region == null ? 1 : region.numRegs;
 		if (charOffsets == null || charOffsets.numRegs < numRegs) 
 			charOffsets = new Region(numRegs);
- 
+
 		Pair[] pairs = new Pair[numRegs * 2];
 		for (int i = 0; i < pairs.length; i++) pairs[i] = new Pair();
  
 		int numPos = 0;
+		// System.out.printf("regions (numRegs:%d):\n", numRegs);
 		for (int i = 0; i < numRegs; i++) {
-			if (region.beg[i] < 0) continue;
+			// System.out.printf(" [%d, %d]\n", region.beg[i], region.end[i]);
+			if (region.beg[i] < 0) {
+				numPos++; numPos++;
+				continue;
+			}
 			pairs[numPos++].bytePos = region.beg[i];
 			pairs[numPos++].bytePos = region.end[i];
 		}
  
+		// for (Pair pair : pairs) {
+		// 	System.out.printf("  * %d\n", pair.bytePos);
+		// }
+		
 		Arrays.sort(pairs);
  
 		Encoding enc = UTF8Encoding.INSTANCE;
@@ -101,6 +110,8 @@ public class Match implements Iterable<Range> {
 		for (int i = 0; i < numPos; i++) {
 			int q = s + pairs[i].bytePos;
 			c += Match.strLength(enc, bytes, p, q);
+			// System.out.printf("p:%d s:%d c:%d q:%d bytePos:%d\n", p, s, c, q, pairs[i].bytePos);
+			// System.out.printf("'%s' %d %d %d\n", new String(bytes), Match.strLength(enc, bytes, p, q), p, q);
 			pairs[i].charPos = c;
 			p = q;
 		}
@@ -115,6 +126,7 @@ public class Match implements Iterable<Range> {
 			charOffsets.beg[i] = pairs[Arrays.binarySearch(pairs, key)].charPos;
 			key.bytePos = region.end[i];
 			charOffsets.end[i] = pairs[Arrays.binarySearch(pairs, key)].charPos;
+			// System.out.printf("  * bytes %d, %d  chars %d, %d\n", region.beg[i], region.end[i], charOffsets.beg[i], charOffsets.end[i]);
 		}
 
 		charOffsetUpdated = true;
