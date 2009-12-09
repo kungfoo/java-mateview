@@ -116,9 +116,7 @@ describe JavaMateView, "when reparsing after changes" do
       HTML
       p :asdf
       END
-      puts "(((())))"
       4.times { |i| @mt.backspace(4, 10-i)}
-      puts "********"
       it_should_match_clean_reparse
     end
 

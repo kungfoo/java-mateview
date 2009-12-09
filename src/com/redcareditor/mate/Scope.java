@@ -233,6 +233,11 @@ public class Scope implements Comparable<Scope>{
 		document.addTextLocation("scopes", end);
 	}
 	
+	public void removeEnd() {
+		this.range.clearEnd();
+		this.innerRange.clearEnd();
+	}
+	
 	public int getLength(){
 		return range.getLength();
 	}

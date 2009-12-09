@@ -93,7 +93,7 @@ public class Scanner implements Iterable<Marker> {
 	
 	public Marker findNextMarker() {
 		// System.out.printf("find_next_marker from (current_scope is %s)\n", currentScope.name);
-		System.out.printf("scanning: '%s' from %d to %d\n", this.line, this.position, this.lineLength);
+		// System.out.printf("scanning: '%s' from %d to %d\n", this.line, this.position, this.lineLength);
 //		if (this.position == this.lineLength)
 //			return null;
 		Marker m;

@@ -18,7 +18,7 @@ public class ParseThunk implements Runnable {
 		this.timeCreated          = System.currentTimeMillis();
 		this.lastModificationTime = System.currentTimeMillis();
 		this.parseFrom            = parseFrom;
-		System.out.printf("New thunk. parseFrom:%d time: %d\n", parseFrom, timeCreated);
+		// System.out.printf("New thunk. parseFrom:%d time: %d\n", parseFrom, timeCreated);
 		Display.getCurrent().timerExec(WAIT, this);
 	}
 	

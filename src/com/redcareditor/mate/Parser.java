@@ -182,14 +182,13 @@ public class Parser {
 	// more if necessary. Returns the index of the last line
 	// parsed.
 	public int parseRange(int fromLine, int toLine) {
-		System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
+		// System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
 
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
 		boolean scopeEverChanged = false;
 		while (lineIx <= toLine) {
 			scopeChanged = parseLine(lineIx);
-			System.out.printf("%d:%b\n", lineIx, scopeChanged);
 			if (scopeChanged) {
 				scopeEverChanged = true;
 				this.parsedUpto = lineIx;
@@ -197,13 +196,10 @@ public class Parser {
 			lineIx++;
 		}
 		if (thunk != null) {
-			System.out.printf("already thunk\n");
 			thunk.delayAndUpdate(lineIx);
 		}
 		else {
-			System.out.printf("new thunk? (%b, %d, %d)\n", scopeEverChanged, lineIx, styledText.getLineCount() - 1);
 			if (scopeEverChanged && lineIx <= styledText.getLineCount() - 1) {
-				System.out.printf("new thunk!\n");
 				thunk = new ParseThunk(this, lineIx);
 				if (Parser.synchronousParsing) {
 					thunk.execute();
@@ -288,7 +284,7 @@ public class Parser {
 		Parser.linesParsed++;
 		String line = styledText.getLine(lineIx) + "\n";
 		int length = line.length();
-		System.out.printf("p%d, ", lineIx);
+		// System.out.printf("p%d, ", lineIx);
 		if (lineIx > this.parsedUpto)
 			this.parsedUpto = lineIx;
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
@@ -304,29 +300,29 @@ public class Parser {
 		// System.out.printf("start pretty:\n%s\n", root.pretty(2));
 		for (Marker m : scanner) {
 			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, length, scanner.position);
-			if (expectedScope != null)
-				System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.getStart().getLine(), 
-					           expectedScope.getStart().getLineOffset());
-			else
-				System.out.printf("no expected scope\n");
-			System.out.printf("  scope: %s %d-%d (line length: %d)\n", 
-								m.pattern.name, m.from, m.match.getCapture(0).end, length);
+			// if (expectedScope != null)
+			// 	System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.getStart().getLine(), 
+			// 		           expectedScope.getStart().getLineOffset());
+			// else
+			// 	System.out.printf("no expected scope\n");
+			// System.out.printf("  scope: %s %d-%d (line length: %d)\n", 
+			// 					m.pattern.name, m.from, m.match.getCapture(0).end, length);
 			if (m.isCloseScope) {
-				System.out.printf("     (closing)\n");
+				// System.out.printf("     (closing)\n");
 				closeScope(scanner, expectedScope, lineIx, line, length, m, 
 							allScopes, closedScopes, removedScopes);
 			}
 			else if (m.pattern instanceof DoublePattern) {
-				System.out.printf("     (opening)\n");
+				// System.out.printf("     (opening)\n");
 				openScope(scanner, expectedScope, lineIx, line, length, m, 
 						   allScopes, closedScopes, removedScopes);
 			}
 			else {
-				System.out.printf("     (single)\n");
+				// System.out.printf("     (single)\n");
 				singleScope(scanner, expectedScope, lineIx, line, length, m, 
 							 allScopes, closedScopes, removedScopes);
 			}
-			System.out.printf("pretty:\n%s\n", root.pretty(2));
+			// System.out.printf("pretty:\n%s\n", root.pretty(2));
 			scanner.position = m.match.getByteCapture(0).end;
 		}
 		clearLine(lineIx, startScope, allScopes, closedScopes, removedScopes);
@@ -376,7 +372,6 @@ public class Parser {
 		if (is_ended) {
 			equal_ends          = (scanner.getCurrentScope().getEnd().equals(document.getTextLocation(lineIx, m.match.getCapture(0).end)));
 			equal_inner_ends    = (scanner.getCurrentScope().getInnerEnd().equals(document.getTextLocation(lineIx, m.from)));
-			System.out.printf("'%s':'%s'\n", scanner.getCurrentScope().endMatchString, endMatchString);
 			equal_match_strings = (scanner.getCurrentScope().endMatchString.equals(endMatchString));
 		}
 		
@@ -451,7 +446,7 @@ public class Parser {
 			// 	System.out.printf("different beginMatchStrings '%s'/'%s'\n", s.beginMatchString, expectedScope.beginMatchString);
 			// }
 			if (s.surfaceIdenticalToModuloEnding(expectedScope)) {
-				System.out.printf("surface_identical_mod_ending: keep expected\n");
+				// System.out.printf("surface_identical_mod_ending: keep expected\n");
 				// don't need to do anything as we have already found this,
 				// but let's keep the old scope since it will have children and what not.
 				newScope = expectedScope;
@@ -465,7 +460,7 @@ public class Parser {
 				scanner.setCurrentScope(expectedScope);
 			}
 			else {
-				System.out.printf("surface_NOT_identical_mod_ending: replace expected\n");
+				// System.out.printf("surface_NOT_identical_mod_ending: replace expected\n");
 				if (s.overlapsWith(expectedScope)) {
 					scanner.getCurrentScope().removeChild(expectedScope);
 					// removed_scopes << expected_scope
@@ -605,7 +600,7 @@ public class Parser {
 				src.append(dp.endString.substring(pos, dp.endString.length()));
 			else
 				src.append(dp.endString);
-			System.out.printf("close re: '%s'\n", src.toString());
+			// System.out.printf("close re: '%s'\n", src.toString());
 			scope.closingRegex = Rx.createRx(src.toString());
 		}
 		return null;
@@ -706,7 +701,6 @@ public class Parser {
 		Scope ts = startScope;
 		while (ts.parent != null) {
 			if (ts.getInnerEnd().getLine() == lineIx) {
-				System.out.printf("scopesThatClosedOnLine.add('%s')\n", ts.name);
 				scopesThatClosedOnLine.add(ts);
 			}
 			ts = ts.parent;
@@ -720,11 +714,7 @@ public class Parser {
 				else {
 					int line = styledText.getLineCount() - 1;
 					int lineOffset = styledText.getCharCount() - styledText.getOffsetAtLine(line);
-					System.out.printf("reopening '%s'\n", s.name);
-					// TODO: why are we setting an end position here for the end of the doc,
-					// but using a null to represent open elsewhere?
-					s.setInnerEndPos(line, lineOffset, false);
-					s.setEndPos(line, lineOffset, false);
+					s.removeEnd();
 					s.isOpen = true;
 				}
 			}

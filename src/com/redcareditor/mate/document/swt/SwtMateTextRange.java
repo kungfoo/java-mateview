@@ -57,6 +57,10 @@ public class SwtMateTextRange implements MateTextRange {
 	public void setEnd(MateTextLocation location) {
 		end = sanatize(location);
 	}
+	
+	public void clearEnd() {
+		end = null;
+	}
 
 	private SwtMateTextLocation sanatize(MateTextLocation location) {
 		if (location instanceof SwtMateTextLocation) {

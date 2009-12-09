@@ -10,6 +10,7 @@ public interface MateTextRange {
 	public MateTextLocation getEnd();
 
 	public void setEnd(MateTextLocation location);
+	public void clearEnd();
 	
 	public int getLength();
 	public boolean conatains(MateTextLocation location);
