@@ -18,7 +18,7 @@ public class ParseThunk implements Runnable {
 		this.timeCreated          = System.currentTimeMillis();
 		this.lastModificationTime = System.currentTimeMillis();
 		this.parseFrom            = parseFrom;
-		// System.out.printf("New thunk. parseFrom:%d time: %d\n", parseFrom, timeCreated);
+		System.out.printf("New thunk. parseFrom:%d time: %d\n", parseFrom, timeCreated);
 		Display.getCurrent().timerExec(WAIT, this);
 	}
 	
@@ -36,8 +36,7 @@ public class ParseThunk implements Runnable {
 		}
 		else {
 			// System.out.printf("  Once, after 0.5 seconds, parse from %d.\n", parseFrom);
-			parser.thunk = null;
-			parser.parseOnwards(parseFrom);
+			execute();
 		}
 	}
 	
@@ -45,5 +44,10 @@ public class ParseThunk implements Runnable {
 		// System.out.printf("Delay thunk time: %s\n", System.currentTimeMillis());
 		this.lastModificationTime = System.currentTimeMillis();
 		this.parseFrom = Math.min(parseFrom, lineIx);
+	}
+	
+	public void execute() {
+		parser.thunk = null;
+		parser.parseOnwards(parseFrom);
 	}
 }

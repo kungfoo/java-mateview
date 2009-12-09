@@ -29,3 +29,5 @@ class JavaMateView::MateText
     parser.root.pretty(0)
   end
 end
+
+JavaMateView::Parser.synchronousParsing = true

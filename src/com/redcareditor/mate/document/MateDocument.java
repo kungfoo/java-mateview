@@ -9,5 +9,7 @@ public interface MateDocument extends MateTextFactory{
 	
 	public boolean addTextLocation(MateTextLocation location);
 	
+	public boolean addTextLocation(String category, MateTextLocation location);
+	
 	public void reparseAll();
 }
