@@ -95,10 +95,7 @@ describe JavaMateView, "when reparsing after changes" do
       HI
       puts "hello"
       END
-      puts "*** TYPE"
       1.times { @mt.type(4, 2, " ") }
-      p @st.text
-      puts "*** REPARSE"
       it_should_match_clean_reparse
     end
 
@@ -154,8 +151,9 @@ describe JavaMateView, "when reparsing after changes" do
     
     it "should handle multibyte characters with aplomb" do
       @st.text = "\"as\"as"
+      puts "TYPEING:"
       @mt.type(0, 1, "†")
-      puts "reparse:"
+      puts "REPARSE:"
       it_should_match_clean_reparse
     end
   end

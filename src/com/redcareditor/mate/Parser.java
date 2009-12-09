@@ -326,7 +326,7 @@ public class Parser {
 				singleScope(scanner, expectedScope, lineIx, line, length, m, 
 							 allScopes, closedScopes, removedScopes);
 			}
-			// System.out.printf("pretty:\n%s\n", root.pretty(2));
+			System.out.printf("pretty:\n%s\n", root.pretty(2));
 			scanner.position = m.match.getByteCapture(0).end;
 		}
 		clearLine(lineIx, startScope, allScopes, closedScopes, removedScopes);
@@ -379,7 +379,7 @@ public class Parser {
 		if (//scanner.getCurrentScope().endPos != null &&
 				scanner.getCurrentScope().getEnd().equals(document.getTextLocation(lineIx, m.match.getCapture(0).end)) &&
 				scanner.getCurrentScope().getInnerEnd().equals(document.getTextLocation(lineIx, m.from)) &&
-				scanner.getCurrentScope().endMatchString == endMatchString) {
+				scanner.getCurrentScope().endMatchString.equals(endMatchString)) {
 				// we have already parsed this line and this scope ends here
 
 			// Re-add the captures from the end of the current scope to the 
