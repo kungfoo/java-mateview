@@ -115,7 +115,7 @@ public class Scope implements Comparable<Scope>{
 		// 			  name, other.name, pattern.name, other.pattern.name, start_loc().to_s(),
 		// 			  other.start_loc().to_s(), inner_start_loc().to_s(), other.inner_start_loc().to_s(),
 		// 			  begin_match_string, other.begin_match_string);
-		if (name.equals(other.name) &&
+		if (((name == null && other.name == null) || name.equals(other.name)) &&
 				pattern == other.pattern &&
 				getStart().equals(other.getStart()) &&
 				getInnerStart().equals(other.getInnerStart()) &&

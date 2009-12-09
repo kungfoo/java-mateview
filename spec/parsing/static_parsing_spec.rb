@@ -360,13 +360,12 @@ END
 
   describe "When parsing HTML:" do
 
-    before(:each) do
+    before do
       @mt.set_grammar_by_name("HTML")
     end
     
     it "should parse an † without blowing up" do
       @st.text = "<h1 class=\"†\">\n"
-      p @mt.parser.root.pretty(0)
     end
 
     it "Test an embedded php string which starts at the beginning of the line" do
