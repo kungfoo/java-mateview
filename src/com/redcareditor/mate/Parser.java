@@ -368,19 +368,20 @@ public class Parser {
 			ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes) {
 		String endMatchString = line.substring(m.from, m.match.getCapture(0).end);
 		
-		// stdout.printf("checking for already closed: %s, (%d,%d)-(%d,%d) (%d,%d)-(%d,%d) '%s' '%s'\n",
-//     scanner.current_scope.name,
-//			  scanner.current_scope.end_line(), scanner.current_scope.end_line_offset(),
-//			  line_ix, m.match.end(0), 
-//			  scanner.current_scope.inner_end_line(), scanner.current_scope.inner_end_line_offset(),
-//				line_ix, m.from,
-//				scanner.current_scope.end_match_string, end_match_string);
-//		  
-		if (//scanner.getCurrentScope().endPos != null &&
-				scanner.getCurrentScope().getEnd().equals(document.getTextLocation(lineIx, m.match.getCapture(0).end)) &&
-				scanner.getCurrentScope().getInnerEnd().equals(document.getTextLocation(lineIx, m.from)) &&
-				scanner.getCurrentScope().endMatchString.equals(endMatchString)) {
-				// we have already parsed this line and this scope ends here
+		boolean is_ended            = !scanner.getCurrentScope().isOpen; //(scanner.getCurrentScope().getEnd() != null);
+		boolean equal_ends          = false;
+		boolean equal_inner_ends    = false;
+		boolean equal_match_strings = false;
+		
+		if (is_ended) {
+			equal_ends          = (scanner.getCurrentScope().getEnd().equals(document.getTextLocation(lineIx, m.match.getCapture(0).end)));
+			equal_inner_ends    = (scanner.getCurrentScope().getInnerEnd().equals(document.getTextLocation(lineIx, m.from)));
+			System.out.printf("'%s':'%s'\n", scanner.getCurrentScope().endMatchString, endMatchString);
+			equal_match_strings = (scanner.getCurrentScope().endMatchString.equals(endMatchString));
+		}
+		
+		if (is_ended && equal_ends && equal_inner_ends && equal_match_strings) {
+			// we have already parsed this line and this scope ends here
 
 			// Re-add the captures from the end of the current scope to the 
 			// tracking arrays
