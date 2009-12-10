@@ -65,7 +65,10 @@ public class SwtColourer implements Colourer {
 
 	private void updateHighlightedLine(int line) {
 		if (caretLineHasChanged(line)) {
-			control.setLineBackground(line, 1, globalLineBackground);
+			int maxLineIx = control.getLineCount() - 1;
+			if (line <= maxLineIx)
+				control.setLineBackground(line, 1, globalLineBackground);
+			if (highlightedLine <= maxLineIx)
 			control.setLineBackground(highlightedLine, 1, globalBackground);
 			highlightedLine = line;
 		}
