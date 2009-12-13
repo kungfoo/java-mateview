@@ -24,6 +24,8 @@ import com.redcareditor.onig.Rx;
 
 public class Parser {
 	int LOOK_AHEAD = 100;
+	public static int linesParsed = 0;
+	public static boolean synchronousParsing = false;
 	
 	public Grammar grammar;
 	public MateText mateText;
@@ -126,7 +128,7 @@ public class Parser {
 	}
 
 	public void verifyEventCallback(int start, int end, String text) {
-//		System.out.printf("verifyEventCallback(%s)\n", text);
+		// System.out.printf("verifyEventCallback(%s)\n", text);
 		if (enabled) {
 			modifyStart = start;
 			modifyEnd   = end;
@@ -136,13 +138,16 @@ public class Parser {
 	
 	public void modifyEventCallback() {
 		// TODO: this isn't quite right...
-		changes.add(styledText.getLineAtOffset(modifyStart), 
-				styledText.getLineAtOffset(modifyStart + modifyText.length()));
-//		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
-		modifyStart = -1;
-		modifyEnd   = -1;
-		modifyText  = null;
-		processChanges();
+		// System.out.printf("modifyEventCallback parser:%p\n", this);
+		// System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
+		if (enabled) {
+			changes.add(styledText.getLineAtOffset(modifyStart), 
+					styledText.getLineAtOffset(modifyStart + modifyText.length()));
+			modifyStart = -1;
+			modifyEnd   = -1;
+			modifyText  = null;
+			processChanges();
+		}
 	}
 
 	public boolean shouldColour() {
@@ -150,7 +155,9 @@ public class Parser {
 	}
 	
 	public void viewportScrolledCallback() {
-		lastVisibleLineChanged(JFaceTextUtil.getBottomIndex(mateText.getTextWidget()));
+		if (enabled) {
+			lastVisibleLineChanged(JFaceTextUtil.getBottomIndex(mateText.getTextWidget()));
+		}
 	}
 	
 	// Process all change ranges.
@@ -174,8 +181,8 @@ public class Parser {
 	// more if necessary. Returns the index of the last line
 	// parsed.
 	public int parseRange(int fromLine, int toLine) {
-		System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
-		System.out.printf("grammar: %s\n", grammar.name);
+		// System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
+
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
 		boolean scopeEverChanged = false;
@@ -191,8 +198,11 @@ public class Parser {
 			thunk.delayAndUpdate(lineIx);
 		}
 		else {
-			if (scopeEverChanged) {
+			if (scopeEverChanged && lineIx <= styledText.getLineCount() - 1) {
 				thunk = new ParseThunk(this, lineIx);
+				if (Parser.synchronousParsing) {
+					thunk.execute();
+				}
 			}
 		}
 
@@ -270,9 +280,10 @@ public class Parser {
 	}
 	
 	private boolean parseLine(int lineIx) {
+		Parser.linesParsed++;
 		String line = styledText.getLine(lineIx) + "\n";
 		int length = line.length();
-		System.out.printf("p%d, ", lineIx);
+		// System.out.printf("p%d, ", lineIx);
 		if (lineIx > this.parsedUpto)
 			this.parsedUpto = lineIx;
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
@@ -285,37 +296,38 @@ public class Parser {
 		ArrayList<Scope> closedScopes = new ArrayList<Scope>();
 		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
+		// System.out.printf("start pretty:\n%s\n", root.pretty(2));
 		for (Marker m : scanner) {
 			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, length, scanner.position);
-//			if (expectedScope != null)
-//				System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.getStart().getLine(), 
-//					           expectedScope.getStart().getLineOffset());
-//			else
-//				System.out.printf("no expected scope\n");
-//			System.out.printf("  scope: %s (%d, %d) (line length: %d)\n", 
-//								m.pattern.name, m.from, m.match.getCapture(0).end, length);
+			// if (expectedScope != null)
+			// 	System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.getStart().getLine(), 
+			// 		           expectedScope.getStart().getLineOffset());
+			// else
+			// 	System.out.printf("no expected scope\n");
+			// System.out.printf("  scope: %s %d-%d (line length: %d)\n", 
+			// 					m.pattern.name, m.from, m.match.getCapture(0).end, length);
 			if (m.isCloseScope) {
-//				System.out.printf("     (closing)\n");
+				// System.out.printf("     (closing)\n");
 				closeScope(scanner, expectedScope, lineIx, line, length, m, 
 							allScopes, closedScopes, removedScopes);
 			}
 			else if (m.pattern instanceof DoublePattern) {
-//				System.out.printf("     (opening)\n");
+				// System.out.printf("     (opening)\n");
 				openScope(scanner, expectedScope, lineIx, line, length, m, 
 						   allScopes, closedScopes, removedScopes);
 			}
 			else {
-//				System.out.printf("     (single)\n");
+				// System.out.printf("     (single)\n");
 				singleScope(scanner, expectedScope, lineIx, line, length, m, 
 							 allScopes, closedScopes, removedScopes);
 			}
-			//System.out.printf("pretty:\n%s\n", root.pretty(2));
-			scanner.position = m.match.getCapture(0).end;
+			// System.out.printf("pretty:\n%s\n", root.pretty(2));
+			scanner.position = m.match.getByteCapture(0).end;
 		}
 		clearLine(lineIx, startScope, allScopes, closedScopes, removedScopes);
 		Scope endScope2 = scopeAfterEndOfLine(lineIx, length);
 //		System.out.printf("end_scope2: %s\n", endScope2.name);
-//		System.out.printf("%s\n", this.root.pretty(0));
+		// System.out.printf("end pretty: %s\n", this.root.pretty(2));
 //		if (colourer != null) {
 //			// System.out.printf("before_uncolour_scopes\n");
 //			colourer.uncolourScopes(removedScopes);
@@ -350,19 +362,20 @@ public class Parser {
 			int length, Marker m, ArrayList<Scope> allScopes, 
 			ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes) {
 		String endMatchString = line.substring(m.from, m.match.getCapture(0).end);
-		// stdout.printf("checking for already closed: %s, (%d,%d)-(%d,%d) (%d,%d)-(%d,%d) '%s' '%s'\n",
-//     scanner.current_scope.name,
-//			  scanner.current_scope.end_line(), scanner.current_scope.end_line_offset(),
-//			  line_ix, m.match.end(0), 
-//			  scanner.current_scope.inner_end_line(), scanner.current_scope.inner_end_line_offset(),
-//				line_ix, m.from,
-//				scanner.current_scope.end_match_string, end_match_string);
-//		  
-		if (//scanner.getCurrentScope().endPos != null &&
-				scanner.getCurrentScope().getEnd().equals(document.getTextLocation(lineIx, m.match.getCapture(0).end)) &&
-				scanner.getCurrentScope().getInnerEnd().equals(document.getTextLocation(lineIx, m.from)) &&
-				scanner.getCurrentScope().endMatchString == endMatchString) {
-				// we have already parsed this line and this scope ends here
+		
+		boolean is_ended            = !scanner.getCurrentScope().isOpen; //(scanner.getCurrentScope().getEnd() != null);
+		boolean equal_ends          = false;
+		boolean equal_inner_ends    = false;
+		boolean equal_match_strings = false;
+		
+		if (is_ended) {
+			equal_ends          = (scanner.getCurrentScope().getEnd().equals(document.getTextLocation(lineIx, m.match.getCapture(0).end)));
+			equal_inner_ends    = (scanner.getCurrentScope().getInnerEnd().equals(document.getTextLocation(lineIx, m.from)));
+			equal_match_strings = (scanner.getCurrentScope().endMatchString.equals(endMatchString));
+		}
+		
+		if (is_ended && equal_ends && equal_inner_ends && equal_match_strings) {
+			// we have already parsed this line and this scope ends here
 
 			// Re-add the captures from the end of the current scope to the 
 			// tracking arrays
@@ -404,18 +417,14 @@ public class Parser {
 	public void openScope(Scanner scanner, Scope expectedScope, int lineIx, 
 			String line, int length, Marker m,
 			ArrayList<Scope> allScopes, ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes ) {
-//		System.out.printf("[opening with %d patterns], \n", ((DoublePattern) m.pattern).patterns.size());
+		// System.out.printf("[opening with %d patterns], \n", ((DoublePattern) m.pattern).patterns.size());
 		Scope s = new Scope(mateText, m.pattern.name);
 		s.pattern = m.pattern;
 		s.openMatch = m.match;
 		setStartPosSafely(s, m, lineIx, length, 0);
 		setInnerStartPosSafely(s, m, lineIx, length, 0);
 		s.beginMatchString = line.substring(m.from, m.match.getCapture(0).end);
-//		var end_iter = buffer.end_iter();
-//		var end_line = end_iter.get_line();
-//		var end_line_index = end_iter.get_line_index();
-//		s.inner_end_mark_set(end_line, end_line_index, false);
-//		s.end_mark_set(end_line, end_line_index, false);
+		
 		s.isOpen = true;
 		s.isCapture = false;
 		s.parent = scanner.getCurrentScope();
@@ -424,19 +433,33 @@ public class Parser {
 		if (expectedScope != null) {
 			// check mod ending scopes as the new one will not have a closing marker
 			// but the expected one will:
+			// stdout.printf("%s == %s and %s == %s and %s == %s and %s == %s and %s == %s",
+			// 			  name, other.name, pattern.name, other.pattern.name, start_loc().to_s(),
+			// 			  other.start_loc().to_s(), inner_start_loc().to_s(), other.inner_start_loc().to_s(),
+			// 			  begin_match_string, other.begin_match_string);
+			// if (!s.name.equals(expectedScope.name)) System.out.printf("different names\n");
+			// if (!s.pattern.name.equals(expectedScope.pattern.name)) System.out.printf("different patterns\n");
+			// if (!s.getStart().equals(expectedScope.getStart())) System.out.printf("different starts\n");
+			// if (!s.getInnerStart().equals(expectedScope.getInnerStart())) System.out.printf("different inner starts\n");
+			// if (!s.beginMatchString.equals(expectedScope.beginMatchString)) {
+			// 	System.out.printf("different beginMatchStrings '%s'/'%s'\n", s.beginMatchString, expectedScope.beginMatchString);
+			// }
 			if (s.surfaceIdenticalToModuloEnding(expectedScope)) {
-				// stdout.printf("surface_identical_mod_ending: keep expected\n");
+				// System.out.printf("surface_identical_mod_ending: keep expected\n");
 				// don't need to do anything as we have already found this,
 				// but let's keep the old scope since it will have children and what not.
 				newScope = expectedScope;
 				for (Scope child : expectedScope.children) {
-					closedScopes.add(child);
-					allScopes.add(child);
+					// if (!child.isCapture) {
+						closedScopes.add(child);
+						allScopes.add(child);
+					// }
 				}
+				// handleCaptures(lineIx, length, line, s, m, allScopes, closedScopes);
 				scanner.setCurrentScope(expectedScope);
 			}
 			else {
-				//stdout.printf("surface_NOT_identical_mod_ending: replace expected\n");
+				// System.out.printf("surface_NOT_identical_mod_ending: replace expected\n");
 				if (s.overlapsWith(expectedScope)) {
 					scanner.getCurrentScope().removeChild(expectedScope);
 					// removed_scopes << expected_scope
@@ -467,7 +490,8 @@ public class Parser {
 		s.isOpen = false;
 		s.isCapture = false;
 //		System.out.printf("beginMatchString '%s' %d - %d\n",  new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from), m.from, m.match.getCapture(0).end);
-		s.beginMatchString = new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from); 
+		// s.beginMatchString = new String(line.getBytes(), m.from, m.match.getCapture(0).end - m.from); 
+		s.beginMatchString = line.substring(m.match.getCapture(0).start, m.match.getCapture(0).end);
 		s.parent = scanner.getCurrentScope();
 		Scope newScope = s;
 		if (expectedScope != null) {
@@ -500,14 +524,13 @@ public class Parser {
 		closedScopes.add(newScope);
 	}
 
-	// TODO: please, give this method a meaningful name.
-	private boolean iDontKnowHowToNameThisFunctionButItsDuplicateCode(int lineIx, int length, int to) {
+	private boolean atEndOfNonFinalLine(int lineIx, int length, int to) {
 		return to == length && styledText.getLineCount() > lineIx+1;
 	}
 
 	public void setStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).start;
-		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) 
+		if (atEndOfNonFinalLine(lineIx, length, to)) 
 			scope.setStartPos(lineIx+1, 0, false);
 		else
 			scope.setStartPos(lineIx, Math.min(to, length), false);
@@ -515,7 +538,7 @@ public class Parser {
 
 	public void setInnerStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).start;
-		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) 
+		if (atEndOfNonFinalLine(lineIx, length, to)) 
 			scope.setInnerStartPos(lineIx+1, 0, false);
 		else
 			scope.setInnerStartPos(lineIx, Math.min(to, length), false);
@@ -523,7 +546,7 @@ public class Parser {
 
 	public void setInnerEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int from = m.match.getCapture(cap).start;
-		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, from)) {
+		if (atEndOfNonFinalLine(lineIx, length, from)) {
 			scope.setInnerEndPos(lineIx, length, true);
 		}
 		else {
@@ -533,7 +556,7 @@ public class Parser {
 	
 	public void setEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).end;
-		if (iDontKnowHowToNameThisFunctionButItsDuplicateCode(lineIx, length, to)) {
+		if (atEndOfNonFinalLine(lineIx, length, to)) {
 			scope.setEndPos(lineIx, length, true);
 		}
 		else {
@@ -576,7 +599,7 @@ public class Parser {
 				src.append(dp.endString.substring(pos, dp.endString.length()));
 			else
 				src.append(dp.endString);
-//			stdout.printf("src: '%s'\n", src.str);
+			// System.out.printf("close re: '%s'\n", src.toString());
 			scope.closingRegex = Rx.createRx(src.toString());
 		}
 		return null;
@@ -686,20 +709,11 @@ public class Parser {
 				if (s.isCapture) {
 					s.parent.removeChild(s);
 					removedScopes.add(s);
-					// @removed_scopes << s
 				}
 				else {
-//					if (colourer != null)
-//						colourer.uncolourScope(s, false);
-					// s.inner_end_mark = null;
-					// s.end_mark = null;
-					// s.is_open = true;
 					int line = styledText.getLineCount() - 1;
 					int lineOffset = styledText.getCharCount() - styledText.getOffsetAtLine(line);
-					// TODO: why are we setting an end position here for the end of the doc,
-					// but using a null to represent open elsewhere?
-					s.setInnerEndPos(line, lineOffset, false);
-					s.setEndPos(line, lineOffset, false);
+					s.removeEnd();
 					s.isOpen = true;
 				}
 			}

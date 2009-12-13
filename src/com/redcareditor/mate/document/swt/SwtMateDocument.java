@@ -1,6 +1,7 @@
 package com.redcareditor.mate.document.swt;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
@@ -23,6 +24,8 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	public SwtMateDocument(MateText mateText) {
 		this.mateText = mateText;
 		this.styledText = mateText.getTextWidget();
+		mateText.getDocument().addPositionCategory("scopes");
+		mateText.getDocument().addPositionUpdater(new SwtScopePositionUpdater("scopes"));
 	}
 
 	public void set(String text) {
@@ -45,8 +48,10 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	public void reparseAll() {
 		SwtMateTextLocation startLocation = new SwtMateTextLocation(0, this);
 		SwtMateTextLocation endLocation = new SwtMateTextLocation(0 + styledText.getCharCount(), this);
-		this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
-		this.mateText.parser.processChanges();
+		if (this.mateText.parser.enabled) {
+			this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
+			this.mateText.parser.processChanges();
+		}
 	}
 
 	public void replace(int start, int length, String text) {
@@ -62,18 +67,21 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	}
 
 	public boolean addTextLocation(MateTextLocation location) {
+		return addTextLocation("default", location);
+	}
+
+	public boolean addTextLocation(String category, MateTextLocation location) {
 		// SwtTextLocation position = new SwtTextLocation(location, this);
 
 		try {
-			mateText.getDocument().addPosition((SwtMateTextLocation) location);
+			mateText.getDocument().addPosition(category, (SwtMateTextLocation) location);
 			return true;
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (BadPositionCategoryException e) {
+			e.printStackTrace();
 		}
-		// catch (BadPositionCategoryException e) {
-		// e.printStackTrace();
-		// }
 
 		return false;
 	}

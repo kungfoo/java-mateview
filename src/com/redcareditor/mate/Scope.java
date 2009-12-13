@@ -104,7 +104,7 @@ public class Scope implements Comparable<Scope>{
 		if (surfaceIdenticalToModuloEnding(other) &&
 				getEnd().equals(other.getEnd()) &&
 				getInnerEnd().equals(other.getInnerEnd()) &&
-				beginMatchString == other.beginMatchString) {
+				beginMatchString.equals(other.beginMatchString)) {
 			return true;
 		}
 		return false;
@@ -115,11 +115,11 @@ public class Scope implements Comparable<Scope>{
 		// 			  name, other.name, pattern.name, other.pattern.name, start_loc().to_s(),
 		// 			  other.start_loc().to_s(), inner_start_loc().to_s(), other.inner_start_loc().to_s(),
 		// 			  begin_match_string, other.begin_match_string);
-		if (name == other.name &&
+		if (((name == null && other.name == null) || name.equals(other.name)) &&
 				pattern == other.pattern &&
 				getStart().equals(other.getStart()) &&
 				getInnerStart().equals(other.getInnerStart()) &&
-				beginMatchString == other.beginMatchString) {
+				beginMatchString.equals(other.beginMatchString)) {
 			return true;
 		}
 		return false;
@@ -212,25 +212,30 @@ public class Scope implements Comparable<Scope>{
 	public void setStartPos(int line, int lineOffset, boolean hasLeftGravity) {
 		MateTextLocation start = document.getTextLocation(line, lineOffset);
 		this.range.setStart(start);
-		document.addTextLocation(start);
+		document.addTextLocation("scopes", start);
 	}
 
 	public void setInnerStartPos(int line, int lineOffset, boolean hasLeftGravity) {
 		MateTextLocation innerStart = document.getTextLocation(line, lineOffset);
 		this.innerRange.setStart(innerStart);
-		document.addTextLocation(innerStart);
+		document.addTextLocation("scopes", innerStart);
 	}
 
 	public void setInnerEndPos(int line, int lineOffset, boolean c) {
 		MateTextLocation innerEnd = document.getTextLocation(line, lineOffset);
 		this.innerRange.setEnd(innerEnd);
-		document.addTextLocation(innerEnd);
+		document.addTextLocation("scopes", innerEnd);
 	}
 
 	public void setEndPos(int line, int lineOffset, boolean c) {
 		MateTextLocation end = document.getTextLocation(line, lineOffset);
 		this.range.setEnd(end);
-		document.addTextLocation(end);
+		document.addTextLocation("scopes", end);
+	}
+	
+	public void removeEnd() {
+		this.range.clearEnd();
+		this.innerRange.clearEnd();
 	}
 	
 	public int getLength(){

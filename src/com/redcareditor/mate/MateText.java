@@ -20,6 +20,7 @@ import com.redcareditor.mate.colouring.Colourer;
 import com.redcareditor.mate.colouring.swt.SwtColourer;
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.mate.document.MateTextLocation;
+import com.redcareditor.mate.document.swt.SwtMateTextLocation;
 import com.redcareditor.mate.document.swt.SwtMateDocument;
 import com.redcareditor.mate.undo.MateTextUndoManager;
 import com.redcareditor.mate.undo.swt.SwtMateTextUndoManager;
@@ -206,5 +207,11 @@ public class MateText extends Composite {
 	
 	public void addGrammarListener(IGrammarListener listener) {
 		grammarListeners.add(listener);
+	}
+	
+	public void redraw() {
+		// SwtMateTextLocation startLocation = new SwtMateTextLocation(0, getMateDocument());
+		// SwtMateTextLocation endLocation = new SwtMateTextLocation(0 + getTextWidget().getCharCount(), getMateDocument());
+		getTextWidget().redraw();
 	}
 }

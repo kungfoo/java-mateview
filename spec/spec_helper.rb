@@ -1,7 +1,6 @@
 
 require File.join(File.dirname(__FILE__), *%w(.. src ruby java-mateview))
 
-
 JavaMateView::Bundle.load_bundles("input/")
 JavaMateView::ThemeManager.load_themes("input/")
 
@@ -30,3 +29,5 @@ class JavaMateView::MateText
     parser.root.pretty(0)
   end
 end
+
+JavaMateView::Parser.synchronousParsing = true
