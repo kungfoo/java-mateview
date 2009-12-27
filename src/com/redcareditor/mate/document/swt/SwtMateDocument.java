@@ -4,6 +4,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IPositionUpdater;
@@ -32,7 +33,11 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 		this.mateText.getDocument().set(text);
 		reparseAll();
 	}
-
+	
+	public IDocument getJFaceDocument() {
+		return this.mateText.getDocument();
+	}
+	
 	public String get() {
 		return this.mateText.getDocument().get();
 	}
