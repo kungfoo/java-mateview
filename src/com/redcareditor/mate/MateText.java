@@ -51,7 +51,7 @@ public class MateText extends Composite {
 		viewer.setDocument(document);
 		setLayout(new FillLayout());
 		colourer = new SwtColourer(this);
-		undoManager = new SwtMateTextUndoManager(this);
+		//undoManager = new SwtMateTextUndoManager(this);
 		mateDocument = new SwtMateDocument(this);
 		grammarListeners = new ArrayList<IGrammarListener>();
 		getTextWidget().setLeftMargin(5);
@@ -64,17 +64,17 @@ public class MateText extends Composite {
 		return ruler;
 	}
 
-	public void undo() {
-		undoManager.undo();
-	}
+	//public void undo() {
+	//	undoManager.undo();
+	//}
 
-	public void redo() {
-		undoManager.redo();
-	}
+	//public void redo() {
+	//	undoManager.redo();
+	//}
 
-	public boolean isDirty() {
-		return undoManager.isDirty();
-	}
+	//public boolean isDirty() {
+	//	return undoManager.isDirty();
+	//}
 
 	public void attachUpdater() {
 

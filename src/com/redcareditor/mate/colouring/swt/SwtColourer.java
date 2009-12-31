@@ -68,8 +68,14 @@ public class SwtColourer implements Colourer {
 			int maxLineIx = control.getLineCount() - 1;
 			if (line <= maxLineIx)
 				control.setLineBackground(line, 1, globalLineBackground);
-			if (highlightedLine <= maxLineIx)
-			control.setLineBackground(highlightedLine, 1, globalBackground);
+			try {
+				if (highlightedLine <= maxLineIx)
+					control.setLineBackground(highlightedLine, 1, globalBackground);
+			}
+			catch (java.lang.ArrayIndexOutOfBoundsException e) {
+			    // What the hell is this? It seems like maxLineIx is already out of date....
+				System.out.printf("caught java.lang.ArrayIndexOutOfBoundsException in updateHighlightedLine\n");
+			}
 			highlightedLine = line;
 		}
 	}

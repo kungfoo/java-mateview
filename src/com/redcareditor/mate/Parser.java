@@ -129,8 +129,8 @@ public class Parser {
 	}
 
 	public void verifyEventCallback(int start, int end, String text) {
-		// System.out.printf("verifyEventCallback(%s)\n", text);
 		if (enabled) {
+//			System.out.printf("verifyEventCallback(%s)\n", text);
 			modifyStart = start;
 			modifyEnd   = end;
 			modifyText  = text;
