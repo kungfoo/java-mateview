@@ -137,13 +137,35 @@ public class Parser {
 		}
 	}
 	
+	public int getLineAtOffset(int offset) {
+		return styledText.getLineAtOffset(offset);
+	}
+	
+	public int getOffsetAtLine(int line) {
+		return styledText.getOffsetAtLine(line);
+	}
+	
+	public int getLineCount() {
+		return styledText.getLineCount();
+	}
+	
+	public int getCharCount() {
+		return styledText.getCharCount();
+	}
+	
+	public String getLine(int line) {
+		return styledText.getLine(line);
+	}
+	
 	public void modifyEventCallback() {
 		// TODO: this isn't quite right...
 		// System.out.printf("modifyEventCallback parser:%p\n", this);
 		// System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
 		if (enabled) {
-			changes.add(styledText.getLineAtOffset(modifyStart), 
-					styledText.getLineAtOffset(modifyStart + modifyText.length()));
+			changes.add(
+				getLineAtOffset(modifyStart), 
+				getLineAtOffset(modifyStart + modifyText.length())
+			);
 			modifyStart = -1;
 			modifyEnd   = -1;
 			modifyText  = null;
@@ -170,8 +192,8 @@ public class Parser {
 				int rangeEnd = Math.min(lastVisibleLine + lookAhead, range.end);
 				thisParsedUpto = parseRange(range.start, rangeEnd);
 			}
-			int startOffset = styledText.getOffsetAtLine(range.start);
-			int endOffset = styledText.getOffsetAtLine(range.end);
+			int startOffset = getOffsetAtLine(range.start);
+			int endOffset   = getOffsetAtLine(range.end);
 			styledText.redrawRange(startOffset, endOffset - startOffset, false);
 		}
 		//		System.out.printf("%s\n", root.pretty(0));
@@ -199,7 +221,7 @@ public class Parser {
 			thunk.delayAndUpdate(lineIx);
 		}
 		else {
-			if (scopeEverChanged && lineIx <= styledText.getLineCount() - 1) {
+			if (scopeEverChanged && lineIx <= getLineCount() - 1) {
 				thunk = new ParseThunk(this, lineIx);
 				if (Parser.synchronousParsing) {
 					thunk.execute();
@@ -216,7 +238,7 @@ public class Parser {
 		if (styledText.isDisposed())
 			return;
 		int lineIx = fromLine;
-		int lineCount = styledText.getLineCount();
+		int lineCount = getLineCount();
 		int lastLine = Math.min(lastVisibleLine + 100, lineCount - 1);
 		while (lineIx <= lastLine) {
 			parseLine(lineIx);
@@ -228,14 +250,14 @@ public class Parser {
 	
 	public void redrawLine(int lineIx) {
 		// System.out.printf("redrawLine(%d)\n", lineIx);
-		int startOffset = styledText.getOffsetAtLine(lineIx);
+		int startOffset = getOffsetAtLine(lineIx);
 		int endOffset;
-		int lineCount = styledText.getLineCount();
+		int lineCount = getLineCount();
 		if (lineIx + 1 < lineCount) {
-			endOffset = styledText.getOffsetAtLine(lineIx + 1) - 1;
+			endOffset = getOffsetAtLine(lineIx + 1) - 1;
 		}
 		else {
-			endOffset = styledText.getCharCount();
+			endOffset = getCharCount();
 		}
 		styledText.redrawRange(startOffset, endOffset - startOffset, false);
 	}
@@ -245,7 +267,7 @@ public class Parser {
 		// System.out.printf("lastVisibleLineChanged(%d)\n", lastVisibleLine);
 		// System.out.printf("  parsedUpto: %d\n", parsed_upto);
 		if (lastVisibleLine + lookAhead >= parsedUpto) {
-			int endRange = Math.min(styledText.getLineCount() - 1, lastVisibleLine + lookAhead);
+			int endRange = Math.min(getLineCount() - 1, lastVisibleLine + lookAhead);
 			parseRange(parsedUpto, endRange);
 		}
 	}
@@ -282,7 +304,7 @@ public class Parser {
 	
 	private boolean parseLine(int lineIx) {
 		Parser.linesParsed++;
-		String line = styledText.getLine(lineIx) + "\n";
+		String line = getLine(lineIx) + "\n";
 		int length = line.length();
 		// System.out.printf("p%d, ", lineIx);
 		if (lineIx > this.parsedUpto)
@@ -526,7 +548,7 @@ public class Parser {
 	}
 
 	private boolean atEndOfNonFinalLine(int lineIx, int length, int to) {
-		return to == length && styledText.getLineCount() > lineIx+1;
+		return to == length && getLineCount() > lineIx+1;
 	}
 
 	public void setStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
@@ -712,8 +734,8 @@ public class Parser {
 					removedScopes.add(s);
 				}
 				else {
-					int line = styledText.getLineCount() - 1;
-					int lineOffset = styledText.getCharCount() - styledText.getOffsetAtLine(line);
+					int line = getLineCount() - 1;
+					int lineOffset = getCharCount() - getOffsetAtLine(line);
 					s.removeEnd();
 					s.isOpen = true;
 				}
