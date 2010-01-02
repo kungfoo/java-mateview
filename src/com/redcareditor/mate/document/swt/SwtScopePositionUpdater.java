@@ -33,7 +33,7 @@ public class SwtScopePositionUpdater implements IPositionUpdater {
 	 * @see org.eclipse.jface.text.IPositionUpdater#update(org.eclipse.jface.text.DocumentEvent)
 	 */
 	public void update(DocumentEvent event) {
-
+		//System.out.printf("SwtScopePositionUpdater#update\n");
 		int eventOffset= event.getOffset();
 		int eventOldEndOffset= eventOffset + event.getLength();
 		int eventNewLength= event.getText() == null ? 0 : event.getText().length();

@@ -16,6 +16,9 @@ import org.eclipse.swt.widgets.ScrollBar;
 
 import org.eclipse.jface.text.IViewportListener;
 import org.eclipse.jface.text.JFaceTextUtil;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocumentListener;
 
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.onig.Match;
@@ -29,6 +32,7 @@ public class Parser {
 	
 	public Grammar grammar;
 	public MateText mateText;
+	public Document jface;
 	public StyledText styledText;
 	public MateDocument document;
 	
@@ -64,6 +68,7 @@ public class Parser {
 		alwaysParseAll = false;
 		modifyStart = -1;
 		document = m.getMateDocument();
+		jface    = (Document) m.getDocument();
 		enabled = true;
 	}
 	
@@ -83,58 +88,11 @@ public class Parser {
 	public void makeRoot() {
 		this.root = new Scope(mateText, this.grammar.scopeName);
 		this.root.isOpen = true;
-//		this.root.setStartPos(0, 0, true);
-//		int lineIx = styledText.getLineCount()-1;
-//		this.root.setEndPos(lineIx, 
-//							styledText.getCharCount() - styledText.getOffsetAtLine(lineIx), false);
-//		System.out.printf("making root: %s\n", this.grammar.scopeName);
 		DoublePattern dp = new DoublePattern();
 		dp.name = this.grammar.name;
 		dp.patterns = this.grammar.patterns;
 		dp.grammar = this.grammar;
 		this.root.pattern = dp;
-	}
-	
-	private VerifyListener verifyListener;
-	private ModifyListener modifyListener;
-	private IViewportListener viewportListener;
-	
-	public void attachListeners() {
-//		System.out.printf("parser attach listeners\n");
-		verifyListener = new VerifyListener() {
-			public void verifyText(VerifyEvent e) {
-				verifyEventCallback(e.start, e.end, e.text);
-			}
-		};
-		modifyListener = new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				modifyEventCallback();
-			}
-		};
-		viewportListener = new IViewportListener() {
-			public void viewportChanged(int verticalOffset) {
-				viewportScrolledCallback();
-			}
-		};
-		
-		mateText.getTextWidget().addVerifyListener(verifyListener);
-		mateText.getTextWidget().addModifyListener(modifyListener);
-		mateText.viewer.addViewportListener(viewportListener);
-	}
-	
-	public void removeListeners() {
-		mateText.getTextWidget().removeVerifyListener(verifyListener);
-		mateText.getTextWidget().removeModifyListener(modifyListener);
-		mateText.viewer.removeViewportListener(viewportListener);
-	}
-
-	public void verifyEventCallback(int start, int end, String text) {
-		if (enabled) {
-//			System.out.printf("verifyEventCallback(%s)\n", text);
-			modifyStart = start;
-			modifyEnd   = end;
-			modifyText  = text;
-		}
 	}
 	
 	public int getLineAtOffset(int offset) {
@@ -157,10 +115,46 @@ public class Parser {
 		return styledText.getLine(line);
 	}
 	
+	private VerifyListener verifyListener;
+	private ModifyListener modifyListener;
+	private IViewportListener viewportListener;
+	private IDocumentListener documentListener;
+	
+	public void attachListeners() {
+		viewportListener = new IViewportListener() {
+			public void viewportChanged(int verticalOffset) {
+				viewportScrolledCallback();
+			}
+		};
+		
+		mateText.viewer.addViewportListener(viewportListener);
+		
+		documentListener = new IDocumentListener() {
+			public void documentAboutToBeChanged(DocumentEvent e) {
+				verifyEventCallback(e.fOffset, e.fOffset + e.fLength, e.fText);
+			}
+			
+			public void documentChanged(DocumentEvent e) {
+				modifyEventCallback();
+			}
+		};
+		mateText.getDocument().addDocumentListener(documentListener);
+	}
+	
+	public void removeListeners() {
+		mateText.viewer.removeViewportListener(viewportListener);
+		mateText.getDocument().removeDocumentListener(documentListener);
+	}
+
+	public void verifyEventCallback(int start, int end, String text) {
+		if (enabled) {
+			modifyStart = start;
+			modifyEnd   = end;
+			modifyText  = text;
+		}
+	}
+	
 	public void modifyEventCallback() {
-		// TODO: this isn't quite right...
-		// System.out.printf("modifyEventCallback parser:%p\n", this);
-		// System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
 		if (enabled) {
 			changes.add(
 				getLineAtOffset(modifyStart), 
@@ -264,29 +258,15 @@ public class Parser {
 	
 	public void lastVisibleLineChanged(int newLastVisibleLine) {
 		this.lastVisibleLine = newLastVisibleLine;
-		// System.out.printf("lastVisibleLineChanged(%d)\n", lastVisibleLine);
-		// System.out.printf("  parsedUpto: %d\n", parsed_upto);
 		if (lastVisibleLine + lookAhead >= parsedUpto) {
 			int endRange = Math.min(getLineCount() - 1, lastVisibleLine + lookAhead);
 			parseRange(parsedUpto, endRange);
-		}
-	}
-
-	public void sleep(int ms) {
-		try{
-		  //do what you want to do before sleeping
-		  Thread.currentThread().sleep(ms);//sleep for 1000 ms
-		  //do what you want to do after sleeptig
-		}
-		catch(InterruptedException ie){
-		//If this thread was intrrupted by
 		}
 	}
 	
 	private Scope scopeBeforeStartOfLine(int lineIx) {
 		Scope startScope = this.root.scopeAt(lineIx, 0);
 		if (startScope.getStart().getLine() == lineIx) {
-//			System.out.printf("sbsol: %s\n", startScope.pattern.name);
 			startScope = startScope.containingDoubleScope(lineIx);
 		}
 
@@ -306,7 +286,7 @@ public class Parser {
 		Parser.linesParsed++;
 		String line = getLine(lineIx) + "\n";
 		int length = line.length();
-		// System.out.printf("p%d, ", lineIx);
+		// System.out.printf("p%d, \n", lineIx);
 		if (lineIx > this.parsedUpto)
 			this.parsedUpto = lineIx;
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
