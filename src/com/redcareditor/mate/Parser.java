@@ -337,10 +337,10 @@ public class Parser {
 //			// System.out.printf("before_colour_line_with_scopes\n");
 //			colourer.colourLineWithScopes(allScopes);
 //			// System.out.printf("after_colour_line_with_scopes\n");
-//		}
+//       ]
 //		else {
 //			// stdout.printf("no colourer");
-//		}
+//		]
 		return (endScope1 != endScope2);
 	}
 
@@ -397,7 +397,7 @@ public class Parser {
 			// stdout.printf("closing scope at %d\n", m.from);
 //			if (colourer != null) {
 //				colourer.uncolourScope(scanner.getCurrentScope(), false);
-//			}
+//			]
 			setInnerEndPosSafely(scanner.getCurrentScope(), m, lineIx, length, 0);
 			setEndPosSafely(scanner.getCurrentScope(), m, lineIx, length, 0);
 			scanner.getCurrentScope().isOpen = false;

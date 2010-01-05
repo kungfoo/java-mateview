@@ -84,12 +84,6 @@ public class SwtColourer implements Colourer {
 		return line != highlightedLine;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.redcareditor.mate.Colourer#setTheme(com.redcareditor.theme.Theme)
-	 */
 	public void setTheme(Theme theme) {
 		this.theme = theme;
 		theme.initForUse();
@@ -117,28 +111,16 @@ public class SwtColourer implements Colourer {
 						Integer.parseInt(caretColourString.substring(3, 5), 16);
 		int blue = Integer.parseInt(backgroundColourString.substring(5, 7), 16) ^
 						Integer.parseInt(caretColourString.substring(5, 7), 16);
-		// System.out.printf("r, g, b: %d, %d, %d\n", red, green, blue);
 		PaletteData palette = new PaletteData (
 			new RGB [] {
 				new RGB (0, 0, 0),
 				new RGB (red, green, blue),
 				new RGB (0xFF, 0xFF, 0xFF),
 			});
-		// System.out.printf("depth: %d\n", Display.getCurrent().getDepth());
 		ImageData maskData = new ImageData (1, height, 2, palette);
 		for (int y=0; y < height; y++)
 			maskData.setPixel(0, y, 1);
 		Image image = new Image (display, maskData);
-		// Image image = new Image(display, 1, height);
-		// GC gc = new GC(image);
-		// gc.setAntialias(SWT.OFF);
-		// gc.setBackground(white);
-		// gc.fillRectangle(0, 0, 1, height);
-		// gc.setForeground(caretColour);
-		// gc.drawLine(0, 0, 0, height);
-		// System.out.printf("alpha: %d\n", gc.getAlpha());
-		// gc.dispose();
-		// caret.setLocation(10, 10);
 		caret.setImage(image);
 		control.setCaret(caret);
 	}
@@ -162,11 +144,6 @@ public class SwtColourer implements Colourer {
 		globalLineBackground = ColourUtil.getColour(ColourUtil.mergeColour(globalColour("background"), globalColour("lineHighlight")));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.redcareditor.mate.Colourer#getTheme()
-	 */
 	public Theme getTheme() {
 		return theme;
 	}
@@ -272,15 +249,18 @@ public class SwtColourer implements Colourer {
 
 	private void setStyleRangeProperties(Scope scope, ThemeSetting setting, StyleRange styleRange) {
 		String fontStyle = setting.settings.get("fontStyle");
-		if (fontStyle == "italic") {
-			styleRange.fontStyle = SWT.ITALIC;
-		} else
-			styleRange.fontStyle = SWT.NORMAL;
-
-		if (fontStyle == "underline")
-			styleRange.fontStyle = SWT.UNDERLINE_SINGLE;
-		else
-			styleRange.fontStyle = SWT.NORMAL;
+		if (fontStyle != null) {
+			// TODO: make this support "bold italic" etc.
+			if (fontStyle.equals("italic")) {
+				styleRange.fontStyle = SWT.ITALIC;
+			}
+			if (fontStyle.equals("bold")) {
+				styleRange.fontStyle = SWT.BOLD;
+			}
+			if (fontStyle.equals("underline")) {
+				styleRange.underline = true;
+			}
+		}
 
 		String background = setting.settings.get("background");
 		// System.out.printf("[Color] scope background: %s\n", background);
