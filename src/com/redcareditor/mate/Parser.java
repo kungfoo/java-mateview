@@ -3,6 +3,10 @@ package com.redcareditor.mate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
+import java.util.logging.Handler;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
@@ -29,7 +33,8 @@ public class Parser {
 	int LOOK_AHEAD = 100;
 	public static int linesParsed = 0;
 	public static boolean synchronousParsing = false;
-	
+	public Logger logger;
+
 	public Grammar grammar;
 	public MateText mateText;
 	public Document jface;
@@ -70,6 +75,13 @@ public class Parser {
 		document = m.getMateDocument();
 		jface    = (Document) m.getDocument();
 		enabled = true;
+		logger = Logger.getLogger("com.redcareditor.mate.Parser");
+		logger.setUseParentHandlers(false);
+		for (Handler h : logger.getHandlers()) {
+			logger.removeHandler(h);
+		}
+		logger.addHandler(MateText.consoleHandler());
+		logger.setLevel(Level.FINE);
 	}
 	
 	public void close() {
@@ -286,13 +298,14 @@ public class Parser {
 		Parser.linesParsed++;
 		String line = getLine(lineIx) + "\n";
 		int length = line.length();
-		// System.out.printf("p%d, \n", lineIx);
+		System.out.printf("p%dx\n", lineIx);
+		logger.info(String.format("parseLine(%d)", lineIx));
 		if (lineIx > this.parsedUpto)
 			this.parsedUpto = lineIx;
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
 		Scope endScope1  = scopeAfterEndOfLine(lineIx, length);
-//		System.out.printf("startScope is: %s\n", startScope.name);
-//		System.out.printf("endScope1: %s\n", endScope1.name);
+		logger.info(String.format("startScope is: %s", startScope.name));
+		logger.info(String.format("endScope1: %s", endScope1.name));
 		Scanner scanner = new Scanner(startScope, line);
 		ArrayList<Scope> allScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);

@@ -2,6 +2,10 @@ package com.redcareditor.mate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.logging.Handler;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -28,10 +32,21 @@ import com.redcareditor.onig.NullRx;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.theme.Theme;
 import com.redcareditor.theme.ThemeManager;
+import com.redcareditor.util.SingleLineFormatter;
 
 public class MateText extends Composite {
 	public Parser parser;
 	public Colourer colourer;
+	public Logger logger;
+
+	static private Handler _consoleHandler;
+	static public Handler consoleHandler() {
+		if (_consoleHandler == null) {
+			_consoleHandler = new ConsoleHandler();
+			_consoleHandler.setFormatter(new SingleLineFormatter());
+		}
+		return _consoleHandler;
+	}
 
 	/* components plugged together */
 	public SourceViewer viewer;
@@ -51,10 +66,18 @@ public class MateText extends Composite {
 		viewer.setDocument(document);
 		setLayout(new FillLayout());
 		colourer = new SwtColourer(this);
-		//undoManager = new SwtMateTextUndoManager(this);
 		mateDocument = new SwtMateDocument(this);
 		grammarListeners = new ArrayList<IGrammarListener>();
 		getTextWidget().setLeftMargin(5);
+		System.out.printf("MateTextinit\n");
+		logger = Logger.getLogger("com.redcareditor.mate.MateText");
+		logger.setUseParentHandlers(false);
+		logger.setLevel(Level.INFO);
+		for (Handler h : logger.getHandlers()) {
+			logger.removeHandler(h);
+		}
+		logger.addHandler(MateText.consoleHandler());
+		logger.info("Created MateText");
 	}
 
 	private CompositeRuler constructRuler() {
@@ -63,18 +86,6 @@ public class MateText extends Composite {
 		ruler.addDecorator(0, lineNumbers);
 		return ruler;
 	}
-
-	//public void undo() {
-	//	undoManager.undo();
-	//}
-
-	//public void redo() {
-	//	undoManager.redo();
-	//}
-
-	//public boolean isDirty() {
-	//	return undoManager.isDirty();
-	//}
 
 	public void attachUpdater() {
 
