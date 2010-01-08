@@ -393,6 +393,18 @@ END
       @mt.set_grammar_by_name("Java")
     end
     
+    it "should parse constants correctly" do
+      @st.text = <<JAVA
+Level.SEVERE
+JAVA
+      @mt.parser.root.pretty(0).should == (t=<<END)
++ source.java (0,0)-(1,0) open
+  + storage.type.java (0,0)-(0,5) closed
+  + constant.other.java (0,5)-(0,12) closed
+    c keyword.operator.dereference.java (0,5)-(0,6) closed
+END
+    end
+    
     it "should not have a weird comment bug" do
       @st.text = <<JAVA
 public class Foo {

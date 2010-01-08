@@ -217,7 +217,6 @@ public class SwtColourer implements Colourer {
 			if (scope.pattern instanceof DoublePattern && ((DoublePattern) scope.pattern).contentName != null && scope.isCapture == false)
 				addStyleRangeForScope(styleRanges, scope, true);
 		}
-		//
 		// Collections.sort(styleRanges, new StyleRangeComparator());
 		// System.out.printf("length: %d\n", styleRanges.size());
 		event.styles = (StyleRange[]) styleRanges.toArray(new StyleRange[0]);
@@ -242,8 +241,8 @@ public class SwtColourer implements Colourer {
 		}
 		if (setting != null) {
 			setStyleRangeProperties(scope, setting, styleRange);
-		styleRanges.add(styleRange);
-			// System.out.printf("[Color] style range (%d, %d) %s\n", styleRange.start, styleRange.length, styleRange.toString());
+			styleRanges.add(styleRange);
+			//System.out.printf("[Color] style range (%d, %d) %s\n", styleRange.start, styleRange.length, styleRange.toString());
 		}
 	}
 
