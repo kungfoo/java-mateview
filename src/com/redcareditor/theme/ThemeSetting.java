@@ -19,6 +19,8 @@ public class ThemeSetting {
 	
 	public List<ScopeMatcher> matchers;
 	
+	public Match thisMatch;
+	
 	public ThemeSetting() {}
 	
 	public ThemeSetting(Dict dict){
@@ -57,4 +59,25 @@ public class ThemeSetting {
 		}
 		return null;
 	}
+	
+	// Merge this ThemeSetting with another, lower priority setting.
+	public void merge(ThemeSetting other) {
+		if (background == null)
+			background = other.background;
+		if (foreground == null)
+			foreground = other.foreground;
+		if (fontStyle == null)
+			fontStyle = other.fontStyle;
+	}
+	
+	// Merge this ThemeSetting with another, higher priority setting.
+	public void override(ThemeSetting other) {
+		if (other.background != null)
+			background = other.background;
+		if (other.foreground != null)
+			foreground = other.foreground;
+		if (other.fontStyle != null)
+			fontStyle = other.fontStyle;
+	}
 }
+
