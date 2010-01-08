@@ -77,16 +77,16 @@ public class Theme {
 	// (see 13.5 of Textmate manual)
 	public ThemeSetting findSetting(Scope scope, boolean inner, ThemeSetting excludeSetting) {
 		String scopeName = scope.hierarchyNames(inner);
-		// System.out.printf("[Theme] finding settings for '%s'\n", scopeName);
+		System.out.printf("[Theme] finding settings for '%s'\n", scopeName);
 		Match current_m = null, m;
 		ThemeSetting current = null;
 		for (ThemeSetting setting : settings) {
 			if (setting == excludeSetting && excludeSetting != null) {
-				// System.out.printf("[Theme] setting '%s' excluded due to parent\n", excludeSetting.name);
+				System.out.printf("[Theme] setting '%s' excluded due to parent\n", excludeSetting.name);
 			}
 			else {
 				if ((m = setting.match(scopeName)) != null) {
-					// System.out.printf("[Theme] setting '%s' matches selector '%s'\n", setting.name, scopeName); 
+					System.out.printf("[Theme] setting '%s' matches selector '%s'\n", setting.name, scopeName); 
 					if (current == null) {
 						current = setting;
 						current_m = m;
@@ -98,12 +98,12 @@ public class Theme {
 				}
 			}
 		}
-//		if (current == null) {
-//			stdout.printf("none match\n");
-//		}
-//		else {
-//			stdout.printf("    best: '%s'\n", current.name);
-//		}
+		if (current == null) {
+			System.out.printf("none match\n");
+		}
+		else {
+			System.out.printf("    best: '%s'\n", current.name);
+		}
 		return current;
 	}
 }

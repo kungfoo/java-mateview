@@ -247,7 +247,7 @@ public class SwtColourer implements Colourer {
 	}
 
 	private void setStyleRangeProperties(Scope scope, ThemeSetting setting, StyleRange styleRange) {
-		String fontStyle = setting.settings.get("fontStyle");
+		String fontStyle = setting.fontStyle;
 		if (fontStyle != null) {
 			// TODO: make this support "bold italic" etc.
 			if (fontStyle.equals("italic")) {
@@ -261,7 +261,7 @@ public class SwtColourer implements Colourer {
 			}
 		}
 
-		String background = setting.settings.get("background");
+		String background = setting.background;
 		// System.out.printf("[Color] scope background: %s\n", background);
 		String mergedBgColour;
 		String parentBg = theme.globalSettings.get("background");
@@ -289,7 +289,7 @@ public class SwtColourer implements Colourer {
 			mergedBgColour = parentBg;
 		}
 		// stdout.printf("		  merged_bg_colour:	 %s\n", merged_bg_colour);
-		String foreground = setting.settings.get("foreground");
+		String foreground = setting.foreground;
 		// System.out.printf("[Color] scope foreground: %s\n", foreground);
 		String parentFg = scope.nearestForegroundColour();
 		if (parentFg == null) {
