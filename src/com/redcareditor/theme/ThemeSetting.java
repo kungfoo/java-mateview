@@ -60,18 +60,11 @@ public class ThemeSetting {
 		return null;
 	}
 	
-	// Merge this ThemeSetting with another, lower priority setting.
-	public void merge(ThemeSetting other) {
-		if (background == null)
-			background = other.background;
-		if (foreground == null)
-			foreground = other.foreground;
-		if (fontStyle == null)
-			fontStyle = other.fontStyle;
-	}
-	
 	// Merge this ThemeSetting with another, higher priority setting.
-	public void override(ThemeSetting other) {
+	public void merge(ThemeSetting other) {
+		//System.out.printf("merging %s %s %s with %s %s %s\n",
+		//	name, background, foreground,
+		//	other.name, other.background, other.foreground);
 		if (other.background != null)
 			background = other.background;
 		if (other.foreground != null)

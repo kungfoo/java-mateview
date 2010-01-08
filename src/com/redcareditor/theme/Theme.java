@@ -83,7 +83,7 @@ public class Theme {
 		}
 		
 		public int compare(Object o1, Object o2) {
-			return -1*ScopeMatcher.compareMatch(scopeName, ((ThemeSetting) o1).thisMatch, ((ThemeSetting) o2).thisMatch);
+			return ScopeMatcher.compareMatch(scopeName, ((ThemeSetting) o1).thisMatch, ((ThemeSetting) o2).thisMatch);
 		}
 	}
 	
@@ -109,7 +109,14 @@ public class Theme {
 		System.out.printf("[Theme] found '%d' matches\n", matchingThemeSettings.size());
 		Collections.sort(matchingThemeSettings, new ThemeSettingComparator(scopeName));
 		
-		return matchingThemeSettings.get(0);
+		// merge them together into a single ThemeSetting
+		ThemeSetting result = new ThemeSetting();
+		for (ThemeSetting ts : matchingThemeSettings) {
+			ts.thisMatch = null;
+			result.merge(ts);
+		}
+			
+		return result;
 	}
 }
 
