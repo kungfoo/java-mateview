@@ -119,19 +119,14 @@ public class MateText extends Composite {
 		for (Bundle bundle : Bundle.getBundles()) {
 			for (Grammar grammar : bundle.getGrammars()) {
 				if (grammar.name.equals(name)) {
-					// int parsed_upto = 150;
-					Theme theme;
 					if (this.parser != null) {
 						this.parser.close();
 					}
 					this.parser = new Parser(grammar, this);
+					if (colourer != null) {
+						colourer.setGlobalColours();
+					}
 					getMateDocument().reparseAll();
-					// this.parser.parseRange(0, getControl().getLineCount()-1);
-					// this.parser.last_visible_line_changed(parsed_upto);
-					// GLib.Signal.emit_by_name(this, "grammar_changed",
-					// gr.name);
-					// if (theme != null)
-					// this.parser.change_theme(theme);
 					for (IGrammarListener grammarListener : grammarListeners) {
 						grammarListener.grammarChanged(grammar.name);
 					}

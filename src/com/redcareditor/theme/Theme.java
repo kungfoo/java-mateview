@@ -65,7 +65,7 @@ public class Theme {
 		if (isSettingAlreadyCached(scope.name)) {
 			return cachedSettingsForScopes.get(scope.name);
 		} else {
-			ThemeSetting setting = findSetting(scope, inner, excludeSetting);
+			ThemeSetting setting = findSetting(scope.hierarchyNames(inner), inner, excludeSetting);
 			cachedSettingsForScopes.put(scope.name, setting);
 			return setting;
 		}
@@ -87,26 +87,26 @@ public class Theme {
 		}
 	}
 	
-	public ThemeSetting findSetting(Scope scope, boolean inner, ThemeSetting excludeSetting) {
-		String scopeName = scope.hierarchyNames(inner);
-		System.out.printf("[Theme] finding settings for '%s'\n", scopeName);
+	public ThemeSetting findSetting(String scopeName, boolean inner, ThemeSetting excludeSetting) {
+		//System.out.printf("[Theme] finding settings for '%s'\n", scopeName);
 		
 		// collect matching ThemeSettings
 		Match m;
 		ArrayList<ThemeSetting> matchingThemeSettings = new ArrayList<ThemeSetting>();
 		for (ThemeSetting setting : settings) {
 			if (setting == excludeSetting && excludeSetting != null) {
-				System.out.printf("[Theme] setting '%s' excluded due to parent\n", excludeSetting.name);
+				// System.out.printf("[Theme] setting '%s' excluded due to parent\n", excludeSetting.name);
 			}
 			else {
 				if ((m = setting.match(scopeName)) != null) {
-					System.out.printf("[Theme] setting '%s' matches selector '%s'\n", setting.name, scopeName);
+					// System.out.printf("[Theme] setting '%s' matches selector '%s'\n", setting.name, scopeName);
 					setting.thisMatch = m;
 					matchingThemeSettings.add(setting);
 				}
 			}
 		}
-		System.out.printf("[Theme] found '%d' matches\n", matchingThemeSettings.size());
+		
+		//System.out.printf("[Theme] found '%d' matches\n", matchingThemeSettings.size());
 		Collections.sort(matchingThemeSettings, new ThemeSettingComparator(scopeName));
 		
 		// merge them together into a single ThemeSetting

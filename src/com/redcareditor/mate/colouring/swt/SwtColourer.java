@@ -87,9 +87,15 @@ public class SwtColourer implements Colourer {
 	public void setTheme(Theme theme) {
 		this.theme = theme;
 		theme.initForUse();
-		initCachedColours();
-		setMateTextColours();
-		setCaretColour();
+		setGlobalColours();
+	}
+	
+	public void setGlobalColours() {
+		if (theme != null) {
+			initCachedColours();
+			setMateTextColours();
+			setCaretColour();
+		}
 	}
 
 	private void setCaretColour() {
@@ -126,8 +132,28 @@ public class SwtColourer implements Colourer {
 	}
 
 	private void setMateTextColours() {
-		control.setBackground(globalBackground);
-		control.setForeground(globalForeground);
+		ThemeSetting globalSetting;
+		if (mateText.parser != null && mateText.parser.grammar != null) {
+			globalSetting = theme.findSetting(mateText.parser.grammar.scopeName, false, null);
+		}
+		else {
+			globalSetting = new ThemeSetting();
+		}
+		
+		if (globalSetting.background == null) {
+			control.setBackground(globalBackground);
+		}
+		else {
+			control.setBackground(ColourUtil.getColour(globalSetting.background));
+		}
+		
+		if (globalSetting.foreground == null) {
+			control.setForeground(globalForeground);
+		}
+		else {
+			control.setForeground(ColourUtil.getColour(globalSetting.foreground));
+		}
+			
 		int currentLine = control.getLineAtOffset(control.getCaretOffset());
 		int startLine = JFaceTextUtil.getPartialTopIndex(control);
 		int endLine = JFaceTextUtil.getPartialBottomIndex(control);

@@ -10,5 +10,7 @@ public interface Colourer {
 	public abstract void setTheme(Theme theme);
 
 	public abstract Theme getTheme();
+	
+	public abstract void setGlobalColours();
 
 }
