@@ -227,12 +227,12 @@ public class SwtColourer implements Colourer {
 			return;
 		int eventLine = mateText.getControl().getLineAtOffset(event.lineOffset);
 		// System.out.printf("c%d, ", eventLine);
-		// System.out.printf("[Color] colouring %d\n", eventLine);
+		System.out.printf("[Color] colouring %d\n", eventLine);
 		ArrayList<Scope> scopes = mateText.parser.root.scopesOnLine(eventLine);
 		// System.out.printf("[Color] got to colour %d scopes\n", scopes.size());
 		ArrayList<StyleRange> styleRanges = new ArrayList<StyleRange>();
 		for (Scope scope : scopes) {
-			// System.out.printf("[Color] scope: %s\n", scope.name);
+			System.out.printf("[Color] scope: %s\n", scope.name);
 			if (scope.parent == null) {
 				continue;
 			}
@@ -240,16 +240,14 @@ public class SwtColourer implements Colourer {
 					&& (scope.pattern instanceof SinglePattern || ((DoublePattern) scope.pattern).contentName == null)) {
 				continue;
 			}
-			addStyleRangeForScope(styleRanges, scope, false);
+			addStyleRangeForScope(styleRanges, scope, false, event);
 			if (scope.pattern instanceof DoublePattern && ((DoublePattern) scope.pattern).contentName != null && scope.isCapture == false)
-				addStyleRangeForScope(styleRanges, scope, true);
+				addStyleRangeForScope(styleRanges, scope, true, event);
 		}
-		// Collections.sort(styleRanges, new StyleRangeComparator());
-		// System.out.printf("length: %d\n", styleRanges.size());
 		event.styles = (StyleRange[]) styleRanges.toArray(new StyleRange[0]);
 	}
 
-	private void addStyleRangeForScope(ArrayList<StyleRange> styleRanges, Scope scope, boolean inner) {
+	private void addStyleRangeForScope(ArrayList<StyleRange> styleRanges, Scope scope, boolean inner, LineStyleEvent event) {
 		StyleRange styleRange = new StyleRange();
 		// TODO: allow for multiple settings that set different
 		// parts of the style.
@@ -258,19 +256,33 @@ public class SwtColourer implements Colourer {
 		if (scope.parent != null)
 			excludeSetting = scope.parent.themeSetting;
 		setting = theme.settingsForScope(scope, inner, null);// exclude_setting);
-
+		
+		int startLineOffset = event.lineOffset;
+		int endLineOffset   = startLineOffset + event.lineText.length();
+		//if (scope.getStart().getOffset() < startLineOffset)
+		//	return;
 		if (inner) {
-			styleRange.start = scope.getInnerStart().getOffset();
-			styleRange.length = scope.getInnerEnd().getOffset() - styleRange.start;
+			styleRange.start = Math.max(scope.getInnerStart().getOffset(), startLineOffset);
+			styleRange.length = Math.min(scope.getInnerEnd().getOffset() - styleRange.start,
+										 event.lineText.length() - styleRange.start + startLineOffset);
 		} else {
-			styleRange.start = scope.getStart().getOffset();
-			styleRange.length = scope.getEnd().getOffset() - styleRange.start;
+			styleRange.start = Math.max(scope.getStart().getOffset(), startLineOffset);
+			styleRange.length = Math.min(scope.getEnd().getOffset() - styleRange.start,
+										 event.lineText.length() - styleRange.start + startLineOffset);
 		}
 		if (setting != null) {
 			setStyleRangeProperties(scope, setting, styleRange);
-			styleRanges.add(styleRange);
-			//System.out.printf("[Color] style range (%d, %d) %s\n", styleRange.start, styleRange.length, styleRange.toString());
+			addStyleRangeWithoutOverlaps(styleRanges, styleRange);
+			System.out.printf("[Color] style range (%d, %d) %s\n", styleRange.start, styleRange.length, styleRange.toString());
 		}
+	}
+
+	private void addStyleRangeWithoutOverlaps(ArrayList<StyleRange> styleRanges, StyleRange styleRange) {
+		if (styleRanges.size() == 0) {
+			styleRanges.add(styleRange);
+			return;
+		}
+		styleRanges.add(styleRange);
 	}
 
 	private void setStyleRangeProperties(Scope scope, ThemeSetting setting, StyleRange styleRange) {
