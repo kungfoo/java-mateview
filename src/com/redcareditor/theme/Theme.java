@@ -62,11 +62,12 @@ public class Theme {
 	}
 
 	public ThemeSetting settingsForScope(Scope scope, boolean inner, ThemeSetting excludeSetting) {
-		if (isSettingAlreadyCached(scope.name)) {
-			return cachedSettingsForScopes.get(scope.name);
+		String hierarchyNames = scope.hierarchyNames(inner);
+		if (isSettingAlreadyCached(hierarchyNames)) {
+			return cachedSettingsForScopes.get(hierarchyNames);
 		} else {
-			ThemeSetting setting = findSetting(scope.hierarchyNames(inner), inner, excludeSetting);
-			cachedSettingsForScopes.put(scope.name, setting);
+			ThemeSetting setting = findSetting(hierarchyNames, inner, excludeSetting);
+			cachedSettingsForScopes.put(hierarchyNames, setting);
 			return setting;
 		}
 	}
@@ -87,27 +88,22 @@ public class Theme {
 		}
 	}
 	
-	public ThemeSetting findSetting(String scopeName, boolean inner, ThemeSetting excludeSetting) {
-		//System.out.printf("[Theme] finding settings for '%s'\n", scopeName);
-		
+	public ThemeSetting findSetting(String hierarchyNames, boolean inner, ThemeSetting excludeSetting) {
 		// collect matching ThemeSettings
 		Match m;
 		ArrayList<ThemeSetting> matchingThemeSettings = new ArrayList<ThemeSetting>();
 		for (ThemeSetting setting : settings) {
 			if (setting == excludeSetting && excludeSetting != null) {
-				// System.out.printf("[Theme] setting '%s' excluded due to parent\n", excludeSetting.name);
 			}
 			else {
-				if ((m = setting.match(scopeName)) != null) {
-					// System.out.printf("[Theme] setting '%s' matches selector '%s'\n", setting.name, scopeName);
+				if ((m = setting.match(hierarchyNames)) != null) {
 					setting.thisMatch = m;
 					matchingThemeSettings.add(setting);
 				}
 			}
 		}
 		
-		//System.out.printf("[Theme] found '%d' matches\n", matchingThemeSettings.size());
-		Collections.sort(matchingThemeSettings, new ThemeSettingComparator(scopeName));
+		Collections.sort(matchingThemeSettings, new ThemeSettingComparator(hierarchyNames));
 		
 		// merge them together into a single ThemeSetting
 		ThemeSetting result = new ThemeSetting();
