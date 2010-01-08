@@ -81,16 +81,16 @@ public class Scanner implements Iterable<Marker> {
 	
 	public Marker findNextMarker() {
 		logger.info(String.format("scanning: '%s' from %d to %d (current_scope is %s)", this.line.replaceAll("\n", ""), this.position, this.lineLength, currentScope.name));
-		Marker bestMarker;
+		Marker bestMarker = null;
 		int newLength;
 		boolean isCloseMatch = false;
-		if ((bestMarker = getCachedMarker()) != null) {
-			logger.info("  got cached marker\n");
-			this.cachedMarkers.remove(bestMarker);
-			removePrecedingCachedMarkers(bestMarker);
-			return bestMarker;
-		}
-		assert(cachedMarkers.size() == 0);
+//		if ((bestMarker = getCachedMarker()) != null) {
+//			logger.info("  got cached marker\n");
+//			this.cachedMarkers.remove(bestMarker);
+//			removePrecedingCachedMarkers(bestMarker);
+//			return bestMarker;
+//		}
+//		assert(cachedMarkers.size() == 0);
 		Rx closingRegex = currentScope.closingRegex;
 		if (closingRegex != null) {
 			Match match = closingRegex.search(this.line, this.position, this.lineLength);

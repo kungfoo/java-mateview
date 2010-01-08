@@ -51,62 +51,52 @@ public class Pattern {
 	}
 
 	public static void replaceRepositoryIncludes(List<Pattern> patterns, Grammar grammar) {
-		List<Pattern> includePatterns = new ArrayList<Pattern>();
-		List<Pattern> patternsToInclude = new ArrayList<Pattern>();
-		boolean anyIncluded = true;
-		while (anyIncluded) {
-			anyIncluded = false;
-			for (Pattern p : patterns) {
-				if (p instanceof IncludePattern && p.name.startsWith("#")) {
-					includePatterns.add(p);
-					String reponame = p.name.substring(1, p.name.length());
-					List<Pattern> repositoryEntryPatterns = grammar.repository.get(reponame);
-					if (repositoryEntryPatterns != null) {
-						anyIncluded = true;
-//						System.out.printf("repository %s with size %d\n", reponame, repositoryEntryPatterns.size());
-						patternsToInclude.addAll(repositoryEntryPatterns);
-					} else {
-						System.out.printf("warning: couldn't find repository key '%s' in grammar '%s'\n", reponame,
-								grammar.name);
-					}
+		int i = 0;
+		while (i < patterns.size()) {
+			Pattern p = patterns.get(i);
+			if (p instanceof IncludePattern && p.name.startsWith("#")) {
+				String reponame = p.name.substring(1, p.name.length());
+				List<Pattern> repositoryEntryPatterns = grammar.repository.get(reponame);
+				if (repositoryEntryPatterns != null) {
+					patterns.remove(i);
+					patterns.addAll(i, repositoryEntryPatterns);
+					i--;
+				} else {
+					System.out.printf("warning: couldn't find repository key '%s' in grammar '%s'\n", reponame,
+							grammar.name);
 				}
 			}
-			removePatterns(patterns, includePatterns);
-			addPatterns(patterns, patternsToInclude);
-			includePatterns.clear();
-			patternsToInclude.clear();
+			i++;
 		}
 	}
 
 	public static void replaceBaseAndSelfIncludes(List<Pattern> patterns, Grammar grammar) {
-		List<Pattern> includePatterns = new ArrayList<Pattern>();
-		List<Pattern> patternsToInclude = new ArrayList<Pattern>();
 		boolean alreadySelf = false; // some patterns have $self twice
 		Grammar ng;
-		for (Pattern p : patterns) {
-//			System.out.printf("    considering %s\n", p.name);
+		int i = 0;
+		while (i < patterns.size()) {
+			Pattern p = patterns.get(i);
 			if (p instanceof IncludePattern) {
-//				System.out.printf("    replacing %s\n", p.name);
 				if (p.name.startsWith("$")) {
-					includePatterns.add(p);
 					if ((p.name.equals("$self") || p.name.equals("$base")) && !alreadySelf) {
 						alreadySelf = true;
-						patternsToInclude.addAll(grammar.patterns);
+						patterns.remove(i);
+						patterns.addAll(i, grammar.patterns);
+						i--;
 					}
 				} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
-//					System.out.printf("importing toplevel patterns from %s\n", ng.name);
 					ng.initForUse();
-					includePatterns.add(p);
-					patternsToInclude.addAll(ng.patterns);
+					patterns.remove(i);
+					patterns.addAll(i, ng.patterns);
+					i--;
 				} else {
 					if (!p.name.startsWith("#")) {
 						System.out.printf("unknown include pattern: %s\n", p.name);
 					}
 				}
 			}
+			i++;
 		}
-		patterns.removeAll(includePatterns);
-		patterns.addAll(patternsToInclude);
 	}
 
 	private static void removePatterns(List<Pattern> patlist, List<Pattern> ps) {
