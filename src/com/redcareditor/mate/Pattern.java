@@ -144,4 +144,21 @@ public class Pattern {
 			disabled = false;
 		}
 	}
+	
+	public String prettyName() {
+		if (name == null) {
+			if (this instanceof SinglePattern) {
+				return ((SinglePattern) this).match.pattern;
+			}
+			else if (this instanceof DoublePattern) {
+				return ((DoublePattern) this).begin.pattern;
+			}
+			else {
+				return "unknown";
+			}
+		}
+		else {
+			return name;
+		}
+	}
 }

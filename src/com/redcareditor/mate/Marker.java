@@ -8,4 +8,22 @@ public class Marker {
 	public Match match;
 	public int from;  // the line offset where it begins
 	public int hint;  // ??
+	
+	public int length() {
+		return match.getCapture(0).end - from;
+	}
+	
+	// Return the most urgent Marker to process. The criteria
+	// is earliest, longest markers.
+	public Marker bestOf(Marker other) {
+		if (other == null) return this;
+		if (other.from < from ||
+			(other.from == from && other.length() == 0) ||
+			(other.from == from && other.length() > length() && length() != 0)) {
+			return other;
+		}
+		else {
+			return this;
+		}
+	}
 }

@@ -6,6 +6,6 @@ import java.util.logging.SimpleFormatter;
 
 public class SingleLineFormatter extends SimpleFormatter {
 	public String format(LogRecord record) {
-		return new java.util.Date() + " " + record.getLoggerName() + " " + record.getLevel() + " " + record.getMessage() + "\r\n";
+		return new java.util.Date().toGMTString() + " " + record.getLoggerName() + " " + record.getLevel() + " " + record.getMessage() + "\r\n";
 	}
 }

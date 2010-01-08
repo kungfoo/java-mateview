@@ -70,7 +70,7 @@ public class MateText extends Composite {
 		grammarListeners = new ArrayList<IGrammarListener>();
 		getTextWidget().setLeftMargin(5);
 		System.out.printf("MateTextinit\n");
-		logger = Logger.getLogger("com.redcareditor.mate.MateText");
+		logger = Logger.getLogger("JMV.MateText");
 		logger.setUseParentHandlers(false);
 		logger.setLevel(Level.INFO);
 		for (Handler h : logger.getHandlers()) {

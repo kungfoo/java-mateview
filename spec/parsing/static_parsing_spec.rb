@@ -411,14 +411,16 @@ JAVA
       c storage.modifier.java (0,7)-(0,12) closed
       c entity.name.type.class.java (0,13)-(0,16) closed
     + meta.class.body.java (0,17)-(4,0) closed
-      + [noname] (1,1)-(1,7) closed
-        c storage.modifier.java (1,1)-(1,7) closed
-      + storage.type.primitive.array.java (1,8)-(1,11) closed
-      + [noname] (1,16)-(1,18) closed
-      + [noname] (1,19)-(3,2) closed
-        + [noname] (2,0)-(3,0) closed
-          c comment.line.double-slash.java (2,0)-(3,0) closed
-            c punctuation.definition.comment.java (2,0)-(2,2) closed
+      + meta.method.java (1,1)-(3,2) closed
+        + storage.modifier.java
+        + meta.method.return-type.java (1,1)-(1,12) closed
+          + storage.type.primitive.java (1,8)-(1,11) closed
+        + meta.method.identifier.java (1,12)-(1,18) closed
+          c entity.name.function.java (1,12)-(1,16) closed
+        + meta.method.body.java (1,19)-(3,1) closed
+          + [noname] (2,0)-(3,0) closed
+            c comment.line.double-slash.java (2,0)-(3,0) closed
+              c punctuation.definition.comment.java (2,0)-(2,2) closed
     c punctuation.section.class.end.java (4,0)-(4,1) closed
 END
     end
