@@ -69,10 +69,9 @@ public class MateText extends Composite {
 		mateDocument = new SwtMateDocument(this);
 		grammarListeners = new ArrayList<IGrammarListener>();
 		getTextWidget().setLeftMargin(5);
-		System.out.printf("MateTextinit\n");
 		logger = Logger.getLogger("JMV.MateText");
 		logger.setUseParentHandlers(false);
-		logger.setLevel(Level.INFO);
+		logger.setLevel(Level.SEVERE);
 		for (Handler h : logger.getHandlers()) {
 			logger.removeHandler(h);
 		}

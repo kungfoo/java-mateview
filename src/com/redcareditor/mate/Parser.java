@@ -81,7 +81,7 @@ public class Parser {
 			logger.removeHandler(h);
 		}
 		logger.addHandler(MateText.consoleHandler());
-//		logger.setLevel(Level.FINE);
+		logger.setLevel(Level.SEVERE);
 	}
 	
 	public void close() {
@@ -298,41 +298,41 @@ public class Parser {
 		Parser.linesParsed++;
 		String line = getLine(lineIx) + "\n";
 		int length = line.length();
-		logger.info(String.format("parseLine(%d)", lineIx));
+		// logger.info(String.format("parseLine(%d)", lineIx));
 		if (lineIx > this.parsedUpto)
 			this.parsedUpto = lineIx;
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
 		Scope endScope1  = scopeAfterEndOfLine(lineIx, length);
-		logger.info(String.format("startScope is: %s", startScope.name));
-		logger.info(String.format("endScope1: %s", endScope1.name));
+		// logger.info(String.format("startScope is: %s", startScope.name));
+		// logger.info(String.format("endScope1: %s", endScope1.name));
 		Scanner scanner = new Scanner(startScope, line);
 		ArrayList<Scope> allScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
 		ArrayList<Scope> closedScopes = new ArrayList<Scope>();
 		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
-		logger.info(String.format("start pretty:\n%s", root.pretty(2)));
+		//logger.info(String.format("start pretty:\n%s", root.pretty(2)));
 		for (Marker m : scanner) {
 			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, length, scanner.position);
-			if (expectedScope != null)
-				logger.info(String.format("expectedScope: %s (%d, %d)", expectedScope.name, expectedScope.getStart().getLine(), 
-					           expectedScope.getStart().getLineOffset()));
-			else
-				logger.info("no expected scope");
-			logger.info(String.format("  scope: %s %d-%d (line length: %d)", 
-								m.pattern.name, m.from, m.match.getCapture(0).end, length));
+			// if (expectedScope != null)
+			// 	logger.info(String.format("expectedScope: %s (%d, %d)", expectedScope.name, expectedScope.getStart().getLine(), 
+			// 		           expectedScope.getStart().getLineOffset()));
+			// else
+			// 	logger.info("no expected scope");
+			// logger.info(String.format("  scope: %s %d-%d (line length: %d)", 
+			// 					m.pattern.name, m.from, m.match.getCapture(0).end, length));
 			if (m.isCloseScope) {
-				logger.info("     (closing)");
+				// logger.info("     (closing)");
 				closeScope(scanner, expectedScope, lineIx, line, length, m, 
 							allScopes, closedScopes, removedScopes);
 			}
 			else if (m.pattern instanceof DoublePattern) {
-				logger.info("     (opening)");
+				// logger.info("     (opening)");
 				openScope(scanner, expectedScope, lineIx, line, length, m, 
 						   allScopes, closedScopes, removedScopes);
 			}
 			else {
-				logger.info("     (single)");
+				// logger.info("     (single)");
 				singleScope(scanner, expectedScope, lineIx, line, length, m, 
 							 allScopes, closedScopes, removedScopes);
 			}
@@ -691,7 +691,7 @@ public class Parser {
 			else {
 				scope.addChild(s);
 			}
-			logger.info(String.format("    capture %s", s.name));
+			// logger.info(String.format("    capture %s", s.name));
 			placedScopes.add(s);
 			captureScopes.remove(s);
 		}

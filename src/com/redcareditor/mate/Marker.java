@@ -17,13 +17,6 @@ public class Marker {
 	// is earliest, longest markers.
 	public Marker bestOf(Marker current) {
 		if (current == null) return this;
-		if (current.from <= from) { // ||
-//			(other.from == from && other.length() == 0) ||
-//			(other.from == from && other.length() > length() && length() != 0)) {
-			return current;
-		}
-		else {
-			return this;
-		}
+		return current.from <= from ? current : this;
 	}
 }
