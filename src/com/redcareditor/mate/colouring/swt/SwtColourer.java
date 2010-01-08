@@ -227,12 +227,12 @@ public class SwtColourer implements Colourer {
 			return;
 		int eventLine = mateText.getControl().getLineAtOffset(event.lineOffset);
 		// System.out.printf("c%d, ", eventLine);
-		System.out.printf("[Color] colouring %d\n", eventLine);
+		// System.out.printf("[Color] colouring %d\n", eventLine);
 		ArrayList<Scope> scopes = mateText.parser.root.scopesOnLine(eventLine);
 		// System.out.printf("[Color] got to colour %d scopes\n", scopes.size());
 		ArrayList<StyleRange> styleRanges = new ArrayList<StyleRange>();
 		for (Scope scope : scopes) {
-			System.out.printf("[Color] scope: %s\n", scope.name);
+			// System.out.printf("[Color] scope: %s\n", scope.name);
 			if (scope.parent == null) {
 				continue;
 			}
@@ -245,6 +245,15 @@ public class SwtColourer implements Colourer {
 				addStyleRangeForScope(styleRanges, scope, true, event);
 		}
 		event.styles = (StyleRange[]) styleRanges.toArray(new StyleRange[0]);
+		// printStyleRanges(styleRanges);
+	}
+
+	private void printStyleRanges(ArrayList<StyleRange> styleRanges) {
+		System.out.printf("[");
+		for (StyleRange r : styleRanges) {
+			System.out.printf("%s, ", r);
+		}
+		System.out.printf("]\n");
 	}
 
 	private void addStyleRangeForScope(ArrayList<StyleRange> styleRanges, Scope scope, boolean inner, LineStyleEvent event) {
@@ -273,7 +282,7 @@ public class SwtColourer implements Colourer {
 		if (setting != null) {
 			setStyleRangeProperties(scope, setting, styleRange);
 			addStyleRangeWithoutOverlaps(styleRanges, styleRange);
-			System.out.printf("[Color] style range (%d, %d) %s\n", styleRange.start, styleRange.length, styleRange.toString());
+			//System.out.printf("[Color] style range (%d, %d) %s\n", styleRange.start, styleRange.length, styleRange.toString());
 		}
 	}
 
@@ -282,7 +291,65 @@ public class SwtColourer implements Colourer {
 			styleRanges.add(styleRange);
 			return;
 		}
-		styleRanges.add(styleRange);
+		
+		// there is always an overlapping StyleRange because the document root scope is always in here
+		int indexOfParent = indexOfOverlappingStyleRange(styleRanges, styleRange);
+		if (indexOfParent == -1) {
+			styleRanges.add(styleRange);
+			return;
+		}
+		
+		StyleRange parentStyleRange = styleRanges.get(indexOfParent);
+		
+		int parentStart = parentStyleRange.start;
+		int parentEnd   = parentStyleRange.start + parentStyleRange.length;
+		int childStart  = styleRange.start;
+		int childEnd    = styleRange.start + styleRange.length;
+		
+		// System.out.printf("parent %d-%d, child: %d-%d\n", parentStart, parentEnd, childStart, childEnd);
+		
+		// *-----*
+		// *-----*
+		if (parentStart == childStart && parentEnd == childEnd) {
+			return;
+		}
+		
+		// *------*
+		// *--*
+		if (childStart == parentStart) {
+			parentStyleRange.start = childEnd;
+			styleRanges.add(indexOfParent, styleRange);
+			return;
+		}
+		
+		// *------*
+		//    *---*
+		if (childEnd == parentEnd) {
+			parentStyleRange.length = childStart - parentStart;
+			styleRanges.add(indexOfParent + 1, styleRange);
+			return;
+		}
+		
+		// *----------*
+		//    *---*
+		parentStyleRange.length = childStart - parentStart;
+		styleRanges.add(indexOfParent + 1, styleRange);
+		StyleRange newStyleRange = new StyleRange();
+		newStyleRange.start = childEnd;
+		newStyleRange.length = parentEnd - childEnd;
+		newStyleRange.fontStyle = parentStyleRange.fontStyle;
+		styleRanges.add(indexOfParent + 2, newStyleRange);
+	}
+	
+	private int indexOfOverlappingStyleRange(ArrayList<StyleRange> styleRanges, StyleRange styleRange) {
+		int i = 0;
+		for (StyleRange possibleParent : styleRanges) {
+			if (possibleParent.start < styleRange.start + styleRange.length && 
+				possibleParent.start + possibleParent.length > styleRange.start)
+				return i;
+			i++;
+		}
+		return -1;
 	}
 
 	private void setStyleRangeProperties(Scope scope, ThemeSetting setting, StyleRange styleRange) {
