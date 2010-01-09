@@ -25,6 +25,9 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocumentListener;
 
 import com.redcareditor.mate.document.MateDocument;
+import com.redcareditor.mate.document.MateTextLocation;
+import com.redcareditor.mate.document.swt.SwtMateDocument;
+import com.redcareditor.mate.document.swt.SwtMateTextLocation;
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Range;
 import com.redcareditor.onig.Rx;
@@ -45,7 +48,7 @@ public class Parser {
 	public int lookAhead;
 	public int lastVisibleLine;
 	public int deactivationLevel;
-	public int parsedUpto;
+	public SwtMateTextLocation parsedUpto;
 	public boolean alwaysParseAll;
 	public boolean enabled;
 	
@@ -69,11 +72,11 @@ public class Parser {
 		deactivationLevel = 0;
 		makeRoot();
 		attachListeners();
-		parsedUpto = 0;
 		alwaysParseAll = false;
 		modifyStart = -1;
 		document = m.getMateDocument();
 		jface    = (Document) m.getDocument();
+		setParsedUpto(0);
 		enabled = true;
 		logger = Logger.getLogger("JMV.Parser ");
 		logger.setUseParentHandlers(false);
@@ -82,6 +85,18 @@ public class Parser {
 		}
 		logger.addHandler(MateText.consoleHandler());
 		logger.setLevel(Level.SEVERE);
+	}
+	
+	public void setParsedUpto(int line_ix) {
+		if (parsedUpto == null) {
+			parsedUpto = (SwtMateTextLocation) document.getTextLocation(0, 0);
+			document.addTextLocation("scopes", parsedUpto);
+		}
+		parsedUpto.offset = getOffsetAtLine(line_ix);
+	}
+	
+	public int getParsedUpto() {
+		return getLineAtOffset(parsedUpto.offset);
 	}
 	
 	public void close() {
@@ -219,7 +234,7 @@ public class Parser {
 			scopeChanged = parseLine(lineIx);
 			if (scopeChanged) {
 				scopeEverChanged = true;
-				this.parsedUpto = lineIx;
+				this.setParsedUpto(lineIx);
 			}
 			lineIx++;
 		}
@@ -248,7 +263,7 @@ public class Parser {
 		int lastLine = Math.min(lastVisibleLine + 100, lineCount - 1);
 		while (lineIx <= lastLine) {
 			parseLine(lineIx);
-			this.parsedUpto = lineIx;
+			this.setParsedUpto(lineIx);
 			redrawLine(lineIx);
 			lineIx++;
 		}
@@ -270,9 +285,9 @@ public class Parser {
 	
 	public void lastVisibleLineChanged(int newLastVisibleLine) {
 		this.lastVisibleLine = newLastVisibleLine;
-		if (lastVisibleLine + lookAhead >= parsedUpto) {
+		if (lastVisibleLine + lookAhead >= getParsedUpto()) {
 			int endRange = Math.min(getLineCount() - 1, lastVisibleLine + lookAhead);
-			parseRange(parsedUpto, endRange);
+			parseRange(getParsedUpto(), endRange);
 		}
 	}
 	
@@ -299,8 +314,8 @@ public class Parser {
 		String line = getLine(lineIx) + "\n";
 		int length = line.length();
 		// logger.info(String.format("parseLine(%d)", lineIx));
-		if (lineIx > this.parsedUpto)
-			this.parsedUpto = lineIx;
+		if (lineIx > getParsedUpto())
+			this.setParsedUpto(lineIx);
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
 		Scope endScope1  = scopeAfterEndOfLine(lineIx, length);
 		// logger.info(String.format("startScope is: %s", startScope.name));

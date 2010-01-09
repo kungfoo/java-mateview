@@ -18,7 +18,7 @@ import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.MateTextRange;
 
 public class SwtMateDocument implements MateDocument, MateTextFactory {
-	private MateText mateText;
+	public MateText mateText;
 	public StyledText styledText;
 	private IPositionUpdater positionUpdater;
 
