@@ -96,6 +96,7 @@ public class Parser {
 	}
 	
 	public int getParsedUpto() {
+		// System.out.printf("parsedUpto %d (/%d)\n", parsedUpto.offset, getCharCount());
 		return getLineAtOffset(parsedUpto.offset);
 	}
 	

@@ -1,7 +1,9 @@
 package com.redcareditor.mate.document.swt;
 
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Document;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.jface.text.BadLocationException;
 
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.mate.document.MateTextLocation;
@@ -10,35 +12,45 @@ import com.redcareditor.mate.document.MateTextLocationComparator;
 public class SwtMateTextLocation extends Position implements MateTextLocation {
 
 	private static final MateTextLocationComparator comperator = new MateTextLocationComparator();
-	private SwtMateDocument document;
+	private Document document;
 
 	public SwtMateTextLocation(int offset, SwtMateDocument document) {
 		super(offset);
-		this.document = document;
+		this.document = (Document) document.getJFaceDocument();
 	}
 
 	public SwtMateTextLocation(int line, int lineOffset, SwtMateDocument document) {
-		super(computeOffset(line, lineOffset, document.styledText));
-		this.document = document;
+		super(computeOffset(line, lineOffset, (Document) document.getJFaceDocument()));
+		this.document = (Document) document.getJFaceDocument();
 	}
 
 	public SwtMateTextLocation(MateTextLocation location, SwtMateDocument document) {
-		super(computeOffset(location.getLine(), location.getLineOffset(), document.styledText));
-		this.document = document;
+		super(computeOffset(location.getLine(), location.getLineOffset(), (Document) document.getJFaceDocument()));
+		this.document = (Document) document.getJFaceDocument();
 	}
 
 	public void setDocument(MateDocument document) {
-		this.document = (SwtMateDocument) document;
+		this.document = (Document) ((SwtMateDocument) document).getJFaceDocument();
 	}
 
 	public int getLine() {
-//		System.out.printf("getLine() (getOffset() = %d, charCount() = %d)\n", getOffset(), document.styledText.getCharCount());
-		
-		return document.styledText.getLineAtOffset(getOffset());
+		try {
+			return document.getLineOfOffset(getOffset());
+		} catch (BadLocationException e) {
+			System.out.printf("*** Warning BadLocationException");
+			e.printStackTrace();
+			return -1;
+		}
 	}
 
 	public int getLineOffset() {
-		return getOffset() - document.styledText.getOffsetAtLine(getLine());
+		try {
+			return getOffset() - document.getLineOffset(getLine());
+		} catch (BadLocationException e) {
+			System.out.printf("*** Warning BadLocationException");
+			e.printStackTrace();
+			return -1;
+		}
 	}
 
 	public int compareTo(MateTextLocation o) {
@@ -47,18 +59,23 @@ public class SwtMateTextLocation extends Position implements MateTextLocation {
 	
 	@Override
 	public int getOffset() {
-		
-		return this.offset < document.styledText.getCharCount() ? this.offset : document.styledText.getCharCount();
+		return this.offset < document.getLength() ? this.offset : document.getLength();
 	}
 	
-	private static int computeOffset(int line, int offset, StyledText text){
-		line = line < 0 ? 0 : line;
-		
-		int result = text.getOffsetAtLine(line)+offset;
-		
-		result = result < 0 ? 0 : result;
-		result = result > text.getCharCount() ? text.getCharCount() : result; 
-		return result;
+	private static int computeOffset(int line, int offset, Document document){
+		try {
+			line = line < 0 ? 0 : line;
+			
+			int result = document.getLineOffset(line) + offset;
+			
+			result = result < 0 ? 0 : result;
+			result = result > document.getLength() ? document.getLength() : result; 
+			return result;
+		} catch (BadLocationException e) {
+			System.out.printf("*** Warning BadLocationException");
+			e.printStackTrace();
+			return -1;
+		}
 	}
 	
 	@Override
