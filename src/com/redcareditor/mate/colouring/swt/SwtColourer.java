@@ -243,9 +243,9 @@ public class SwtColourer implements Colourer {
 			addStyleRangeForScope(styleRanges, scope, false, event);
 			if (scope.pattern instanceof DoublePattern && ((DoublePattern) scope.pattern).contentName != null && scope.isCapture == false)
 				addStyleRangeForScope(styleRanges, scope, true, event);
+			// printStyleRanges(styleRanges);
 		}
 		event.styles = (StyleRange[]) styleRanges.toArray(new StyleRange[0]);
-		// printStyleRanges(styleRanges);
 	}
 
 	private void printStyleRanges(ArrayList<StyleRange> styleRanges) {
@@ -311,6 +311,7 @@ public class SwtColourer implements Colourer {
 		// *-----*
 		// *-----*
 		if (parentStart == childStart && parentEnd == childEnd) {
+			styleRangeCopyValues(parentStyleRange, styleRange);
 			return;
 		}
 		
@@ -337,8 +338,15 @@ public class SwtColourer implements Colourer {
 		StyleRange newStyleRange = new StyleRange();
 		newStyleRange.start = childEnd;
 		newStyleRange.length = parentEnd - childEnd;
-		newStyleRange.fontStyle = parentStyleRange.fontStyle;
+		styleRangeCopyValues(newStyleRange, parentStyleRange);
 		styleRanges.add(indexOfParent + 2, newStyleRange);
+	}
+	
+	private void styleRangeCopyValues(StyleRange target, StyleRange source) {
+		target.fontStyle = source.fontStyle;
+		target.foreground = source.foreground;
+		target.background = source.background;
+		target.underline = source.underline;
 	}
 	
 	private int indexOfOverlappingStyleRange(ArrayList<StyleRange> styleRanges, StyleRange styleRange) {
