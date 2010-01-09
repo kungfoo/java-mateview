@@ -143,7 +143,7 @@ public class SwtColourer implements Colourer {
 	}
 
 	private ThemeSetting globalThemeSetting() {
-		if (mateText.parser != null && mateText.parser.grammar != null) {
+		if (mateText.parser != null && mateText.parser.grammar != null && theme != null) {
 			return theme.findSetting(mateText.parser.grammar.scopeName, false, null);
 		}
 		else {
@@ -176,6 +176,8 @@ public class SwtColourer implements Colourer {
 	}
 
 	private String bareGlobalColour(String name) {
+		if (theme == null)
+			return "#FFFFFF";
 		String colour = theme.globalSettings.get(name);
 		if (isColorDefined(colour)) {
 			return colour;
