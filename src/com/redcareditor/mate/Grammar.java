@@ -43,6 +43,8 @@ public class Grammar {
 			propertyLoader.loadStringProperty(property);
 		}
 		grammarsByScopeNames.put(scopeName, this);
+		if (scopeName == null)
+			System.out.printf("** WARNING: syntax %s has no top level scope name.\n", name);
 		propertyLoader.loadRegexProperty("firstLineMatch");
 		if (plist.containsElement("fileTypes"))
 			fileTypes = plist.getStrings("fileTypes");
