@@ -55,9 +55,11 @@ public class Pattern {
 		while (i < patterns.size()) {
 			Pattern p = patterns.get(i);
 			if (p instanceof IncludePattern && p.name.startsWith("#")) {
+				// System.out.printf("repo include: %s\n", p.name);
 				String reponame = p.name.substring(1, p.name.length());
 				List<Pattern> repositoryEntryPatterns = grammar.repository.get(reponame);
 				if (repositoryEntryPatterns != null) {
+					// System.out.printf("  got %d patterns\n", repositoryEntryPatterns.size());
 					patterns.remove(i);
 					patterns.addAll(i, repositoryEntryPatterns);
 					i--;

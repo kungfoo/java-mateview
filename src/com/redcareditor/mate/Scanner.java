@@ -98,7 +98,7 @@ public class Scanner implements Iterable<Marker> {
 		Rx closingRegex = currentScope.closingRegex;
 		if (closingRegex != null) {
 			Match match = closingRegex.search(this.line, this.position, this.lineLength);
-			if (match != null) {
+			if (match != null && match.getCapture(0).start != currentScope.getStart().getLineOffset()) {
 				// logger.info(String.format("closing match: %s (%d-%d)", this.currentScope.name, match.getCapture(0).start, match.getCapture(0).end));
 				Marker newMarker = new Marker();
 				newMarker.pattern = this.currentScope.pattern;

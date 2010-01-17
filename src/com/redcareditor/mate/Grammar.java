@@ -110,6 +110,7 @@ public class Grammar {
 	}
 
 	private void replaceIncludePatterns() {
+		Pattern.replaceIncludePatterns(patterns, this);
 		for (Pattern p : allPatterns) {
 //			System.out.printf("%s replaceIncludePattern for %s\n", this.name, p.name);
 			if (p instanceof DoublePattern) {
@@ -117,7 +118,6 @@ public class Grammar {
 			}
 //			System.out.printf("%s replaceIncludePattern for %s [done]\n", this.name, p.name);
 		}
-		Pattern.replaceIncludePatterns(patterns, this);
 	}
 
 	public static Grammar findByScopeName(String scope) {

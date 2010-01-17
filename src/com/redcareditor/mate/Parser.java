@@ -355,8 +355,8 @@ public class Parser {
 			// 		           expectedScope.getStart().getLineOffset()));
 			// else
 			// 	logger.info("no expected scope");
-			// logger.info(String.format("  scope: %s %d-%d (line length: %d)", 
-			// 					m.pattern.name, m.from, m.match.getCapture(0).end, length));
+			//logger.info(String.format("  scope: %s %d-%d (line length: %d)", 
+			//					m.pattern.name, m.from, m.match.getCapture(0).end, length));
 			if (m.isCloseScope) {
 				// logger.info("     (closing)");
 				closeScope(scanner, expectedScope, lineIx, line, length, m, 
