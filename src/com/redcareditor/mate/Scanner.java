@@ -71,10 +71,14 @@ public class Scanner implements Iterable<Marker> {
 		Match match = null;
 		if (p instanceof SinglePattern) {
 			SinglePattern sp = (SinglePattern) p;
-			match = sp.match.search(line, from, this.lineLength);
+			if (sp.match.regex != null) {
+				match = sp.match.search(line, from, this.lineLength);
+			}
 		}
 		else if (p instanceof DoublePattern) {
-			match = ((DoublePattern) p).begin.search(this.line, from, this.lineLength);
+			if (((DoublePattern) p).begin.regex != null) {
+				match = ((DoublePattern) p).begin.search(this.line, from, this.lineLength);
+			}
 		}
 		return match;
 	}

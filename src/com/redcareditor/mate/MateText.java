@@ -113,6 +113,7 @@ public class MateText extends Composite {
 	// Sets the grammar explicitly by name.
 	// TODO: restore the uncolouring stuff
 	public boolean setGrammarByName(String name) {
+		System.out.printf("setGrammarByName(%s)\n", name);
 		if (this.parser != null && this.parser.grammar.name.equals(name))
 			return true;
 

@@ -78,8 +78,8 @@ public class Rx {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (org.joni.exception.SyntaxException e) {
-			System.out.printf("** WARNING: SyntaxException when compiling '%s'\n", pattern);
-			e.printStackTrace();
+			System.out.printf("** WARNING: SyntaxException when compiling '%s': %s\n", pattern, e.getMessage());
+			//e.printStackTrace();
 		}
 		return null;
 	}
