@@ -260,18 +260,16 @@ public class SwtColourer implements Colourer {
 
 	private void addStyleRangeForScope(ArrayList<StyleRange> styleRanges, Scope scope, boolean inner, LineStyleEvent event) {
 		StyleRange styleRange = new StyleRange();
-		// TODO: allow for multiple settings that set different
-		// parts of the style.
+
 		ThemeSetting setting = null;
 		ThemeSetting excludeSetting = null;
 		if (scope.parent != null)
 			excludeSetting = scope.parent.themeSetting;
-		setting = theme.settingsForScope(scope, inner, null);// exclude_setting);
+		setting = theme.settingsForScope(scope, inner, null);
 		
 		int startLineOffset = event.lineOffset;
 		int endLineOffset   = startLineOffset + event.lineText.length();
-		//if (scope.getStart().getOffset() < startLineOffset)
-		//	return;
+
 		if (inner) {
 			styleRange.start = Math.max(scope.getInnerStart().getOffset(), startLineOffset);
 			styleRange.length = Math.min(scope.getInnerEnd().getOffset() - styleRange.start,
@@ -321,6 +319,7 @@ public class SwtColourer implements Colourer {
 		// *--*
 		if (childStart == parentStart) {
 			parentStyleRange.start = childEnd;
+			parentStyleRange.length -= styleRange.length;
 			styleRanges.add(indexOfParent, styleRange);
 			return;
 		}
