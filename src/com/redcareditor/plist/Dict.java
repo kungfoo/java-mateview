@@ -1,17 +1,15 @@
 package com.redcareditor.plist;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.redcareditor.onig.Rx;
+import com.redcareditor.plist.parser.PlistParser;
+import com.redcareditor.plist.parser.PlistParsingException;
 
 /**
  * class to load plist files.
@@ -20,47 +18,24 @@ import com.redcareditor.onig.Rx;
  * 
  */
 public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
-
-	private static SAXBuilder builder;
-
-	// NOTE: this method is not thread safe, if we ever go there, this needs to
-	// contain a mutex!
-	private static SAXBuilder getSAXBuilderInstance() {
-		if (builder == null) {
-			builder = new SAXBuilder(false);
-			builder.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-
-		}
-		return builder;
-	}
+	/*
+	 * a lot of Dicts seem to have very few entries, so we use a small default
+	 * size
+	 */
+	private static final int DEFAULT_MAP_SIZE = 2;
 
 	public static Dict parseFile(String filename) {
+		FileInputStream stream;
 		try {
-			Document document = getSAXBuilderInstance().build(new File(filename));
-			return new Dict(document.getRootElement().getChild("dict"));
-
-		} catch (JDOMException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println("The file " + filename + " was not found!");
-			e.printStackTrace();
+			stream = new FileInputStream(filename);
+		} catch (FileNotFoundException e) {
+			throw new PlistParsingException("tried to parse plist file: " + filename + "\nIt was not found though.");
 		}
-		return null;
+		return PlistParser.parse(stream);
 	}
-
-	@SuppressWarnings("unchecked")
-	protected Dict(Element element) {
-		value = new HashMap<String, PlistNode<?>>();
-
-		List<Element> children = element.getChildren();
-		String key = null;
-		for (Element c : children) {
-			if (c.getName().equals("key")) {
-				key = c.getValue();
-			} else {
-				value.put(key, PlistNode.parseElement(c));
-			}
-		}
+	
+	public Dict() {
+		value = new HashMap<String, PlistNode<?>>(DEFAULT_MAP_SIZE);
 	}
 
 	public String getString(String key) {
