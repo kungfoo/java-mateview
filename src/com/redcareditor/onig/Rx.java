@@ -9,6 +9,7 @@ import org.joni.Option;
 import org.joni.Regex;
 import org.joni.Region;
 import org.joni.Syntax;
+import org.joni.WarnCallback;
 
 /**
  * wrapper class around the Joni Regex library which is a optimized port of
@@ -68,15 +69,24 @@ public class Rx {
 		return search(line, 0, line.length());
 	}
 
+	class Warnings implements WarnCallback {
+		public void warn(String message) {
+			System.out.printf("got warning from regex: %s\n", message);
+		}
+	}
+
 	private Regex compileRegex(String pattern) {
 		byte[] bytes;
 		try {
 			bytes = pattern.getBytes("UTF-8");
 			return new Regex(bytes, 0, bytes.length, Option.DEFAULT,
-					UTF8Encoding.INSTANCE, Syntax.RUBY);
+					UTF8Encoding.INSTANCE, Syntax.DEFAULT, new Warnings());
 
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
+		} catch (org.joni.exception.SyntaxException e) {
+			System.out.printf("** WARNING: SyntaxException when compiling '%s': %s\n", pattern, e.getMessage());
+			//e.printStackTrace();
 		}
 		return null;
 	}

@@ -387,6 +387,57 @@ END
 END
     end
   end
+  
+  describe "When parsing Java" do
+    before do
+      @mt.set_grammar_by_name("Java")
+    end
+    
+    it "should parse constants correctly" do
+      @st.text = <<JAVA
+Level.SEVERE
+JAVA
+      @mt.parser.root.pretty(0).should == (t=<<END)
++ source.java (0,0)-(1,0) open
+  + storage.type.java (0,0)-(0,5) closed
+  + constant.other.java (0,5)-(0,12) closed
+    c keyword.operator.dereference.java (0,5)-(0,6) closed
+END
+    end
+    
+    it "should not have a weird comment bug" do
+      @st.text = <<JAVA
+public class Foo {
+	public int nonn() {
+//		}
+	}
+}
+
+JAVA
+      @mt.parser.root.pretty(0).should == (t=<<END)
++ source.java (0,0)-(6,0) open
+  + meta.class.java (0,0)-(4,1) closed
+    + [noname] (0,0)-(0,6) closed
+      c storage.modifier.java (0,0)-(0,6) closed
+    + meta.class.identifier.java (0,7)-(0,16) closed
+      c storage.modifier.java (0,7)-(0,12) closed
+      c entity.name.type.class.java (0,13)-(0,16) closed
+    + meta.class.body.java (0,17)-(4,0) closed
+      + meta.method.java (1,1)-(3,2) closed
+        + [noname] (1,1)-(1,7) closed
+          c storage.modifier.java (1,1)-(1,7) closed
+        + meta.method.return-type.java (1,8)-(1,12) closed
+          + storage.type.primitive.array.java (1,8)-(1,11) closed
+        + meta.method.identifier.java (1,12)-(1,18) closed
+          c entity.name.function.java (1,12)-(1,16) closed
+        + meta.method.body.java (1,19)-(3,1) closed
+          + [noname] (2,0)-(3,0) closed
+            c comment.line.double-slash.java (2,0)-(3,0) closed
+              c punctuation.definition.comment.java (2,0)-(2,2) closed
+    c punctuation.section.class.end.java (4,0)-(4,1) closed
+END
+    end
+  end
 end
 
 

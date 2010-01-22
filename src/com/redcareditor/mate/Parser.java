@@ -3,6 +3,10 @@ package com.redcareditor.mate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
+import java.util.logging.Handler;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
@@ -14,10 +18,18 @@ import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ScrollBar;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IViewportListener;
 import org.eclipse.jface.text.JFaceTextUtil;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocumentListener;
 
 import com.redcareditor.mate.document.MateDocument;
+import com.redcareditor.mate.document.MateTextLocation;
+import com.redcareditor.mate.document.swt.SwtMateDocument;
+import com.redcareditor.mate.document.swt.SwtMateTextLocation;
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Range;
 import com.redcareditor.onig.Rx;
@@ -26,17 +38,19 @@ public class Parser {
 	int LOOK_AHEAD = 100;
 	public static int linesParsed = 0;
 	public static boolean synchronousParsing = false;
-	
+	public Logger logger;
+
 	public Grammar grammar;
 	public MateText mateText;
+	public Document document;
 	public StyledText styledText;
-	public MateDocument document;
+	public MateDocument mateDocument;
 	
 	public int parsed_upto;	
 	public int lookAhead;
 	public int lastVisibleLine;
 	public int deactivationLevel;
-	public int parsedUpto;
+	public SwtMateTextLocation parsedUpto;
 	public boolean alwaysParseAll;
 	public boolean enabled;
 	
@@ -55,16 +69,36 @@ public class Parser {
 		styledText = m.getTextWidget();
 		lookAhead = LOOK_AHEAD;
 		lastVisibleLine = 0;
-//		tags = new Sequence<TextTag>(null);
 		changes = new RangeSet();
 		deactivationLevel = 0;
 		makeRoot();
 		attachListeners();
-		parsedUpto = 0;
 		alwaysParseAll = false;
 		modifyStart = -1;
-		document = m.getMateDocument();
+		mateDocument = m.getMateDocument();
+		document     = (Document) m.getDocument();
+		setParsedUpto(0);
 		enabled = true;
+		logger = Logger.getLogger("JMV.Parser ");
+		logger.setUseParentHandlers(false);
+		for (Handler h : logger.getHandlers()) {
+			logger.removeHandler(h);
+		}
+		logger.addHandler(MateText.consoleHandler());
+		logger.setLevel(Level.INFO);
+	}
+	
+	public void setParsedUpto(int line_ix) {
+		if (parsedUpto == null) {
+			parsedUpto = (SwtMateTextLocation) mateDocument.getTextLocation(0, 0);
+			mateDocument.addTextLocation("scopes", parsedUpto);
+		}
+		parsedUpto.offset = getOffsetAtLine(line_ix);
+	}
+	
+	public int getParsedUpto() {
+		// System.out.printf("parsedUpto %d (/%d)\n", parsedUpto.offset, getCharCount());
+		return getLineAtOffset(parsedUpto.offset);
 	}
 	
 	public void close() {
@@ -83,52 +117,84 @@ public class Parser {
 	public void makeRoot() {
 		this.root = new Scope(mateText, this.grammar.scopeName);
 		this.root.isOpen = true;
-//		this.root.setStartPos(0, 0, true);
-//		int lineIx = styledText.getLineCount()-1;
-//		this.root.setEndPos(lineIx, 
-//							styledText.getCharCount() - styledText.getOffsetAtLine(lineIx), false);
-//		System.out.printf("making root: %s\n", this.grammar.scopeName);
-		DoublePattern dp = new DoublePattern(grammar, null);
-		dp.name = grammar.name;
-		dp.patterns = grammar.patterns;
-		root.pattern = dp;
+		DoublePattern dp = new DoublePattern();
+		dp.name = this.grammar.name;
+		dp.patterns = this.grammar.patterns;
+		dp.grammar = this.grammar;
+		this.root.pattern = dp;
+	}
+	
+	public int getLineAtOffset(int offset) {
+		try {
+			return document.getLineOfOffset(offset);
+		} catch (BadLocationException e) {
+			System.out.printf("*** Warning BadLocationException");
+			e.printStackTrace();
+			return -1;
+		}
+	}
+	
+	public int getOffsetAtLine(int line) {
+		try {
+			return document.getLineOffset(line);
+		} catch (BadLocationException e) {
+			System.out.printf("*** Warning BadLocationException");
+			e.printStackTrace();
+			return -1;
+		}
+	}
+	
+	public int getLineCount() {
+		return document.getNumberOfLines();
+	}
+	
+	public int getCharCount() {
+		return document.getLength();
+	}
+	
+	public String getLine(int line) {
+		try {
+			IRegion region = document.getLineInformation(line);
+			return document.get(region.getOffset(), region.getLength());
+		} catch (BadLocationException e) {
+			System.out.printf("*** Warning BadLocationException");
+			e.printStackTrace();
+			return "";
+		}
 	}
 	
 	private VerifyListener verifyListener;
 	private ModifyListener modifyListener;
 	private IViewportListener viewportListener;
+	private IDocumentListener documentListener;
 	
 	public void attachListeners() {
-//		System.out.printf("parser attach listeners\n");
-		verifyListener = new VerifyListener() {
-			public void verifyText(VerifyEvent e) {
-				verifyEventCallback(e.start, e.end, e.text);
-			}
-		};
-		modifyListener = new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				modifyEventCallback();
-			}
-		};
 		viewportListener = new IViewportListener() {
 			public void viewportChanged(int verticalOffset) {
 				viewportScrolledCallback();
 			}
 		};
 		
-		mateText.getTextWidget().addVerifyListener(verifyListener);
-		mateText.getTextWidget().addModifyListener(modifyListener);
 		mateText.viewer.addViewportListener(viewportListener);
+		
+		documentListener = new IDocumentListener() {
+			public void documentAboutToBeChanged(DocumentEvent e) {
+				verifyEventCallback(e.fOffset, e.fOffset + e.fLength, e.fText);
+			}
+			
+			public void documentChanged(DocumentEvent e) {
+				modifyEventCallback();
+			}
+		};
+		mateText.getDocument().addDocumentListener(documentListener);
 	}
 	
 	public void removeListeners() {
-		mateText.getTextWidget().removeVerifyListener(verifyListener);
-		mateText.getTextWidget().removeModifyListener(modifyListener);
 		mateText.viewer.removeViewportListener(viewportListener);
+		mateText.getDocument().removeDocumentListener(documentListener);
 	}
 
 	public void verifyEventCallback(int start, int end, String text) {
-		// System.out.printf("verifyEventCallback(%s)\n", text);
 		if (enabled) {
 			modifyStart = start;
 			modifyEnd   = end;
@@ -137,12 +203,11 @@ public class Parser {
 	}
 	
 	public void modifyEventCallback() {
-		// TODO: this isn't quite right...
-		// System.out.printf("modifyEventCallback parser:%p\n", this);
-		// System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
 		if (enabled) {
-			changes.add(styledText.getLineAtOffset(modifyStart), 
-					styledText.getLineAtOffset(modifyStart + modifyText.length()));
+			changes.add(
+				getLineAtOffset(modifyStart), 
+				getLineAtOffset(modifyStart + modifyText.length())
+			);
 			modifyStart = -1;
 			modifyEnd   = -1;
 			modifyText  = null;
@@ -163,14 +228,14 @@ public class Parser {
 	// Process all change ranges.
 	public void processChanges() {
 		int thisParsedUpto = -1;
-		// System.out.printf("process_changes (lastVisibleLine: %d) (charCount = %d)\n", lastVisibleLine, styledText.getCharCount());
+		// System.out.printf("process_changes (lastVisibleLine: %d) (charCount = %d)\n", lastVisibleLine, document.getLength());
 		for (Range range : changes) {
 			if (range.end > thisParsedUpto && range.start <= lastVisibleLine + lookAhead) {
 				int rangeEnd = Math.min(lastVisibleLine + lookAhead, range.end);
 				thisParsedUpto = parseRange(range.start, rangeEnd);
 			}
-			int startOffset = styledText.getOffsetAtLine(range.start);
-			int endOffset = styledText.getOffsetAtLine(range.end);
+			int startOffset = getOffsetAtLine(range.start);
+			int endOffset   = getOffsetAtLine(range.end);
 			styledText.redrawRange(startOffset, endOffset - startOffset, false);
 		}
 		//		System.out.printf("%s\n", root.pretty(0));
@@ -190,7 +255,7 @@ public class Parser {
 			scopeChanged = parseLine(lineIx);
 			if (scopeChanged) {
 				scopeEverChanged = true;
-				this.parsedUpto = lineIx;
+				this.setParsedUpto(lineIx);
 			}
 			lineIx++;
 		}
@@ -198,7 +263,7 @@ public class Parser {
 			thunk.delayAndUpdate(lineIx);
 		}
 		else {
-			if (scopeEverChanged && lineIx <= styledText.getLineCount() - 1) {
+			if (scopeEverChanged && lineIx <= getLineCount() - 1) {
 				thunk = new ParseThunk(this, lineIx);
 				if (Parser.synchronousParsing) {
 					thunk.execute();
@@ -215,11 +280,11 @@ public class Parser {
 		if (styledText.isDisposed())
 			return;
 		int lineIx = fromLine;
-		int lineCount = styledText.getLineCount();
+		int lineCount = getLineCount();
 		int lastLine = Math.min(lastVisibleLine + 100, lineCount - 1);
 		while (lineIx <= lastLine) {
 			parseLine(lineIx);
-			this.parsedUpto = lineIx;
+			this.setParsedUpto(lineIx);
 			redrawLine(lineIx);
 			lineIx++;
 		}
@@ -227,43 +292,29 @@ public class Parser {
 	
 	public void redrawLine(int lineIx) {
 		// System.out.printf("redrawLine(%d)\n", lineIx);
-		int startOffset = styledText.getOffsetAtLine(lineIx);
+		int startOffset = getOffsetAtLine(lineIx);
 		int endOffset;
-		int lineCount = styledText.getLineCount();
+		int lineCount = getLineCount();
 		if (lineIx + 1 < lineCount) {
-			endOffset = styledText.getOffsetAtLine(lineIx + 1) - 1;
+			endOffset = getOffsetAtLine(lineIx + 1) - 1;
 		}
 		else {
-			endOffset = styledText.getCharCount();
+			endOffset = getCharCount();
 		}
 		styledText.redrawRange(startOffset, endOffset - startOffset, false);
 	}
 	
 	public void lastVisibleLineChanged(int newLastVisibleLine) {
 		this.lastVisibleLine = newLastVisibleLine;
-		// System.out.printf("lastVisibleLineChanged(%d)\n", lastVisibleLine);
-		// System.out.printf("  parsedUpto: %d\n", parsed_upto);
-		if (lastVisibleLine + lookAhead >= parsedUpto) {
-			int endRange = Math.min(styledText.getLineCount() - 1, lastVisibleLine + lookAhead);
-			parseRange(parsedUpto, endRange);
-		}
-	}
-
-	public void sleep(int ms) {
-		try{
-		  //do what you want to do before sleeping
-		  Thread.currentThread().sleep(ms);//sleep for 1000 ms
-		  //do what you want to do after sleeptig
-		}
-		catch(InterruptedException ie){
-		//If this thread was intrrupted by
+		if (lastVisibleLine + lookAhead >= getParsedUpto()) {
+			int endRange = Math.min(getLineCount() - 1, lastVisibleLine + lookAhead);
+			parseRange(getParsedUpto(), endRange);
 		}
 	}
 	
 	private Scope scopeBeforeStartOfLine(int lineIx) {
 		Scope startScope = this.root.scopeAt(lineIx, 0);
 		if (startScope.getStart().getLine() == lineIx) {
-//			System.out.printf("sbsol: %s\n", startScope.pattern.name);
 			startScope = startScope.containingDoubleScope(lineIx);
 		}
 
@@ -281,43 +332,43 @@ public class Parser {
 	
 	private boolean parseLine(int lineIx) {
 		Parser.linesParsed++;
-		String line = styledText.getLine(lineIx) + "\n";
+		String line = getLine(lineIx) + "\n";
 		int length = line.length();
-		// System.out.printf("p%d, ", lineIx);
-		if (lineIx > this.parsedUpto)
-			this.parsedUpto = lineIx;
+		//logger.info(String.format("parseLine(%d)", lineIx));
+		if (lineIx > getParsedUpto())
+			this.setParsedUpto(lineIx);
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
 		Scope endScope1  = scopeAfterEndOfLine(lineIx, length);
-//		System.out.printf("startScope is: %s\n", startScope.name);
-//		System.out.printf("endScope1: %s\n", endScope1.name);
+		// logger.info(String.format("startScope is: %s", startScope.name));
+		// logger.info(String.format("endScope1: %s", endScope1.name));
 		Scanner scanner = new Scanner(startScope, line);
 		ArrayList<Scope> allScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
 		ArrayList<Scope> closedScopes = new ArrayList<Scope>();
 		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
-		// System.out.printf("start pretty:\n%s\n", root.pretty(2));
+		//logger.info(String.format("start pretty:\n%s", root.pretty(2)));
 		for (Marker m : scanner) {
 			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, length, scanner.position);
 			// if (expectedScope != null)
-			// 	System.out.printf("expectedScope: %s (%d, %d)\n", expectedScope.name, expectedScope.getStart().getLine(), 
-			// 		           expectedScope.getStart().getLineOffset());
+			// 	logger.info(String.format("expectedScope: %s (%d, %d)", expectedScope.name, expectedScope.getStart().getLine(), 
+			// 		           expectedScope.getStart().getLineOffset()));
 			// else
-			// 	System.out.printf("no expected scope\n");
-			// System.out.printf("  scope: %s %d-%d (line length: %d)\n", 
-			// 					m.pattern.name, m.from, m.match.getCapture(0).end, length);
+			// 	logger.info("no expected scope");
+			//logger.info(String.format("  scope: %s %d-%d (line length: %d)", 
+			//					m.pattern.name, m.from, m.match.getCapture(0).end, length));
 			if (m.isCloseScope) {
-				// System.out.printf("     (closing)\n");
+				// logger.info("     (closing)");
 				closeScope(scanner, expectedScope, lineIx, line, length, m, 
 							allScopes, closedScopes, removedScopes);
 			}
 			else if (m.pattern instanceof DoublePattern) {
-				// System.out.printf("     (opening)\n");
+				// logger.info("     (opening)");
 				openScope(scanner, expectedScope, lineIx, line, length, m, 
 						   allScopes, closedScopes, removedScopes);
 			}
 			else {
-				// System.out.printf("     (single)\n");
+				// logger.info("     (single)");
 				singleScope(scanner, expectedScope, lineIx, line, length, m, 
 							 allScopes, closedScopes, removedScopes);
 			}
@@ -334,10 +385,10 @@ public class Parser {
 //			// System.out.printf("before_colour_line_with_scopes\n");
 //			colourer.colourLineWithScopes(allScopes);
 //			// System.out.printf("after_colour_line_with_scopes\n");
-//		}
+//       ]
 //		else {
 //			// stdout.printf("no colourer");
-//		}
+//		]
 		return (endScope1 != endScope2);
 	}
 
@@ -345,7 +396,7 @@ public class Parser {
 //		System.out.printf("get_expected_scope(%s, %d, %d)\n", currentScope.name, line, lineOffset);
 		if (lineOffset == lineLength)
 			return null;
-		Scope expectedScope = currentScope.firstChildAfter(document.getTextLocation(line, lineOffset));
+		Scope expectedScope = currentScope.firstChildAfter(mateDocument.getTextLocation(line, lineOffset));
 //		System.out.printf("first_child_after: %s\n", expectedScope.name);
 		assert(expectedScope != currentScope);
 		if (expectedScope != null) {
@@ -369,8 +420,8 @@ public class Parser {
 		boolean equal_match_strings = false;
 		
 		if (is_ended) {
-			equal_ends          = (scanner.getCurrentScope().getEnd().equals(document.getTextLocation(lineIx, m.match.getCapture(0).end)));
-			equal_inner_ends    = (scanner.getCurrentScope().getInnerEnd().equals(document.getTextLocation(lineIx, m.from)));
+			equal_ends          = (scanner.getCurrentScope().getEnd().equals(mateDocument.getTextLocation(lineIx, m.match.getCapture(0).end)));
+			equal_inner_ends    = (scanner.getCurrentScope().getInnerEnd().equals(mateDocument.getTextLocation(lineIx, m.from)));
 			equal_match_strings = (scanner.getCurrentScope().endMatchString.equals(endMatchString));
 		}
 		
@@ -394,7 +445,7 @@ public class Parser {
 			// stdout.printf("closing scope at %d\n", m.from);
 //			if (colourer != null) {
 //				colourer.uncolourScope(scanner.getCurrentScope(), false);
-//			}
+//			]
 			setInnerEndPosSafely(scanner.getCurrentScope(), m, lineIx, length, 0);
 			setEndPosSafely(scanner.getCurrentScope(), m, lineIx, length, 0);
 			scanner.getCurrentScope().isOpen = false;
@@ -525,7 +576,7 @@ public class Parser {
 	}
 
 	private boolean atEndOfNonFinalLine(int lineIx, int length, int to) {
-		return to == length && styledText.getLineCount() > lineIx+1;
+		return to == length && getLineCount() > lineIx+1;
 	}
 
 	public void setStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
@@ -676,6 +727,7 @@ public class Parser {
 			else {
 				scope.addChild(s);
 			}
+			// logger.info(String.format("    capture %s", s.name));
 			placedScopes.add(s);
 			captureScopes.remove(s);
 		}
@@ -711,8 +763,8 @@ public class Parser {
 					removedScopes.add(s);
 				}
 				else {
-					int line = styledText.getLineCount() - 1;
-					int lineOffset = styledText.getCharCount() - styledText.getOffsetAtLine(line);
+					int line = getLineCount() - 1;
+					int lineOffset = getCharCount() - getOffsetAtLine(line);
 					s.removeEnd();
 					s.isOpen = true;
 				}

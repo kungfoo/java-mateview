@@ -7,35 +7,44 @@ import java.util.Map;
 import com.redcareditor.mate.ScopeMatcher;
 import com.redcareditor.onig.Match;
 import com.redcareditor.plist.Dict;
+import com.redcareditor.plist.PlistNode;
 import com.redcareditor.plist.PlistPropertyLoader;
 
 public class ThemeSetting {
 	public String name;
 	public String scopeSelector;
-	public Map<String, String> settings;
+	public String background;
+	public String foreground;
+	public String fontStyle;
+	
 	public List<ScopeMatcher> matchers;
 	
-	private PlistPropertyLoader propertyLoader;
+	public Match thisMatch;
+	
+	public ThemeSetting() {}
 	
 	public ThemeSetting(Dict dict){
-		propertyLoader = new PlistPropertyLoader(dict, this);
-		propertyLoader.loadStringProperty("name");
-		this.scopeSelector = dict.getString("scope");
+		name          = dict.getString("name");
+		scopeSelector = dict.getString("scope");
 		
 		loadSettings(dict);
 		compileScopeMatchers();
 	}
 
 	private void loadSettings(Dict dict) {
-		settings = new HashMap<String, String>();
 		Dict settingsDict = dict.getDictionary("settings");
-		for(String key : settingsDict.value.keySet()){
-			settings.put(key, (String) settingsDict.value.get(key).value);
-		}
+		
+		background = getSetting(settingsDict, "background");
+		foreground = getSetting(settingsDict, "foreground");
+		fontStyle  = getSetting(settingsDict, "fontStyle");
+	}
+
+	private String getSetting(Dict settingsDict, String settingName) {
+		PlistNode node = settingsDict.value.get(settingName);
+		return node == null ? null : (String) node.value;
 	}
 
 	public void compileScopeMatchers() {
-		//stdout.printf("  compiling '%s'\n", selector);
 		this.matchers = ScopeMatcher.compile(scopeSelector);
 	}
 
@@ -50,4 +59,18 @@ public class ThemeSetting {
 		}
 		return null;
 	}
+	
+	// Merge this ThemeSetting with another, higher priority setting.
+	public void merge(ThemeSetting other) {
+		//System.out.printf("merging %s %s %s with %s %s %s\n",
+		//	name, background, foreground,
+		//	other.name, other.background, other.foreground);
+		if (other.background != null)
+			background = other.background;
+		if (other.foreground != null)
+			foreground = other.foreground;
+		if (other.fontStyle != null)
+			fontStyle = other.fontStyle;
+	}
 }
+

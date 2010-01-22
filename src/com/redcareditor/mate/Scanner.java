@@ -2,6 +2,10 @@ package com.redcareditor.mate;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.logging.Logger;
+import java.util.logging.Handler;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Rx;
@@ -12,7 +16,8 @@ public class Scanner implements Iterable<Marker> {
 	public String line;
 	public int lineLength;
 	public ArrayList<Marker> cachedMarkers;
-	
+	public Logger logger;
+
 	public void setCurrentScope(Scope scope) {
 		this.currentScope = scope;
 		cachedMarkers.clear();
@@ -28,6 +33,12 @@ public class Scanner implements Iterable<Marker> {
 		this.lineLength = line.getBytes().length;
 		this.position = 0;
 		this.cachedMarkers = new ArrayList<Marker>();
+		logger = Logger.getLogger("JMV.Scanner");
+		logger.setUseParentHandlers(false);
+		for (Handler h : logger.getHandlers()) {
+			logger.removeHandler(h);
+		}
+		logger.addHandler(MateText.consoleHandler());
 	}
 
 	// if we have already scanned this line for this scope then
@@ -35,18 +46,9 @@ public class Scanner implements Iterable<Marker> {
 	// match in case of a tie).
 	public Marker getCachedMarker() {
 		Marker m = null;
-		int bestLength = 0;
 		int newLength;
-		for (Marker m1 : cachedMarkers) {
-			newLength = m1.match.getCapture(0).end - m1.from;
-			if (m == null || 
-				m1.from < m.from || 
-				(m1.from == m.from && newLength > bestLength) ||
-				(m1.from == m.from && newLength == bestLength && m1.isCloseScope)
-				) {
-				m = m1;
-				bestLength = newLength;
-			}
+		for (Marker newMarker : cachedMarkers) {
+			m = newMarker.bestOf(m);
 		}
 		return m;
 	}
@@ -54,27 +56,14 @@ public class Scanner implements Iterable<Marker> {
 	public void removePrecedingCachedMarkers(Marker m) {
 		int ix = 0;
 		int len = cachedMarkers.size();
-		//stdout.printf("num cached: %d\n", len);
 		for(int i = 0; i < len; i++, ix++) {
 			if (cachedMarkers.get(ix).from < m.match.getCapture(0).end) {
 				cachedMarkers.remove(ix);
 				ix--;
 			}
 		}
-		//stdout.printf("num cached after removals: %d\n", cached_markers.size);
 	}
 
-	public void sleep(int ms) {
-		try{
-		  //do what you want to do before sleeping
-		  Thread.currentThread().sleep(ms);//sleep for 1000 ms
-		  //do what you want to do after sleeptig
-		}
-		catch(InterruptedException ie){
-		//If this thread was intrrupted by
-		}
-	}
-	
 	public Match scanForMatch(int from, Pattern p) {
 		if (p.name != null && (p.name.startsWith("#") || p.name.startsWith("$")))
 			System.out.printf("*** WARNING trying to scan for pattern called %s\n", p.name);
@@ -82,49 +71,46 @@ public class Scanner implements Iterable<Marker> {
 		Match match = null;
 		if (p instanceof SinglePattern) {
 			SinglePattern sp = (SinglePattern) p;
-			match = sp.match.search(line, from, this.lineLength);
+			if (sp.match.regex != null) {
+				match = sp.match.search(line, from, this.lineLength);
+			}
 		}
 		else if (p instanceof DoublePattern) {
-//			System.out.printf("p: %s, p.begin: %s\n", p, ((DoublePattern) p).begin);
-			match = ((DoublePattern) p).begin.search(this.line, from, this.lineLength);
+			if (((DoublePattern) p).begin.regex != null) {
+				match = ((DoublePattern) p).begin.search(this.line, from, this.lineLength);
+			}
 		}
 		return match;
 	}
 	
 	public Marker findNextMarker() {
-		// System.out.printf("find_next_marker from (current_scope is %s)\n", currentScope.name);
-		// System.out.printf("scanning: '%s' from %d to %d\n", this.line, this.position, this.lineLength);
-//		if (this.position == this.lineLength)
-//			return null;
-		Marker m;
-		int bestLength = 0;
+		// logger.info(String.format("scanning: '%s' from %d to %d (current_scope is %s)", this.line.replaceAll("\n", ""), this.position, this.lineLength, currentScope.name));
+		Marker bestMarker = null;
 		int newLength;
 		boolean isCloseMatch = false;
-		if ((m = getCachedMarker()) != null) {
-//			System.out.printf("got cached marker\n");
-			this.cachedMarkers.remove(m);
-			removePrecedingCachedMarkers(m);
-			return m;
-		}
-//		System.out.printf("no cached marker\n");
-		assert(cachedMarkers.size() == 0);
+//		if ((bestMarker = getCachedMarker()) != null) {
+//			logger.info("  got cached marker\n");
+//			this.cachedMarkers.remove(bestMarker);
+//			removePrecedingCachedMarkers(bestMarker);
+//			return bestMarker;
+//		}
+//		assert(cachedMarkers.size() == 0);
 		Rx closingRegex = currentScope.closingRegex;
 		if (closingRegex != null) {
 			Match match = closingRegex.search(this.line, this.position, this.lineLength);
-			if (match != null) {
-				// System.out.printf("closing match: %s (%d-%d)\n", this.currentScope.name, match.getCapture(0).start, match.getCapture(0).end);
+			if (match != null && match.getCapture(0).start != currentScope.getStart().getLineOffset()) {
+				// logger.info(String.format("closing match: %s (%d-%d)", this.currentScope.name, match.getCapture(0).start, match.getCapture(0).end));
 				Marker newMarker = new Marker();
 				newMarker.pattern = this.currentScope.pattern;
 				newMarker.match = match;
 				newMarker.from = match.getCapture(0).start;
 				newMarker.isCloseScope = true;
 				this.cachedMarkers.add(newMarker);
-				m = newMarker;
-				bestLength = newMarker.match.getCapture(0).end - newMarker.from;
+				bestMarker = newMarker;
 				isCloseMatch = true;
 			}
 		}
-		// System.out.printf("scanning for %d patterns\n", ((DoublePattern) currentScope.pattern).patterns.size());
+		// logger.info(String.format("  scanning for %d patterns", ((DoublePattern) currentScope.pattern).patterns.size()));
 		for (Pattern p : ((DoublePattern) currentScope.pattern).patterns) {
 			// System.out.printf("     scanning for %s (%s)\n", p.name, p.disabled);
 			if (p.disabled)
@@ -136,29 +122,22 @@ public class Scanner implements Iterable<Marker> {
 				   positionNow != positionPrev // some regex's have zero width (meta.selector.css)
 				) {
 				positionPrev = positionNow;
-				// System.out.printf("matched: %s (%d-%d)\n", p.name, match.getCapture(0).start, match.getCapture(0).end);
+				// logger.info(String.format("  matched: %s (%d-%d)", p.prettyName(), match.getCapture(0).start, match.getCapture(0).end));
 				Marker newMarker = new Marker();
 				newMarker.pattern = p;
 				newMarker.match = match;
 				newMarker.from = match.getCapture(0).start;
 				newMarker.isCloseScope = false;
 				this.cachedMarkers.add(newMarker);
-				newLength = newMarker.match.getCapture(0).end - newMarker.from;
-				if (m == null || newMarker.from < m.from ||
-						(newMarker.from == m.from && newLength == 0) ||
-						(newMarker.from == m.from && newLength > bestLength && !isCloseMatch)) {
-					m = newMarker;
-					bestLength = newLength;
-				}
+				bestMarker = newMarker.bestOf(bestMarker);
 				positionNow = match.getByteCapture(0).end;
-				// System.out.printf("  new position: %d\n", positionNow);
 			}
 		}
-		if (m != null) {
-			this.cachedMarkers.remove(m);
-			this.removePrecedingCachedMarkers(m);
+		if (bestMarker != null) {
+			this.cachedMarkers.remove(bestMarker);
+			this.removePrecedingCachedMarkers(bestMarker);
 		}
-		return m;
+		return bestMarker;
 	}
 	
 	public Iterator<Marker> iterator() {

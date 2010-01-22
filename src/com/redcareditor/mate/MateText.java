@@ -2,6 +2,10 @@ package com.redcareditor.mate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.logging.Handler;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -28,10 +32,21 @@ import com.redcareditor.onig.NullRx;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.theme.Theme;
 import com.redcareditor.theme.ThemeManager;
+import com.redcareditor.util.SingleLineFormatter;
 
 public class MateText extends Composite {
 	public Parser parser;
 	public Colourer colourer;
+	public Logger logger;
+
+	static private Handler _consoleHandler;
+	static public Handler consoleHandler() {
+		if (_consoleHandler == null) {
+			_consoleHandler = new ConsoleHandler();
+			_consoleHandler.setFormatter(new SingleLineFormatter());
+		}
+		return _consoleHandler;
+	}
 
 	/* components plugged together */
 	public SourceViewer viewer;
@@ -51,10 +66,17 @@ public class MateText extends Composite {
 		viewer.setDocument(document);
 		setLayout(new FillLayout());
 		colourer = new SwtColourer(this);
-		undoManager = new SwtMateTextUndoManager(this);
 		mateDocument = new SwtMateDocument(this);
 		grammarListeners = new ArrayList<IGrammarListener>();
 		getTextWidget().setLeftMargin(5);
+		logger = Logger.getLogger("JMV.MateText");
+		logger.setUseParentHandlers(false);
+		logger.setLevel(Level.SEVERE);
+		for (Handler h : logger.getHandlers()) {
+			logger.removeHandler(h);
+		}
+		logger.addHandler(MateText.consoleHandler());
+		logger.info("Created MateText");
 	}
 
 	private CompositeRuler constructRuler() {
@@ -62,18 +84,6 @@ public class MateText extends Composite {
 		lineNumbers = new LineNumberRulerColumn();
 		ruler.addDecorator(0, lineNumbers);
 		return ruler;
-	}
-
-	public void undo() {
-		undoManager.undo();
-	}
-
-	public void redo() {
-		undoManager.redo();
-	}
-
-	public boolean isDirty() {
-		return undoManager.isDirty();
 	}
 
 	public void attachUpdater() {
@@ -103,25 +113,21 @@ public class MateText extends Composite {
 	// Sets the grammar explicitly by name.
 	// TODO: restore the uncolouring stuff
 	public boolean setGrammarByName(String name) {
+		System.out.printf("setGrammarByName(%s)\n", name);
 		if (this.parser != null && this.parser.grammar.name.equals(name))
 			return true;
 
 		for (Bundle bundle : Bundle.getBundles()) {
 			for (Grammar grammar : bundle.getGrammars()) {
 				if (grammar.name.equals(name)) {
-					// int parsed_upto = 150;
-					Theme theme;
 					if (this.parser != null) {
 						this.parser.close();
 					}
 					this.parser = new Parser(grammar, this);
+					if (colourer != null) {
+						colourer.setGlobalColours();
+					}
 					getMateDocument().reparseAll();
-					// this.parser.parseRange(0, getControl().getLineCount()-1);
-					// this.parser.last_visible_line_changed(parsed_upto);
-					// GLib.Signal.emit_by_name(this, "grammar_changed",
-					// gr.name);
-					// if (theme != null)
-					// this.parser.change_theme(theme);
 					for (IGrammarListener grammarListener : grammarListeners) {
 						grammarListener.grammarChanged(grammar.name);
 					}

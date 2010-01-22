@@ -4,6 +4,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IPositionUpdater;
@@ -17,22 +18,26 @@ import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.MateTextRange;
 
 public class SwtMateDocument implements MateDocument, MateTextFactory {
-	private MateText mateText;
-	public StyledText styledText;
+	public MateText mateText;
 	private IPositionUpdater positionUpdater;
+	public Document document;
 
 	public SwtMateDocument(MateText mateText) {
 		this.mateText = mateText;
-		this.styledText = mateText.getTextWidget();
-		mateText.getDocument().addPositionCategory("scopes");
-		mateText.getDocument().addPositionUpdater(new SwtScopePositionUpdater("scopes"));
+		this.document = (Document) mateText.getDocument();
+		document.addPositionCategory("scopes");
+		document.addPositionUpdater(new SwtScopePositionUpdater("scopes"));
 	}
 
 	public void set(String text) {
 		this.mateText.getDocument().set(text);
 		reparseAll();
 	}
-
+	
+	public IDocument getJFaceDocument() {
+		return this.mateText.getDocument();
+	}
+	
 	public String get() {
 		return this.mateText.getDocument().get();
 	}
@@ -47,7 +52,7 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 
 	public void reparseAll() {
 		SwtMateTextLocation startLocation = new SwtMateTextLocation(0, this);
-		SwtMateTextLocation endLocation = new SwtMateTextLocation(0 + styledText.getCharCount(), this);
+		SwtMateTextLocation endLocation = new SwtMateTextLocation(0 + document.getLength(), this);
 		if (this.mateText.parser.enabled) {
 			this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
 			this.mateText.parser.processChanges();
@@ -71,8 +76,6 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	}
 
 	public boolean addTextLocation(String category, MateTextLocation location) {
-		// SwtTextLocation position = new SwtTextLocation(location, this);
-
 		try {
 			mateText.getDocument().addPosition(category, (SwtMateTextLocation) location);
 			return true;
@@ -87,20 +90,26 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	}
 
 	public int getLineCount() {
-		return styledText.getLineCount();
+		return document.getNumberOfLines();
 	}
 
 	public int getLineLength(int line) {
-		int startOffset = styledText.getOffsetAtLine(line);
-		int endOffset;
-
-		if (line + 1 < getLineCount()) {
-			endOffset = styledText.getOffsetAtLine(line + 1);
-		} else {
-			endOffset = styledText.getCharCount();
+		try {
+			int startOffset = document.getLineOffset(line);
+			int endOffset;
+  
+			if (line + 1 < getLineCount()) {
+				endOffset = document.getLineOffset(line + 1);
+			} else {
+				endOffset = document.getLength();
+			}
+  
+			return endOffset - startOffset;
+		} catch (BadLocationException e) {
+			System.out.printf("*** Warning BadLocationException");
+			e.printStackTrace();
+			return -1;
 		}
-
-		return endOffset - startOffset;
 	}
 
 	public MateTextLocation getTextLocation(int line, int offset) {

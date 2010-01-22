@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.Comparator;
 
 import com.redcareditor.mate.Scope;
 import com.redcareditor.mate.ScopeMatcher;
@@ -60,11 +62,12 @@ public class Theme {
 	}
 
 	public ThemeSetting settingsForScope(Scope scope, boolean inner, ThemeSetting excludeSetting) {
-		if (isSettingAlreadyCached(scope.name)) {
-			return cachedSettingsForScopes.get(scope.name);
+		String hierarchyNames = scope.hierarchyNames(inner);
+		if (isSettingAlreadyCached(hierarchyNames)) {
+			return cachedSettingsForScopes.get(hierarchyNames);
 		} else {
-			ThemeSetting setting = findSetting(scope, inner, excludeSetting);
-			cachedSettingsForScopes.put(scope.name, setting);
+			ThemeSetting setting = findSetting(hierarchyNames, inner, excludeSetting);
+			cachedSettingsForScopes.put(hierarchyNames, setting);
 			return setting;
 		}
 	}
@@ -73,37 +76,47 @@ public class Theme {
 		return cachedSettingsForScopes.containsKey(scope);
 	}
 
-	// TODO make this return multiple themes if they are identical
-	// (see 13.5 of Textmate manual)
-	public ThemeSetting findSetting(Scope scope, boolean inner, ThemeSetting excludeSetting) {
-		String scopeName = scope.hierarchyNames(inner);
-		// System.out.printf("[Theme] finding settings for '%s'\n", scopeName);
-		Match current_m = null, m;
-		ThemeSetting current = null;
+	public class ThemeSettingComparator implements Comparator {
+		String scopeName;
+		
+		public ThemeSettingComparator(String scopeName) {
+			this.scopeName = scopeName;
+		}
+		
+		public int compare(Object o1, Object o2) {
+			return ScopeMatcher.compareMatch(scopeName, ((ThemeSetting) o1).thisMatch, ((ThemeSetting) o2).thisMatch);
+		}
+	}
+	
+	public ThemeSetting findSetting(String hierarchyNames, boolean inner, ThemeSetting excludeSetting) {
+		// collect matching ThemeSettings
+		Match m;
+		ArrayList<ThemeSetting> matchingThemeSettings = new ArrayList<ThemeSetting>();
 		for (ThemeSetting setting : settings) {
 			if (setting == excludeSetting && excludeSetting != null) {
-				// System.out.printf("[Theme] setting '%s' excluded due to parent\n", excludeSetting.name);
 			}
 			else {
-				if ((m = setting.match(scopeName)) != null) {
-					// System.out.printf("[Theme] setting '%s' matches selector '%s'\n", setting.name, scopeName); 
-					if (current == null) {
-						current = setting;
-						current_m = m;
-					}
-					else if (ScopeMatcher.compareMatch(scopeName, current_m, m) < 0) {
-						current = setting;
-						current_m = m;
-					}
+				if ((m = setting.match(hierarchyNames)) != null) {
+					setting.thisMatch = m;
+					matchingThemeSettings.add(setting);
 				}
 			}
 		}
-//		if (current == null) {
-//			stdout.printf("none match\n");
-//		}
-//		else {
-//			stdout.printf("    best: '%s'\n", current.name);
-//		}
-		return current;
+		
+		Collections.sort(matchingThemeSettings, new ThemeSettingComparator(hierarchyNames));
+		
+		// merge them together into a single ThemeSetting
+		ThemeSetting result = new ThemeSetting();
+		for (ThemeSetting ts : matchingThemeSettings) {
+			ts.thisMatch = null;
+			result.merge(ts);
+		}
+			
+		return result;
 	}
 }
+
+
+
+
+

@@ -43,6 +43,8 @@ public class Grammar {
 			propertyLoader.loadStringProperty(property);
 		}
 		grammarsByScopeNames.put(scopeName, this);
+		if (scopeName == null)
+			System.out.printf("** WARNING: syntax %s has no top level scope name.\n", name);
 		propertyLoader.loadRegexProperty("firstLineMatch");
 		if (plist.containsElement("fileTypes"))
 			fileTypes = plist.getStrings("fileTypes");
@@ -57,17 +59,21 @@ public class Grammar {
 		propertyLoader.loadRegexProperty("foldingStartMarker");
 		propertyLoader.loadRegexProperty("foldingStopMarker");
 		
-		allPatterns = new ArrayList<Pattern>();
+		this.allPatterns = new ArrayList<Pattern>();
 		loadPatterns();
 		loadRepository();
 		replaceIncludePatterns();
 	}
 
 	private void loadPatterns() {
-		patterns = new ArrayList<Pattern>();
-		Dict[] patternsDict = plist.getDictionaries("patterns");
-		for (Dict patternDict : patternsDict) {
-			createAndAddPattern(patterns, patternDict);
+		this.patterns = new ArrayList<Pattern>();
+		Dict[] dictPatterns = plist.getDictionaries("patterns");
+		for (Dict p : dictPatterns) {
+			Pattern pattern = Pattern.createPattern(allPatterns, p);
+			if (pattern != null) {
+				pattern.grammar = this;
+				this.patterns.add(pattern);
+			}
 		}
 	}
 
@@ -76,37 +82,42 @@ public class Grammar {
 		Dict plistRepo = plist.getDictionary("repository");
 		if (plistRepo == null)
 			return;
+		Dict plistRepoEntry;
 		for (String key : plistRepo.keys()) {
+//			System.out.printf("loading repository entry: %s\n", key);
 			List<Pattern> repoArray = new ArrayList<Pattern>();
-			Dict plistRepoEntry = plistRepo.getDictionary(key);
+			plistRepoEntry = plistRepo.getDictionary(key);
 			if (plistRepoEntry.containsElement("begin") || plistRepoEntry.containsElement("match")) {
-				createAndAddPattern(repoArray, plistRepoEntry);
+//				System.out.printf("    contains begin or match\n");
+				Pattern pattern = Pattern.createPattern(this.allPatterns, plistRepoEntry);
+				if (pattern != null) {
+					pattern.grammar = this;
+					repoArray.add(pattern);
+				}
 			}
 			else if (plistRepoEntry.containsElement("patterns")) {
+//				System.out.printf("    contains patterns\n");
 				for (PlistNode<?> plistPattern : plistRepoEntry.getArray("patterns")) {
-					createAndAddPattern(repoArray, (Dict) plistPattern);
+					Pattern pattern = Pattern.createPattern(this.allPatterns, (Dict) plistPattern);
+					if (pattern != null) {
+						pattern.grammar = this;
+						repoArray.add(pattern);
+					}
 				}
 			}
 			repository.put(key, repoArray);
 		}
 	}
 
-	public Pattern createAndAddPattern(List<Pattern> repoArray, Dict plistRepoEntry) {
-		Pattern pattern = Pattern.createPattern(this, plistRepoEntry);
-		allPatterns.add(pattern);
-		if (pattern != null) {
-			repoArray.add(pattern);
-		}
-		return pattern;
-	}
-
 	private void replaceIncludePatterns() {
+		Pattern.replaceIncludePatterns(patterns, this);
 		for (Pattern p : allPatterns) {
+//			System.out.printf("%s replaceIncludePattern for %s\n", this.name, p.name);
 			if (p instanceof DoublePattern) {
 				Pattern.replaceIncludePatterns(((DoublePattern) p).patterns, this);
 			}
+//			System.out.printf("%s replaceIncludePattern for %s [done]\n", this.name, p.name);
 		}
-		Pattern.replaceIncludePatterns(patterns, this);
 	}
 
 	public static Grammar findByScopeName(String scope) {

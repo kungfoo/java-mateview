@@ -18,7 +18,7 @@ public class BundleTest {
 		for (String bundleName : bundleNames) {
 			containsBundleNamed(bundleName);
 		}
-		assertEquals(10, Bundle.getBundles().size());
+		assertEquals(11, Bundle.getBundles().size());
 	}
 
 	private void containsBundleNamed(String bundleName) {

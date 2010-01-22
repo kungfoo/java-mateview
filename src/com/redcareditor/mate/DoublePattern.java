@@ -21,9 +21,9 @@ public class DoublePattern extends Pattern {
 	public Map<Integer, String> bothCaptures;
 	public List<Pattern> patterns;
 
+	public DoublePattern() {}
 	
-	public DoublePattern(Grammar grammar, Dict dict) {
-		super(grammar);
+	public DoublePattern(List<Pattern> grammarPatterns, Dict dict) {
 		name = dict.getString("name");
 //		System.out.printf("new DoublePattern name: %s\n", name);
 		try {
@@ -33,19 +33,22 @@ public class DoublePattern extends Pattern {
 			begin = Rx.createRx(dict.getString("begin"));
 
 			loadCaptures(dict);
-			loadPatterns(dict);
+			loadPatterns(grammarPatterns, dict);
+			grammarPatterns.add(this);
 		}
 		catch(ValueException e) {
 			System.out.printf("joni.exception.ValueException: %s in %s\n", e.getMessage(), dict.getString("begin"));
 		}
 	}
 
-	private void loadPatterns(Dict dict) {
+	private void loadPatterns(List<Pattern> grammarPatterns, Dict dict) {
 		patterns = new ArrayList<Pattern>();
 		if (dict.containsElement("patterns")) {
 			for (PlistNode<?> plistPattern : dict.getArray("patterns")) {
-				// FIXME: grammar is null here. The order of things is b0rked.
-				grammar.createAndAddPattern(patterns, (Dict) plistPattern);
+				Pattern subPattern = Pattern.createPattern(grammarPatterns, (Dict) plistPattern);
+				if (subPattern != null) {
+					patterns.add(subPattern);
+				}
 			}
 		}
 	}
@@ -60,10 +63,5 @@ public class DoublePattern extends Pattern {
 		if (dict.containsElement("endCaptures")) {
 			endCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("endCaptures"));
 		}
-	}
-	
-	@Override
-	public void replaceRepositoryIncludes() {
-		// Nothing to do for this type of pattern.
 	}
 }

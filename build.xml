@@ -87,7 +87,7 @@
 	</target>
 
 	<target name="compile" depends="prepare">
-		<javac srcdir="${src.dir}" destdir="${build.prod.dir}" debug="true">
+		<javac target="1.5" srcdir="${src.dir}" destdir="${build.prod.dir}" debug="true">
 			<classpath refid="project.classpath" />
 		</javac>
 	</target>

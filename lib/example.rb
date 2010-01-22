@@ -76,7 +76,33 @@ class MateExample < Jface::ApplicationWindow
     set_scopes_action.text = "Print Scope Tree"
     file_menu.add set_scopes_action
     
+    set_block_selection = SetBlockSelection.new
+    set_block_selection.window = self
+    set_block_selection.text = "Set Block Selection"
+    file_menu.add set_block_selection
+
+    set_block_selection = SetNotBlockSelection.new
+    set_block_selection.window = self
+    set_block_selection.text = "Set Not Block Selection"
+    file_menu.add set_block_selection
+    
     return main_menu
+  end
+  
+  class SetBlockSelection < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.get_text_widget.set_block_selection(true)
+    end
+  end
+  
+  class SetNotBlockSelection < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.get_text_widget.set_block_selection(false)
+    end
   end
   
   class SetMacClassic < Jface::Action

@@ -1,5 +1,8 @@
 package com.redcareditor.mate.document.swt;
 
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.BadLocationException;
+
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.MateTextRange;
@@ -48,9 +51,15 @@ public class SwtMateTextRange implements MateTextRange {
 		if (end != null) {
 			return end;
 		} else {// Return end of Document if not set
-			int lastLine = document.getLineCount() - 1;
-			int lastLineOffset = document.styledText.getCharCount() - document.styledText.getOffsetAtLine(lastLine);
-			return document.getTextLocation(lastLine, lastLineOffset);
+			try {
+				int lastLine = document.document.getNumberOfLines() - 1;
+				int lastLineOffset = document.document.getLength() - document.document.getLineOffset(lastLine);
+				return document.getTextLocation(lastLine, lastLineOffset);
+			} catch (BadLocationException e) {
+				System.out.printf("*** Warning BadLocationException");
+				e.printStackTrace();
+				return null;
+			}
 		}
 	}
 

@@ -40,11 +40,6 @@ public class SwtColourer implements Colourer {
 	private int highlightedLine = 0;
 	private StyledText control;
 
-	/* cached swt colors */
-	private Color globalLineBackground;
-	private Color globalBackground;
-	private Color globalForeground;
-
 	public SwtColourer(MateText mt) {
 		mateText = mt;
 
@@ -67,9 +62,15 @@ public class SwtColourer implements Colourer {
 		if (caretLineHasChanged(line)) {
 			int maxLineIx = control.getLineCount() - 1;
 			if (line <= maxLineIx)
-				control.setLineBackground(line, 1, globalLineBackground);
-			if (highlightedLine <= maxLineIx)
-			control.setLineBackground(highlightedLine, 1, globalBackground);
+				control.setLineBackground(line, 1, ColourUtil.getColour(globalLineBackground()));
+			try {
+				if (highlightedLine <= maxLineIx)
+					control.setLineBackground(highlightedLine, 1, ColourUtil.getColour(globalBackground()));
+			}
+			catch (java.lang.ArrayIndexOutOfBoundsException e) {
+			    // What the hell is this? It seems like maxLineIx is already out of date....
+				System.out.printf("caught java.lang.ArrayIndexOutOfBoundsException in updateHighlightedLine\n");
+			}
 			highlightedLine = line;
 		}
 	}
@@ -78,18 +79,17 @@ public class SwtColourer implements Colourer {
 		return line != highlightedLine;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.redcareditor.mate.Colourer#setTheme(com.redcareditor.theme.Theme)
-	 */
 	public void setTheme(Theme theme) {
 		this.theme = theme;
 		theme.initForUse();
-		initCachedColours();
-		setMateTextColours();
-		setCaretColour();
+		setGlobalColours();
+	}
+	
+	public void setGlobalColours() {
+		if (theme != null) {
+			setMateTextColours();
+			setCaretColour();
+		}
 	}
 
 	private void setCaretColour() {
@@ -100,72 +100,84 @@ public class SwtColourer implements Colourer {
 		caret = new Caret(control, SWT.NONE);
 		Display display = Display.getCurrent();
 		// System.out.printf("caret colour: %s %d %d\n", globalColour("caret"), width, height);
-		String caretColourString = globalColour("caret");
+		String caretColourString = bareGlobalColour("caret");
 		Color caretColour = ColourUtil.getColour(caretColourString);
 		Color white = display.getSystemColor(SWT.COLOR_WHITE);
 		Color black = display.getSystemColor(SWT.COLOR_BLACK);
-		String backgroundColourString = globalColour("background");
+		String backgroundColourString = globalBackground();
 		int red = Integer.parseInt(backgroundColourString.substring(1, 3), 16) ^ 
 					Integer.parseInt(caretColourString.substring(1, 3), 16);
 		int green = Integer.parseInt(backgroundColourString.substring(3, 5), 16) ^ 
 						Integer.parseInt(caretColourString.substring(3, 5), 16);
 		int blue = Integer.parseInt(backgroundColourString.substring(5, 7), 16) ^
 						Integer.parseInt(caretColourString.substring(5, 7), 16);
-		// System.out.printf("r, g, b: %d, %d, %d\n", red, green, blue);
 		PaletteData palette = new PaletteData (
 			new RGB [] {
 				new RGB (0, 0, 0),
 				new RGB (red, green, blue),
 				new RGB (0xFF, 0xFF, 0xFF),
 			});
-		// System.out.printf("depth: %d\n", Display.getCurrent().getDepth());
 		ImageData maskData = new ImageData (1, height, 2, palette);
 		for (int y=0; y < height; y++)
 			maskData.setPixel(0, y, 1);
 		Image image = new Image (display, maskData);
-		// Image image = new Image(display, 1, height);
-		// GC gc = new GC(image);
-		// gc.setAntialias(SWT.OFF);
-		// gc.setBackground(white);
-		// gc.fillRectangle(0, 0, 1, height);
-		// gc.setForeground(caretColour);
-		// gc.drawLine(0, 0, 0, height);
-		// System.out.printf("alpha: %d\n", gc.getAlpha());
-		// gc.dispose();
-		// caret.setLocation(10, 10);
 		caret.setImage(image);
 		control.setCaret(caret);
 	}
 
 	private void setMateTextColours() {
-		control.setBackground(globalBackground);
-		control.setForeground(globalForeground);
+		control.setBackground(ColourUtil.getColour(globalBackground()));
+		control.setForeground(ColourUtil.getColour(globalForeground()));
 		int currentLine = control.getLineAtOffset(control.getCaretOffset());
-		int startLine = JFaceTextUtil.getPartialTopIndex(control);
-		int endLine = JFaceTextUtil.getPartialBottomIndex(control);
-		for (int i = startLine; i <= endLine; i ++)
-			control.setLineBackground(i, 1, globalBackground);
-		control.setLineBackground(currentLine, 1, globalLineBackground);
+//		int startLine = JFaceTextUtil.getPartialTopIndex(control);
+	//	int endLine = JFaceTextUtil.getPartialBottomIndex(control);
+		for (int i = 0; i < control.getLineCount(); i ++)
+			control.setLineBackground(i, 1, ColourUtil.getColour(globalBackground()));
+		control.setLineBackground(currentLine, 1, ColourUtil.getColour(globalLineBackground()));
 		mateText.setGutterBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		mateText.setGutterForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
 	}
 
-	private void initCachedColours() {
-		globalBackground = ColourUtil.getColour(globalColour("background"));
-		globalForeground = ColourUtil.getColour(globalColour("foreground"));
-		globalLineBackground = ColourUtil.getColour(ColourUtil.mergeColour(globalColour("background"), globalColour("lineHighlight")));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.redcareditor.mate.Colourer#getTheme()
-	 */
 	public Theme getTheme() {
 		return theme;
 	}
 
-	private String globalColour(String name) {
+	private ThemeSetting globalThemeSetting() {
+		if (mateText.parser != null && mateText.parser.grammar != null && theme != null) {
+			return theme.findSetting(mateText.parser.grammar.scopeName, false, null);
+		}
+		else {
+			return new ThemeSetting();
+		}
+	}
+
+	private String globalBackground() {
+		ThemeSetting globalSetting = globalThemeSetting();
+		if (globalSetting.background == null) {
+			return bareGlobalColour("background");
+		}
+		else {
+			return globalSetting.background;
+		}
+	}
+	
+	private String globalForeground() {
+		ThemeSetting globalSetting = globalThemeSetting();
+		if (globalSetting.foreground == null) {
+			return bareGlobalColour("foreground");
+		}
+		else {
+			return globalSetting.foreground;
+		}
+	}
+	
+	private String globalLineBackground() {
+		return ColourUtil.mergeColour(globalBackground(), bareGlobalColour("lineHighlight"));
+	}
+
+	private String bareGlobalColour(String name) {
+		if (theme == null)
+			return "#FFFFFF";
 		String colour = theme.globalSettings.get(name);
 		if (isColorDefined(colour)) {
 			return colour;
@@ -230,71 +242,147 @@ public class SwtColourer implements Colourer {
 					&& (scope.pattern instanceof SinglePattern || ((DoublePattern) scope.pattern).contentName == null)) {
 				continue;
 			}
-			addStyleRangeForScope(styleRanges, scope, false);
+			addStyleRangeForScope(styleRanges, scope, false, event);
 			if (scope.pattern instanceof DoublePattern && ((DoublePattern) scope.pattern).contentName != null && scope.isCapture == false)
-				addStyleRangeForScope(styleRanges, scope, true);
+				addStyleRangeForScope(styleRanges, scope, true, event);
+			// printStyleRanges(styleRanges);
 		}
-		//
-		// Collections.sort(styleRanges, new StyleRangeComparator());
-		// System.out.printf("length: %d\n", styleRanges.size());
 		event.styles = (StyleRange[]) styleRanges.toArray(new StyleRange[0]);
 	}
 
-	private void addStyleRangeForScope(ArrayList<StyleRange> styleRanges, Scope scope, boolean inner) {
+	private void printStyleRanges(ArrayList<StyleRange> styleRanges) {
+		System.out.printf("[");
+		for (StyleRange r : styleRanges) {
+			System.out.printf("%s, ", r);
+		}
+		System.out.printf("]\n");
+	}
+
+	private void addStyleRangeForScope(ArrayList<StyleRange> styleRanges, Scope scope, boolean inner, LineStyleEvent event) {
 		StyleRange styleRange = new StyleRange();
-		// TODO: allow for multiple settings that set different
-		// parts of the style.
+
 		ThemeSetting setting = null;
 		ThemeSetting excludeSetting = null;
 		if (scope.parent != null)
 			excludeSetting = scope.parent.themeSetting;
-		setting = theme.settingsForScope(scope, inner, null);// exclude_setting);
+		setting = theme.settingsForScope(scope, inner, null);
+		
+		int startLineOffset = event.lineOffset;
+		int endLineOffset   = startLineOffset + event.lineText.length();
 
 		if (inner) {
-			styleRange.start = scope.getInnerStart().getOffset();
-			styleRange.length = scope.getInnerEnd().getOffset() - styleRange.start;
+			styleRange.start = Math.max(scope.getInnerStart().getOffset(), startLineOffset);
+			styleRange.length = Math.min(scope.getInnerEnd().getOffset() - styleRange.start,
+										 event.lineText.length() - styleRange.start + startLineOffset);
 		} else {
-			styleRange.start = scope.getStart().getOffset();
-			styleRange.length = scope.getEnd().getOffset() - styleRange.start;
+			styleRange.start = Math.max(scope.getStart().getOffset(), startLineOffset);
+			styleRange.length = Math.min(scope.getEnd().getOffset() - styleRange.start,
+										 event.lineText.length() - styleRange.start + startLineOffset);
 		}
 		if (setting != null) {
 			setStyleRangeProperties(scope, setting, styleRange);
-		styleRanges.add(styleRange);
-			// System.out.printf("[Color] style range (%d, %d) %s\n", styleRange.start, styleRange.length, styleRange.toString());
+			addStyleRangeWithoutOverlaps(styleRanges, styleRange);
+			//System.out.printf("[Color] style range (%d, %d) %s\n", styleRange.start, styleRange.length, styleRange.toString());
 		}
 	}
 
+	private void addStyleRangeWithoutOverlaps(ArrayList<StyleRange> styleRanges, StyleRange styleRange) {
+		if (styleRanges.size() == 0) {
+			styleRanges.add(styleRange);
+			return;
+		}
+		
+		// there is always an overlapping StyleRange because the document root scope is always in here
+		int indexOfParent = indexOfOverlappingStyleRange(styleRanges, styleRange);
+		if (indexOfParent == -1) {
+			styleRanges.add(styleRange);
+			return;
+		}
+		
+		StyleRange parentStyleRange = styleRanges.get(indexOfParent);
+		
+		int parentStart = parentStyleRange.start;
+		int parentEnd   = parentStyleRange.start + parentStyleRange.length;
+		int childStart  = styleRange.start;
+		int childEnd    = styleRange.start + styleRange.length;
+		
+		// System.out.printf("parent %d-%d, child: %d-%d\n", parentStart, parentEnd, childStart, childEnd);
+		
+		// *-----*
+		// *-----*
+		if (parentStart == childStart && parentEnd == childEnd) {
+			styleRangeCopyValues(parentStyleRange, styleRange);
+			return;
+		}
+		
+		// *------*
+		// *--*
+		if (childStart == parentStart) {
+			parentStyleRange.start = childEnd;
+			parentStyleRange.length -= styleRange.length;
+			styleRanges.add(indexOfParent, styleRange);
+			return;
+		}
+		
+		// *------*
+		//    *---*
+		if (childEnd == parentEnd) {
+			parentStyleRange.length = childStart - parentStart;
+			styleRanges.add(indexOfParent + 1, styleRange);
+			return;
+		}
+		
+		// *----------*
+		//    *---*
+		parentStyleRange.length = childStart - parentStart;
+		styleRanges.add(indexOfParent + 1, styleRange);
+		StyleRange newStyleRange = new StyleRange();
+		newStyleRange.start = childEnd;
+		newStyleRange.length = parentEnd - childEnd;
+		styleRangeCopyValues(newStyleRange, parentStyleRange);
+		styleRanges.add(indexOfParent + 2, newStyleRange);
+	}
+	
+	private void styleRangeCopyValues(StyleRange target, StyleRange source) {
+		target.fontStyle = source.fontStyle;
+		target.foreground = source.foreground;
+		target.background = source.background;
+		target.underline = source.underline;
+	}
+	
+	private int indexOfOverlappingStyleRange(ArrayList<StyleRange> styleRanges, StyleRange styleRange) {
+		int i = 0;
+		for (StyleRange possibleParent : styleRanges) {
+			if (possibleParent.start < styleRange.start + styleRange.length && 
+				possibleParent.start + possibleParent.length > styleRange.start)
+				return i;
+			i++;
+		}
+		return -1;
+	}
+
 	private void setStyleRangeProperties(Scope scope, ThemeSetting setting, StyleRange styleRange) {
-		String fontStyle = setting.settings.get("fontStyle");
-		if (fontStyle == "italic") {
-			styleRange.fontStyle = SWT.ITALIC;
-		} else
-			styleRange.fontStyle = SWT.NORMAL;
+		String fontStyle = setting.fontStyle;
+		if (fontStyle != null) {
+			// TODO: make this support "bold italic" etc.
+			if (fontStyle.equals("italic")) {
+				styleRange.fontStyle = SWT.ITALIC;
+			}
+			if (fontStyle.equals("bold")) {
+				styleRange.fontStyle = SWT.BOLD;
+			}
+			if (fontStyle.equals("underline")) {
+				styleRange.underline = true;
+			}
+		}
 
-		if (fontStyle == "underline")
-			styleRange.fontStyle = SWT.UNDERLINE_SINGLE;
-		else
-			styleRange.fontStyle = SWT.NORMAL;
-
-		String background = setting.settings.get("background");
+		String background = setting.background;
 		// System.out.printf("[Color] scope background: %s\n", background);
 		String mergedBgColour;
-		String parentBg = theme.globalSettings.get("background");
-		// System.out.printf("		   global background: %s\n", parentBg);
-		// TODO: wasn't this a better way of creating the background colours?
-		// var parent_bg = scope.nearest_background_colour();
-		// if (parent_bg == null) {
-		// }
-		// else {
-		// stdout.printf("		  parent background: %s\n", parent_bg);
-		// }
+		String parentBg = globalBackground();
+		//System.out.printf("		   global background: %s\n", parentBg);
 		if (background != null && background != "") {
-			// if (parent_bg != null) {
-			// merged_bg_colour = parent_bg;
-			// }
-			// else {
 			mergedBgColour = ColourUtil.mergeColour(parentBg, background);
-			// }
 			if (mergedBgColour != null) {
 				scope.bgColour = mergedBgColour;
 				styleRange.background = ColourUtil.getColour(mergedBgColour);
@@ -304,11 +392,11 @@ public class SwtColourer implements Colourer {
 			mergedBgColour = parentBg;
 		}
 		// stdout.printf("		  merged_bg_colour:	 %s\n", merged_bg_colour);
-		String foreground = setting.settings.get("foreground");
+		String foreground = setting.foreground;
 		// System.out.printf("[Color] scope foreground: %s\n", foreground);
 		String parentFg = scope.nearestForegroundColour();
 		if (parentFg == null) {
-			parentFg = theme.globalSettings.get("foreground");
+			parentFg = globalForeground();
 			// stdout.printf("		  global foreground:		%s\n",
 			// parent_fg);
 		}
