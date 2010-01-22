@@ -20,7 +20,7 @@ public class Stack<T> {
 		stack.push(t);
 	}
 
-	public T pop(T t) {
+	public T pop() {
 		if (stack.isEmpty()) {
 			return null;
 		} else {

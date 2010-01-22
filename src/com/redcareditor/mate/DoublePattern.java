@@ -8,7 +8,7 @@ import org.joni.exception.ValueException;
 
 import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
-import com.redcareditor.plist.PlistNode;
+import com.redcareditor.plist.parser.PlistNode;
 
 public class DoublePattern extends Pattern {
 	public String contentName;

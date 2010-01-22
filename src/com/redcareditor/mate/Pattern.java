@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.redcareditor.plist.Dict;
-import com.redcareditor.plist.PlistNode;
+import com.redcareditor.plist.parser.PlistNode;
 
 public class Pattern {
 	public Grammar grammar;

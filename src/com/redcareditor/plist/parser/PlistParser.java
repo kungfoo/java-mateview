@@ -14,7 +14,6 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.redcareditor.plist.Dict;
-import com.redcareditor.plist.PlistNode;
 
 /**
  * encapsulates streaming parsing of Apple Plist Property files into the
@@ -34,12 +33,41 @@ public class PlistParser {
 
 		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-
+			if (qName.equals("array")) {
+				stack.push(new ArrayNode());
+			} else if (qName.equals("dict") && stack.peek() instanceof ArrayNode) {
+				/* currently parsing an array with subdicts */
+				Dict dict = new Dict();
+				ArrayNode node = (ArrayNode) stack.peek();
+				node.add(dict);
+				stack.push(dict);
+			}
 		}
 
 		@Override
-		public void endElement(String uri, String localName, String qName) throws SAXException {
+		public void endElement(String uri, String localName, String name) throws SAXException {
+			if (name.equals("key")) {
+				String key = buffer.toString();
+				PlistNode<?> node = new PlistNode<Object>();
+				((Dict) stack.peek()).addNode(key, node);
+				stack.push(node);
+			} else if (name.equals("dict")) {
+				/* end of the dict we're currently adding key-value pairs */
+				stack.pop();
+			} else {
+				// TODO: handle all types...
+				if (name.equals("string")) {
+					PlistNode<String> node = (PlistNode<String>) stack.peek();
+					node.value = buffer.toString();
+				} else if (name.equals("array")) {
+					ArrayNode node = (ArrayNode) stack.pop();
+				}
 
+				if (!(stack.peek() instanceof ArrayNode)) {
+					stack.pop();
+				}
+			}
+			buffer.setLength(0);
 		}
 
 		@Override

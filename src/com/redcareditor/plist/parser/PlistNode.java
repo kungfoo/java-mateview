@@ -1,4 +1,4 @@
-package com.redcareditor.plist;
+package com.redcareditor.plist.parser;
 
 
 /**
@@ -10,6 +10,7 @@ package com.redcareditor.plist;
  * @param <T>
  */
 public class PlistNode<T> {
+	private PlistNode<?> parent;
 	public T value;
 
 	public PlistNode(T value) {
@@ -17,6 +18,13 @@ public class PlistNode<T> {
 	}
 
 	protected PlistNode() {
+	}
 
+	public void setParent(PlistNode<?> node) {
+		parent = node;
+	}
+
+	public PlistNode<?> getParent() {
+		return parent;
 	}
 }

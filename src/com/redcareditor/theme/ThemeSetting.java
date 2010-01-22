@@ -7,8 +7,8 @@ import java.util.Map;
 import com.redcareditor.mate.ScopeMatcher;
 import com.redcareditor.onig.Match;
 import com.redcareditor.plist.Dict;
-import com.redcareditor.plist.PlistNode;
 import com.redcareditor.plist.PlistPropertyLoader;
+import com.redcareditor.plist.parser.PlistNode;
 
 public class ThemeSetting {
 	public String name;

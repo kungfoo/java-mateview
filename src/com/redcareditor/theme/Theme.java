@@ -11,8 +11,8 @@ import com.redcareditor.mate.Scope;
 import com.redcareditor.mate.ScopeMatcher;
 import com.redcareditor.onig.Match;
 import com.redcareditor.plist.Dict;
-import com.redcareditor.plist.PlistNode;
 import com.redcareditor.plist.PlistPropertyLoader;
+import com.redcareditor.plist.parser.PlistNode;
 
 public class Theme {
 	public String author;

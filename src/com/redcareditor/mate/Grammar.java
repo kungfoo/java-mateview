@@ -7,8 +7,8 @@ import java.util.Map;
 
 import com.redcareditor.onig.Rx;
 import com.redcareditor.plist.Dict;
-import com.redcareditor.plist.PlistNode;
 import com.redcareditor.plist.PlistPropertyLoader;
+import com.redcareditor.plist.parser.PlistNode;
 
 public class Grammar {
 	public String name;

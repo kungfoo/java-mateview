@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.redcareditor.onig.Rx;
+import com.redcareditor.plist.parser.PlistNode;
 import com.redcareditor.plist.parser.PlistParser;
 import com.redcareditor.plist.parser.PlistParsingException;
 
@@ -90,5 +91,10 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 		} else {
 			return null;
 		}
+	}
+
+	public void addNode(String key, PlistNode<?> node) {
+		value.put(key, node);
+		node.setParent(this);
 	}
 }
