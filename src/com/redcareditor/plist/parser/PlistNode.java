@@ -27,4 +27,9 @@ public class PlistNode<T> {
 	public PlistNode<?> getParent() {
 		return parent;
 	}
+
+	@Override
+	public String toString() {
+		return value == null ? "null" : value.toString();
+	}
 }

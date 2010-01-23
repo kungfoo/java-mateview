@@ -10,22 +10,24 @@ import org.junit.Test;
 public class DictTest {
 	private Dict dict;
 
-	@Before
-	public void setup() {
-		dict = Dict.parseFile("input/Bundles/Ruby.tmbundle/Syntaxes/Ruby.plist");
+	@Test
+	public void testParseSubDicts() {
+		dict = Dict.parseFile("input/ruby-subdict.plist");
 		assertNotNull(dict);
+		// TODO: check the contents!
 	}
 
 	@Test
 	public void testSimpleStringItem() {
+		dict = Dict.parseFile("input/Bundles/Ruby.tmbundle/Syntaxes/Ruby.plist");
 		String firstLine = dict.getString("firstLineMatch");
 		assertEquals("^#!/.*\\bruby\\b", firstLine);
 	}
 
 	@Test
 	public void testFileTypes() {
-		String[] check = { "rb", "rbx", "rjs", "Rakefile", "rake", "cgi",
-				"fcgi", "gemspec", "irbrc", "capfile" };
+		dict = Dict.parseFile("input/Bundles/Ruby.tmbundle/Syntaxes/Ruby.plist");
+		String[] check = { "rb", "rbx", "rjs", "Rakefile", "rake", "cgi", "fcgi", "gemspec", "irbrc", "capfile" };
 		String[] types = dict.getStrings("fileTypes");
 
 		assertArrayEquals(check, types);

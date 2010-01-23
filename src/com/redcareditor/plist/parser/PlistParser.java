@@ -46,10 +46,11 @@ public class PlistParser {
 
 		@Override
 		public void endElement(String uri, String localName, String name) throws SAXException {
+			PlistNode<?> peek = stack.peek();
 			if (name.equals("key")) {
 				String key = buffer.toString();
 				PlistNode<?> node = new PlistNode<Object>();
-				((Dict) stack.peek()).addNode(key, node);
+				((Dict) peek).addNode(key, node);
 				stack.push(node);
 			} else if (name.equals("dict")) {
 				/* end of the dict we're currently adding key-value pairs */
@@ -57,17 +58,36 @@ public class PlistParser {
 			} else {
 				// TODO: handle all types...
 				if (name.equals("string")) {
-					PlistNode<String> node = (PlistNode<String>) stack.peek();
-					node.value = buffer.toString();
+					updateValue(peek, buffer.toString());
+					
+				} else if (name.equals("integer")) {
+					updateValue(peek,Integer.parseInt(buffer.toString()));
+					
+				} else if (name.equals("true")) {
+					((PlistNode<Boolean>) peek).value = true;
+					
+				} else if(name.equals("false")){
+					((PlistNode<Boolean>) peek).value = false;
+					
 				} else if (name.equals("array")) {
 					ArrayNode node = (ArrayNode) stack.pop();
+					peek = stack.peek();
+					updateValue(peek, node);
 				}
 
-				if (!(stack.peek() instanceof ArrayNode)) {
+				if (!(peek instanceof ArrayNode)) {
 					stack.pop();
 				}
 			}
 			buffer.setLength(0);
+		}
+
+		private void updateValue(Object node, Object value) {
+			if (node instanceof ArrayNode) {
+				((ArrayNode) node).add(value);
+			} else {
+				((PlistNode<Object>) node).value = value;
+			}
 		}
 
 		@Override
