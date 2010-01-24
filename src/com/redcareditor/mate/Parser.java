@@ -97,8 +97,8 @@ public class Parser {
 	}
 	
 	public int getParsedUpto() {
-		// System.out.printf("parsedUpto %d (/%d)\n", parsedUpto.offset, getCharCount());
-		return getLineAtOffset(parsedUpto.offset);
+		// System.out.printf("parsedUpto %d,%d (/%d)\n", parsedUpto.getOffset(), parsedUpto.getLength(), getCharCount());
+		return getLineAtOffset(parsedUpto.getOffset());
 	}
 	
 	public void close() {
@@ -128,7 +128,7 @@ public class Parser {
 		try {
 			return document.getLineOfOffset(offset);
 		} catch (BadLocationException e) {
-			System.out.printf("*** Warning BadLocationException");
+			System.out.printf("*** Warning BadLocationException offset:%d\n", offset);
 			e.printStackTrace();
 			return -1;
 		}
