@@ -314,8 +314,10 @@ public class Parser {
 	
 	private Scope scopeBeforeStartOfLine(int lineIx) {
 		Scope startScope = this.root.scopeAt(lineIx, 0);
-		if (startScope.getStart().getLine() == lineIx) {
+		// System.out.printf("scopeBeforeStartOfLine: %s\n", startScope.pattern.name);
+		if (startScope.getStart().getLine() == lineIx) { // || startScope.pattern instanceof SinglePattern) {
 			startScope = startScope.containingDoubleScope(lineIx);
+			// System.out.printf("scopeBeforeStartOfLine: up %s\n", startScope.pattern.name);
 		}
 
 		return startScope;
@@ -334,7 +336,7 @@ public class Parser {
 		Parser.linesParsed++;
 		String line = getLine(lineIx) + "\n";
 		int length = line.length();
-		//logger.info(String.format("parseLine(%d)", lineIx));
+		// logger.info(String.format("parseLine(%d)", lineIx));
 		if (lineIx > getParsedUpto())
 			this.setParsedUpto(lineIx);
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
@@ -581,38 +583,38 @@ public class Parser {
 
 	public void setStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).start;
-		if (atEndOfNonFinalLine(lineIx, length, to)) 
-			scope.setStartPos(lineIx+1, 0, false);
-		else
+		// if (atEndOfNonFinalLine(lineIx, length, to)) 
+		// 	scope.setStartPos(lineIx+1, 0, false);
+		// else
 			scope.setStartPos(lineIx, Math.min(to, length), false);
 	}
 
 	public void setInnerStartPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).start;
-		if (atEndOfNonFinalLine(lineIx, length, to)) 
-			scope.setInnerStartPos(lineIx+1, 0, false);
-		else
+		// if (atEndOfNonFinalLine(lineIx, length, to)) 
+		// 	scope.setInnerStartPos(lineIx+1, 0, false);
+		// else
 			scope.setInnerStartPos(lineIx, Math.min(to, length), false);
 	}
 
 	public void setInnerEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int from = m.match.getCapture(cap).start;
-		if (atEndOfNonFinalLine(lineIx, length, from)) {
-			scope.setInnerEndPos(lineIx, length, true);
-		}
-		else {
+		// if (atEndOfNonFinalLine(lineIx, length, from)) {
+		// 	scope.setInnerEndPos(lineIx, length, true);
+		// }
+		// else {
 			scope.setInnerEndPos(lineIx, Math.min(from, length-1), true);
-		}
+		// }
 	}
 	
 	public void setEndPosSafely(Scope scope, Marker m, int lineIx, int length, int cap) {
 		int to = m.match.getCapture(cap).end;
-		if (atEndOfNonFinalLine(lineIx, length, to)) {
-			scope.setEndPos(lineIx, length, true);
-		}
-		else {
+		// if (atEndOfNonFinalLine(lineIx, length, to)) {
+		// 	scope.setEndPos(lineIx, length, true);
+		// }
+		// else {
 			scope.setEndPos(lineIx, Math.min(to, length-1), true);
-		}
+		// }
 	}
 	
 	// Opens scopes for captures AND creates closing regexp from
