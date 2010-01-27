@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+<key>name</key>
+<string>my sample plist!</string>
+<key>version</key>
+<integer>1001</integer>
+<key>enabled</key>
+<true />
 <key>patterns</key>
 	<array>
 		<dict>
@@ -92,4 +98,6 @@
 			<key>name</key>
 			<string>meta.module.ruby</string>
 		</dict>
+	</array>
 </dict>
+</plist>

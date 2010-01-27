@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.redcareditor.onig.Rx;
+import com.redcareditor.plist.parser.ArrayNode;
 import com.redcareditor.plist.parser.PlistNode;
 import com.redcareditor.plist.parser.PlistParser;
 import com.redcareditor.plist.parser.PlistParsingException;
@@ -49,11 +50,10 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 
 	@SuppressWarnings("unchecked")
 	public String[] getStrings(String key) {
-		List<PlistNode<String>> strings = (List<PlistNode<String>>) value.get(key).value;
-		String[] result = new String[strings.size()];
-		int i = 0;
-		for (PlistNode<String> str : strings) {
-			result[i++] = str.value;
+		ArrayNode strings =  (ArrayNode) value.get(key).value;
+		String[] result = new String[strings.value.size()];
+		for(int i = 0; i < strings.value.size(); i++){
+			result[i] = (String) strings.value.get(i);
 		}
 		return result;
 	}

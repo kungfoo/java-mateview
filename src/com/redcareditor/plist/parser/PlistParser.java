@@ -39,43 +39,42 @@ public class PlistParser {
 				/* currently parsing an array with subdicts */
 				Dict dict = new Dict();
 				ArrayNode node = (ArrayNode) stack.peek();
-				node.add(dict);
+				//node.add(dict);
 				stack.push(dict);
+			} else if (qName.equals("dict")) {
+				stack.push(new Dict());
 			}
 		}
 
 		@Override
 		public void endElement(String uri, String localName, String name) throws SAXException {
-			PlistNode<?> peek = stack.peek();
 			if (name.equals("key")) {
 				String key = buffer.toString();
 				PlistNode<?> node = new PlistNode<Object>();
-				((Dict) peek).addNode(key, node);
+				((Dict) stack.peek()).addNode(key, node);
 				stack.push(node);
-			} else if (name.equals("dict")) {
-				/* end of the dict we're currently adding key-value pairs */
-				stack.pop();
 			} else {
-				// TODO: handle all types...
-				if (name.equals("string")) {
-					updateValue(peek, buffer.toString());
-					
+				if (name.equals("dict")) {
+					/* end of the dict we're currently adding key-value pairs */
+					Dict dict = (Dict) stack.pop();
+					updateValue(stack.peek(), dict);
+				} else if (name.equals("string")) {
+					updateValue(stack.peek(), buffer.toString());
 				} else if (name.equals("integer")) {
-					updateValue(peek,Integer.parseInt(buffer.toString()));
-					
+					updateValue(stack.peek(), Integer.parseInt(buffer.toString()));
+
 				} else if (name.equals("true")) {
-					((PlistNode<Boolean>) peek).value = true;
-					
-				} else if(name.equals("false")){
-					((PlistNode<Boolean>) peek).value = false;
-					
+					((PlistNode<Boolean>) stack.peek()).value = true;
+
+				} else if (name.equals("false")) {
+					((PlistNode<Boolean>) stack.peek()).value = false;
+
 				} else if (name.equals("array")) {
 					ArrayNode node = (ArrayNode) stack.pop();
-					peek = stack.peek();
-					updateValue(peek, node);
+					updateValue(stack.peek(), node);
 				}
 
-				if (!(peek instanceof ArrayNode)) {
+				if (!(stack.peek() instanceof ArrayNode)) {
 					stack.pop();
 				}
 			}
@@ -108,7 +107,7 @@ public class PlistParser {
 			reader.setEntityResolver(resolver);
 			reader.setContentHandler(handler);
 			reader.parse(new InputSource(stream));
-			return root;
+			return (Dict) root.value;
 
 		} catch (Exception e) {
 			throw new PlistParsingException("There has been a plist parser error", e);

@@ -15,6 +15,7 @@ public class DictTest {
 		dict = Dict.parseFile("input/ruby-subdict.plist");
 		assertNotNull(dict);
 		// TODO: check the contents!
+		
 	}
 
 	@Test
