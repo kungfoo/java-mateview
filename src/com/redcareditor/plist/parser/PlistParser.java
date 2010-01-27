@@ -35,17 +35,12 @@ public class PlistParser {
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 			if (qName.equals("array")) {
 				stack.push(new ArrayNode());
-			} else if (qName.equals("dict") && stack.peek() instanceof ArrayNode) {
-				/* currently parsing an array with subdicts */
-				Dict dict = new Dict();
-				ArrayNode node = (ArrayNode) stack.peek();
-				//node.add(dict);
-				stack.push(dict);
 			} else if (qName.equals("dict")) {
 				stack.push(new Dict());
 			}
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void endElement(String uri, String localName, String name) throws SAXException {
 			if (name.equals("key")) {
@@ -81,6 +76,7 @@ public class PlistParser {
 			buffer.setLength(0);
 		}
 
+		@SuppressWarnings("unchecked")
 		private void updateValue(Object node, Object value) {
 			if (node instanceof ArrayNode) {
 				((ArrayNode) node).add(value);

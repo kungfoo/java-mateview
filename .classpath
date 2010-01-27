@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="bench"/>
-	<classpathentry kind="lib" path="lib/jdom.jar" />
 	<classpathentry kind="lib" path="lib/jcodings.jar"/>
 	<classpathentry kind="lib" path="lib/joni.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.7.jar"/>

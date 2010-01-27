@@ -12,7 +12,6 @@ import ch.mollusca.benchmarking.Benchmark;
 
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Rx;
-import com.redcareditor.plist.Dict;
 import com.redcareditor.util.FileUtility;
 
 public class GrammarBenchmark {
