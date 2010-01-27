@@ -45,7 +45,7 @@ unless defined?(JavaMateView)
 
   module Plist
     import com.redcareditor.plist.Dict
-    import com.redcareditor.plist.PlistNode
+    import com.redcareditor.plist.parser.PlistNode
     import com.redcareditor.plist.PlistPropertyLoader
   end
 
