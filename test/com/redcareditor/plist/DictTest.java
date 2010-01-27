@@ -14,8 +14,11 @@ public class DictTest {
 	public void testParseSubDicts() {
 		dict = Dict.parseFile("input/ruby-subdict.plist");
 		assertNotNull(dict);
-		// TODO: check the contents!
 		
+		assertEquals("my sample plist!", dict.getString("name"));
+		Dict[] dicts = dict.getDictionaries("patterns");
+		assertEquals(2, dicts.length);
+		assertEquals(new Integer(1001), dict.getInt("version"));
 	}
 
 	@Test

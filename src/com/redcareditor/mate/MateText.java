@@ -2,10 +2,10 @@ package com.redcareditor.mate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
-import java.util.logging.Handler;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -23,11 +23,7 @@ import org.eclipse.swt.widgets.Display;
 import com.redcareditor.mate.colouring.Colourer;
 import com.redcareditor.mate.colouring.swt.SwtColourer;
 import com.redcareditor.mate.document.MateDocument;
-import com.redcareditor.mate.document.MateTextLocation;
-import com.redcareditor.mate.document.swt.SwtMateTextLocation;
 import com.redcareditor.mate.document.swt.SwtMateDocument;
-import com.redcareditor.mate.undo.MateTextUndoManager;
-import com.redcareditor.mate.undo.swt.SwtMateTextUndoManager;
 import com.redcareditor.onig.NullRx;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.theme.Theme;
@@ -55,7 +51,6 @@ public class MateText extends Composite {
 	private LineNumberRulerColumn lineNumbers;
 	private SwtMateDocument mateDocument;
 
-	private MateTextUndoManager undoManager;
 	private List<IGrammarListener> grammarListeners;
 
 	public MateText(Composite parent) {

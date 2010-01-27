@@ -32,13 +32,11 @@ public class Theme {
 	}
 
 	private void loadSettings(Dict dict) {
-		List<PlistNode<?>> dictSettings = dict.getArray("settings");
-		for (PlistNode<?> node : dictSettings) {
-			Dict nodeDict = (Dict) node;
-			if (!nodeDict.containsElement("scope")) {
-				loadGlobalSetting(nodeDict);
+		for (Dict node : dict.getDictionaries("settings")) {
+			if (!node.containsElement("scope")) {
+				loadGlobalSetting(node);
 			} else {
-				settings.add(new ThemeSetting(nodeDict));
+				settings.add(new ThemeSetting(node));
 			}
 		}
 	}

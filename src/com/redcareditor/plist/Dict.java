@@ -48,28 +48,29 @@ public class Dict extends PlistNode<Map<String, PlistNode<?>>> {
 		return tryGettingValue(this, key);
 	}
 
-	@SuppressWarnings("unchecked")
 	public String[] getStrings(String key) {
-		ArrayNode strings =  (ArrayNode) value.get(key).value;
-		String[] result = new String[strings.value.size()];
-		for(int i = 0; i < strings.value.size(); i++){
-			result[i] = (String) strings.value.get(i);
-		}
-		return result;
+		List<Object> list = ((ArrayNode)value.get(key).value).value;
+		return list.toArray(new String[0]);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Dict[] getDictionaries(String key) {
-		List<Dict> dictionaries = (List<Dict>) value.get(key).value;
-		return dictionaries.toArray(new Dict[0]);
+		List<Object> list = ((ArrayNode)value.get(key).value).value;
+		return list.toArray(new Dict[0]);
 	}
 
+	/* this can be replaced with getDictionaries.
+	 * no casts are necessary then...
 	public List<PlistNode<?>> getArray(String key) {
 		return tryGettingValue(this, key);
 	}
+	*/
 
 	public Dict getDictionary(String key) {
-		return (Dict) value.get(key);
+		if(value.containsKey(key)){
+			return (Dict) value.get(key).value;
+		} else {
+			return null;
+		}
 	}
 
 	public Rx getRegExp(String key) {

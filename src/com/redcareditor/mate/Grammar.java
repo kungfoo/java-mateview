@@ -97,8 +97,8 @@ public class Grammar {
 			}
 			else if (plistRepoEntry.containsElement("patterns")) {
 //				System.out.printf("    contains patterns\n");
-				for (PlistNode<?> plistPattern : plistRepoEntry.getArray("patterns")) {
-					Pattern pattern = Pattern.createPattern(this.allPatterns, (Dict) plistPattern);
+				for (Dict plistPattern : plistRepoEntry.getDictionaries("patterns")) {
+					Pattern pattern = Pattern.createPattern(this.allPatterns, plistPattern);
 					if (pattern != null) {
 						pattern.grammar = this;
 						repoArray.add(pattern);
