@@ -17,16 +17,21 @@ import org.eclipse.jface.text.Position;
  * @since 3.1
  */
 public class SwtScopePositionUpdater implements IPositionUpdater {
+	static final int LEFT_GRAVITY  = 0;
+	static final int RIGHT_GRAVITY = 1;
+	
 	/** The position category. */
 	private final String fCategory;
+	private final int fGravity;
 
 	/**
 	 * Creates a new updater for the given <code>category</code>.
 	 *
 	 * @param category the new category.
 	 */
-	public SwtScopePositionUpdater(String category) {
-		fCategory= category;
+	public SwtScopePositionUpdater(String category, int gravity) {
+		fCategory = category;
+		fGravity  = gravity;
 	}
 
 	/*
@@ -60,9 +65,11 @@ public class SwtScopePositionUpdater implements IPositionUpdater {
 				} else if (posOffset < eventOffset) {
 					// position comes way before change - leave alone
 				} else {
-					// position is within replaced text - move it to the end of the replacement
-					// (right gravity)
-					position.setOffset(eventNewEndOffset);
+					// position is within replaced text - 
+					if (fGravity == RIGHT_GRAVITY)
+						position.setOffset(eventNewEndOffset);
+					else
+						position.setOffset(eventOffset);
 				}
 				
 				// System.out.printf("  position %d offset:%d length:%d end:%d\n", i, position.getOffset(), position.getLength(), position.getOffset() + position.getLength());

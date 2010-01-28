@@ -91,7 +91,7 @@ public class Parser {
 	public void setParsedUpto(int line_ix) {
 		if (parsedUpto == null) {
 			parsedUpto = (SwtMateTextLocation) mateDocument.getTextLocation(0, 0);
-			mateDocument.addTextLocation("scopes", parsedUpto);
+			mateDocument.addTextLocation("lefts", parsedUpto);
 		}
 		parsedUpto.offset = getOffsetAtLine(line_ix);
 	}
@@ -305,7 +305,9 @@ public class Parser {
 	}
 	
 	public void lastVisibleLineChanged(int newLastVisibleLine) {
+		// System.out.printf("lastVisibleLineChanged(%d)\n", newLastVisibleLine);
 		this.lastVisibleLine = newLastVisibleLine;
+		// System.out.printf("lastVisibleLine: %d, lookAhead: %d, getParsedUpto: %d\n", lastVisibleLine, lookAhead, getParsedUpto());
 		if (lastVisibleLine + lookAhead >= getParsedUpto()) {
 			int endRange = Math.min(getLineCount() - 1, lastVisibleLine + lookAhead);
 			parseRange(getParsedUpto(), endRange);
@@ -336,9 +338,10 @@ public class Parser {
 		Parser.linesParsed++;
 		String line = getLine(lineIx) + "\n";
 		int length = line.length();
-		// logger.info(String.format("parseLine(%d)", lineIx));
+		//logger.info(String.format("parseLine(%d)", lineIx));
 		if (lineIx > getParsedUpto())
 			this.setParsedUpto(lineIx);
+		//System.out.printf("getParsedUpto: %d\n", getParsedUpto());
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
 		Scope endScope1  = scopeAfterEndOfLine(lineIx, length);
 		// logger.info(String.format("startScope is: %s", startScope.name));
