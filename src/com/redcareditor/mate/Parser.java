@@ -346,7 +346,7 @@ public class Parser {
 		Scope endScope1  = scopeAfterEndOfLine(lineIx, length);
 		// logger.info(String.format("startScope is: %s", startScope.name));
 		// logger.info(String.format("endScope1: %s", endScope1.name));
-		Scanner scanner = new Scanner(startScope, line);
+		Scanner scanner = new Scanner(startScope, line, lineIx);
 		ArrayList<Scope> allScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
 		ArrayList<Scope> closedScopes = new ArrayList<Scope>();
@@ -363,12 +363,12 @@ public class Parser {
 			//logger.info(String.format("  scope: %s %d-%d (line length: %d)", 
 			//					m.pattern.name, m.from, m.match.getCapture(0).end, length));
 			if (m.isCloseScope) {
-				// logger.info("     (closing)");
+				//logger.info("     (closing)");
 				closeScope(scanner, expectedScope, lineIx, line, length, m, 
 							allScopes, closedScopes, removedScopes);
 			}
 			else if (m.pattern instanceof DoublePattern) {
-				// logger.info("     (opening)");
+				//logger.info("     (opening)");
 				openScope(scanner, expectedScope, lineIx, line, length, m, 
 						   allScopes, closedScopes, removedScopes);
 			}

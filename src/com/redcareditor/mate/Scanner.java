@@ -15,6 +15,7 @@ public class Scanner implements Iterable<Marker> {
 	public int position;
 	public String line;
 	public int lineLength;
+	public int lineIx;
 	public ArrayList<Marker> cachedMarkers;
 	public Logger logger;
 
@@ -27,9 +28,10 @@ public class Scanner implements Iterable<Marker> {
 		return this.currentScope;
 	}
 	
-	public Scanner(Scope startScope, String line) {
+	public Scanner(Scope startScope, String line, int lineIx) {
 		this.currentScope = startScope;
 		this.line = line;
+		this.lineIx = lineIx;
 		this.lineLength = line.getBytes().length;
 		this.position = 0;
 		this.cachedMarkers = new ArrayList<Marker>();
@@ -97,10 +99,13 @@ public class Scanner implements Iterable<Marker> {
 //		assert(cachedMarkers.size() == 0);
 		Rx closingRegex = currentScope.closingRegex;
 		if (closingRegex != null) {
-		//	logger.info(String.format("closing regex: '%s'", closingRegex.pattern));
+			//logger.info(String.format("closing regex: '%s'", closingRegex.pattern));
 			Match match = closingRegex.search(this.line, this.position, this.lineLength);
-			if (match != null && match.getCapture(0).start != currentScope.getStart().getLineOffset()) {
-		//		logger.info(String.format("closing match: %s (%d-%d)", this.currentScope.name, match.getCapture(0).start, match.getCapture(0).end));
+			if (match != null && 
+			       !(match.getCapture(0).start == currentScope.getStart().getLineOffset() && 
+			         currentScope.getStart().getLine() == this.lineIx)
+			    ) {
+				//logger.info(String.format("closing match: %s (%d-%d)", this.currentScope.name, match.getCapture(0).start, match.getCapture(0).end));
 				Marker newMarker = new Marker();
 				newMarker.pattern = this.currentScope.pattern;
 				newMarker.match = match;
@@ -109,6 +114,8 @@ public class Scanner implements Iterable<Marker> {
 				this.cachedMarkers.add(newMarker);
 				bestMarker = newMarker;
 				isCloseMatch = true;
+			} else {
+				// logger.info(String.format("no close match"));
 			}
 		}
 		//logger.info(String.format("  scanning for %d patterns", ((DoublePattern) currentScope.pattern).patterns.size()));
