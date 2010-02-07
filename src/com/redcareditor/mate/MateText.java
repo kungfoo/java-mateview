@@ -58,11 +58,21 @@ public class MateText extends Composite {
 	private MateTextUndoManager undoManager;
 	private List<IGrammarListener> grammarListeners;
 
-	public MateText(Composite parent) {
+	// why doesn't this compile??
+    //public MateText(Composite parent) {
+    //	MateText(parent, false);
+    //}
+
+	public MateText(Composite parent, Boolean singleLine) {
 		super(parent, SWT.NONE);
 		document = new Document();
 		gutter = constructRuler();
-		viewer = new SourceViewer(this, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
+		if (singleLine) {
+			viewer = new SourceViewer(this, null, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL | SWT.SINGLE);
+		}
+		else {
+			viewer = new SourceViewer(this, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
+		}
 		viewer.setDocument(document);
 		setLayout(new FillLayout());
 		colourer = new SwtColourer(this);

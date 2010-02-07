@@ -5,7 +5,7 @@ describe JavaMateView, "when reparsing after changes" do
   before(:each) do
     $display ||= Swt::Widgets::Display.new
     @shell = Swt::Widgets::Shell.new($display)
-    @mt = JavaMateView::MateText.new(@shell)
+    @mt = JavaMateView::MateText.new(@shell, false)
     @st = @mt.get_text_widget
   end
   

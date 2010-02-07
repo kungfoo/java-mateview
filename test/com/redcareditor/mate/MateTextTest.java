@@ -12,7 +12,7 @@ public class MateTextTest {
 	public void setUp() {
 		Bundle.loadBundles("input/");
 		Shell shell = new Shell();
-		mt = new MateText(new MateText(shell));
+		mt = new MateText(new MateText(shell), false);
 	}
 	
 	@Test

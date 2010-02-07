@@ -20,7 +20,7 @@ class MateExample < Jface::ApplicationWindow
   def createContents(parent)
     @contents = Swt::Widgets::Composite.new(parent, Swt::SWT::NONE)
     @contents.layout = Swt::Layout::FillLayout.new
-    @mate_text = JavaMateView::MateText.new(@contents)
+    @mate_text = JavaMateView::MateText.new(@contents, false)
     
     @mate_text.add_grammar_listener do |new_name|
       puts "listened for #{new_name} in #{self}"
