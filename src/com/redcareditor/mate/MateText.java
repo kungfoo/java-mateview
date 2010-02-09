@@ -57,13 +57,16 @@ public class MateText {
 
 	private MateTextUndoManager undoManager;
 	private List<IGrammarListener> grammarListeners;
+	
+	private Boolean singleLine;
 
 	// why doesn't this compile??
     //public MateText(Composite parent) {
     //	MateText(parent, false);
     //}
 
-	public MateText(Composite parent, Boolean singleLine) {
+	public MateText(Composite parent, Boolean thisSingleLine) {
+		singleLine = thisSingleLine;
 		document = new Document();
 		gutter = constructRuler();
 		if (singleLine) {
@@ -85,6 +88,10 @@ public class MateText {
 		}
 		logger.addHandler(MateText.consoleHandler());
 		logger.info("Created MateText");
+	}
+
+	public Boolean isSingleLine() {
+	  return singleLine;
 	}
 
 	private CompositeRuler constructRuler() {
