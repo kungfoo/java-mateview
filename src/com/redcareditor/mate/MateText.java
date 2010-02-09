@@ -16,7 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
@@ -34,7 +34,7 @@ import com.redcareditor.theme.Theme;
 import com.redcareditor.theme.ThemeManager;
 import com.redcareditor.util.SingleLineFormatter;
 
-public class MateText extends Composite {
+public class MateText {
 	public Parser parser;
 	public Colourer colourer;
 	public Logger logger;
@@ -64,17 +64,15 @@ public class MateText extends Composite {
     //}
 
 	public MateText(Composite parent, Boolean singleLine) {
-		super(parent, SWT.NONE);
 		document = new Document();
 		gutter = constructRuler();
 		if (singleLine) {
-			viewer = new SourceViewer(this, null, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL | SWT.SINGLE);
+			viewer = new SourceViewer(parent, null, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL | SWT.SINGLE);
 		}
 		else {
-			viewer = new SourceViewer(this, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
+			viewer = new SourceViewer(parent, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		}
 		viewer.setDocument(document);
-		setLayout(new FillLayout());
 		colourer = new SwtColourer(this);
 		mateDocument = new SwtMateDocument(this);
 		grammarListeners = new ArrayList<IGrammarListener>();
