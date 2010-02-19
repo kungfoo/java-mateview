@@ -305,7 +305,7 @@ public class Parser {
 	}
 	
 	public void lastVisibleLineChanged(int newLastVisibleLine) {
-		// System.out.printf("lastVisibleLineChanged(%d)\n", newLastVisibleLine);
+		//System.out.printf("lastVisibleLineChanged(%d)\n", newLastVisibleLine);
 		this.lastVisibleLine = newLastVisibleLine;
 		// System.out.printf("lastVisibleLine: %d, lookAhead: %d, getParsedUpto: %d\n", lastVisibleLine, lookAhead, getParsedUpto());
 		if (lastVisibleLine + lookAhead >= getParsedUpto()) {

@@ -104,6 +104,10 @@ public class MateText {
 	public void attachUpdater() {
 
 	}
+	
+	public String grammarName() {
+		return parser.grammar.name;
+	}
 
 	public StyledText getTextWidget() {
 		return viewer.getTextWidget();
@@ -228,6 +232,10 @@ public class MateText {
 	
 	public void addGrammarListener(IGrammarListener listener) {
 		grammarListeners.add(listener);
+	}
+	
+	public void removeGrammarListener(IGrammarListener listener) {
+		grammarListeners.remove(listener);
 	}
 	
 	public void redraw() {
