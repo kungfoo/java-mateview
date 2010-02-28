@@ -92,6 +92,16 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 
 		return false;
 	}
+	
+	public boolean removeTextLocation(String category, MateTextLocation location) {
+		try {
+			mateText.getDocument().removePosition(category, (SwtMateTextLocation) location);
+			return true;
+		} catch (BadPositionCategoryException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	public int getLineCount() {
 		return document.getNumberOfLines();
