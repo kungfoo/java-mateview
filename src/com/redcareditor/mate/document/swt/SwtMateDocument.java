@@ -25,6 +25,9 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	public SwtMateDocument(MateText mateText) {
 		this.mateText = mateText;
 		this.document = (Document) mateText.getDocument();
+		for (IPositionUpdater u : document.getPositionUpdaters()) {
+			document.removePositionUpdater(u);
+		}
 		document.addPositionCategory("scopes");
 		document.addPositionUpdater(new SwtScopePositionUpdater("scopes", SwtScopePositionUpdater.RIGHT_GRAVITY));
 		document.addPositionCategory("lefts");

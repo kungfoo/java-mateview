@@ -57,10 +57,10 @@ public class SwtMateTextLocation extends Position implements MateTextLocation {
 		return comperator.compare(this, o);
 	}
 	
-	@Override
-	public int getOffset() {
-		return this.offset < document.getLength() ? this.offset : document.getLength();
-	}
+	//@Override
+	//public int getOffset() {
+	//	return this.offset < document.getLength() ? this.offset : document.getLength();
+	//}
 	
 	private static int computeOffset(int line, int offset, Document document){
 		try {
