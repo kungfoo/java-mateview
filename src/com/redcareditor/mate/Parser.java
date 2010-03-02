@@ -211,7 +211,8 @@ public class Parser {
 			modifyStart = -1;
 			modifyEnd   = -1;
 			modifyText  = null;
-			processChanges();
+			if (deactivationLevel == 0)
+				processChanges();
 		}
 	}
 
@@ -223,6 +224,18 @@ public class Parser {
 		if (enabled) {
 			lastVisibleLineChanged(JFaceTextUtil.getBottomIndex(mateText.getTextWidget()));
 		}
+	}
+	
+	public void deactivate() {
+		deactivationLevel++;
+	}
+	
+	public void reactivate() {
+		deactivationLevel--;
+		if (deactivationLevel < 0) 
+			deactivationLevel = 0;
+		if (deactivationLevel == 0)
+			processChanges();
 	}
 	
 	// Process all change ranges.
