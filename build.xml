@@ -29,6 +29,14 @@
 	<condition property="platform" value="linux">
 		<and>
 			<os family="unix" />
+			<os arch="i386" />
+		</and>
+	</condition>
+
+	<condition property="platform" value="linux64">
+		<and>
+			<os family="unix" />
+			<os arch="amd64" />
 		</and>
 	</condition>
 
