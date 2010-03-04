@@ -15,7 +15,11 @@ swt_lib = case Config::CONFIG["host_os"]
       'osx/swt'
     end
   when /linux/i
-    'linux/swt'
+    if %w(amd64 x84_64).include? Config::CONFIG["host_cpu"]
+      'linux64/swt'
+    else
+      'linux/swt'
+    end
   when /windows/i
     'windows/swt'
 end

@@ -25,6 +25,9 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	public SwtMateDocument(MateText mateText) {
 		this.mateText = mateText;
 		this.document = (Document) mateText.getDocument();
+		for (IPositionUpdater u : document.getPositionUpdaters()) {
+			document.removePositionUpdater(u);
+		}
 		document.addPositionCategory("scopes");
 		document.addPositionUpdater(new SwtScopePositionUpdater("scopes", SwtScopePositionUpdater.RIGHT_GRAVITY));
 		document.addPositionCategory("lefts");
@@ -90,6 +93,16 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 			e.printStackTrace();
 		}
 
+		return false;
+	}
+	
+	public boolean removeTextLocation(String category, MateTextLocation location) {
+		try {
+			mateText.getDocument().removePosition(category, (SwtMateTextLocation) location);
+			return true;
+		} catch (BadPositionCategoryException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
 

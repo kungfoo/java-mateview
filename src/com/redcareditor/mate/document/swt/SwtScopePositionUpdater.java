@@ -43,7 +43,7 @@ public class SwtScopePositionUpdater implements IPositionUpdater {
 		int eventNewLength    = event.getText() == null ? 0 : event.getText().length();
 		int eventNewEndOffset = eventOffset + eventNewLength;
 		int deltaLength       = eventNewLength - event.getLength();
-		// System.out.printf("SwtScopePositionUpdater delta:%d\n", deltaLength);
+		//System.out.printf("SwtScopePositionUpdater cat:%s grav:%d delta:%d\n", fCategory, fGravity, deltaLength);
 
 		try {
 			Position[] positions= event.getDocument().getPositions(fCategory);
@@ -57,7 +57,7 @@ public class SwtScopePositionUpdater implements IPositionUpdater {
 				int posOffset = position.getOffset();
 				int posLength = position.getLength();  // always zero
 				int posEnd    = posOffset + posLength;
-				// System.out.printf("  position %d offset:%d length:%d end:%d\n", i, posOffset, posLength, posEnd);
+				//System.out.printf("  position %s offset:%d\n", position.toString(), posOffset);
 				
 				if (posOffset > eventOldEndOffset) {
 					// position comes way after change - shift
@@ -71,8 +71,7 @@ public class SwtScopePositionUpdater implements IPositionUpdater {
 					else
 						position.setOffset(eventOffset);
 				}
-				
-				// System.out.printf("  position %d offset:%d length:%d end:%d\n", i, position.getOffset(), position.getLength(), position.getOffset() + position.getLength());
+				//System.out.printf("  position %s offset:%d\n", position.toString(), position.getOffset());
 			}
 		} catch (BadPositionCategoryException e) {
 			// ignore and return

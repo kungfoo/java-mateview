@@ -58,14 +58,13 @@ public class MateText {
 	private MateTextUndoManager undoManager;
 	private List<IGrammarListener> grammarListeners;
 	
-	private Boolean singleLine;
+	private boolean singleLine;
 
-	// why doesn't this compile??
-    //public MateText(Composite parent) {
-    //	MateText(parent, false);
-    //}
+        public MateText(Composite parent) {
+                this(parent, false);
+        }
 
-	public MateText(Composite parent, Boolean thisSingleLine) {
+	public MateText(Composite parent, boolean thisSingleLine) {
 		singleLine = thisSingleLine;
 		document = new Document();
 		gutter = constructRuler();
@@ -90,7 +89,7 @@ public class MateText {
 		logger.info("Created MateText");
 	}
 
-	public Boolean isSingleLine() {
+	public boolean isSingleLine() {
 	  return singleLine;
 	}
 
@@ -103,6 +102,10 @@ public class MateText {
 
 	public void attachUpdater() {
 
+	}
+	
+	public String grammarName() {
+		return parser.grammar.name;
 	}
 
 	public StyledText getTextWidget() {
@@ -125,10 +128,14 @@ public class MateText {
 		return parser.shouldColour();
 	}
 	
+	public String scopeAt(int line, int line_offset) {
+		return parser.root.scopeAt(line, line_offset).hierarchyNames(true);
+	}
+	
 	// Sets the grammar explicitly by name.
 	// TODO: restore the uncolouring stuff
 	public boolean setGrammarByName(String name) {
-		System.out.printf("setGrammarByName(%s)\n", name);
+		// System.out.printf("setGrammarByName(%s)\n", name);
 		if (this.parser != null && this.parser.grammar.name.equals(name))
 			return true;
 
@@ -228,6 +235,10 @@ public class MateText {
 	
 	public void addGrammarListener(IGrammarListener listener) {
 		grammarListeners.add(listener);
+	}
+	
+	public void removeGrammarListener(IGrammarListener listener) {
+		grammarListeners.remove(listener);
 	}
 	
 	public void redraw() {

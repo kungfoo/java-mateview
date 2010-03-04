@@ -134,7 +134,14 @@ public class Scanner implements Iterable<Marker> {
 				Marker newMarker = new Marker();
 				newMarker.pattern = p;
 				newMarker.match = match;
-				newMarker.from = match.getCapture(0).start;
+				try {
+					newMarker.from = match.getCapture(0).start;
+				}
+				catch (ArrayIndexOutOfBoundsException e) {
+					System.out.printf("*** Warning ArrayIndexOutOfBoundsException pattern: %s, line:'%s'\n", p.name, line);
+					e.printStackTrace();
+					continue;
+				}
 				newMarker.isCloseScope = false;
 				this.cachedMarkers.add(newMarker);
 				bestMarker = newMarker.bestOf(bestMarker);

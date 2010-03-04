@@ -1,5 +1,7 @@
 package com.redcareditor.onig;
 
+import java.io.UnsupportedEncodingException;
+
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -102,7 +104,13 @@ public class Match implements Iterable<Range> {
 		Arrays.sort(pairs);
  
 		Encoding enc = UTF8Encoding.INSTANCE;
-		byte[] bytes = text.getBytes();
+		byte[] bytes;
+		try {
+			bytes = text.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			bytes = text.getBytes();
+		}
 		int p = 0;
 		int s = p;
  
