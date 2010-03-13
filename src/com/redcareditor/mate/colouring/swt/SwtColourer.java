@@ -10,6 +10,10 @@ import org.eclipse.jface.text.JFaceTextUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.custom.LineStyleEvent;
 import org.eclipse.swt.custom.LineStyleListener;
 import org.eclipse.swt.custom.StyleRange;
@@ -51,26 +55,51 @@ public class SwtColourer implements Colourer {
 			}
 		});
 
+		addCaretMovedListeners();
+	}
+	
+	private boolean inModification = false;
+	private int lineToUpdate = -1;
+	
+    // This little dance with these three listeners and two attributes is necessary because
+    // the caretMoved event is fired before the text is modified in the buffer, so
+    // control.getLineCount() is not uptodate when it is called in updateHighlightedLine.
+	private void addCaretMovedListeners() {
 		control.addCaretListener(new CaretListener() {
 			public void caretMoved(CaretEvent e) {
-				updateHighlightedLine(control.getLineAtOffset(e.caretOffset));
+				lineToUpdate = control.getLineAtOffset(e.caretOffset);
+				if (!inModification) {
+					updateHighlightedLine(lineToUpdate);
+					lineToUpdate = -1;
+				}
 			}
 		});
+		
+		control.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				if (inModification && lineToUpdate != -1) {
+					updateHighlightedLine(lineToUpdate);
+				}
+				inModification = false;
+				lineToUpdate = -1;
+			}
+		});
+
+		control.addVerifyListener(new VerifyListener() {
+			public void verifyText(VerifyEvent e) {
+				inModification = true;
+			}
+		});
+
 	}
 
 	private void updateHighlightedLine(int line) {
 		if (caretLineHasChanged(line)) {
 			int maxLineIx = control.getLineCount() - 1;
-			try {
-				if (line <= maxLineIx)
-					control.setLineBackground(line, 1, ColourUtil.getColour(globalLineBackground()));
-				if (highlightedLine <= maxLineIx)
-					control.setLineBackground(highlightedLine, 1, ColourUtil.getColour(globalBackground()));
-			}
-			catch (java.lang.ArrayIndexOutOfBoundsException e) {
-			    // What the hell is this? It seems like maxLineIx is already out of date....
-				System.out.printf("caught java.lang.ArrayIndexOutOfBoundsException in updateHighlightedLine\n");
-			}
+			if (line <= maxLineIx)
+				control.setLineBackground(line, 1, ColourUtil.getColour(globalLineBackground()));
+			if (highlightedLine <= maxLineIx)
+				control.setLineBackground(highlightedLine, 1, ColourUtil.getColour(globalBackground()));
 			highlightedLine = line;
 		}
 	}
