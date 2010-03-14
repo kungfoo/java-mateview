@@ -308,6 +308,8 @@ public class SwtColourer implements Colourer {
 			styleRange.length = Math.min(scope.getEnd().getOffset() - styleRange.start,
 										 event.lineText.length() - styleRange.start + startLineOffset);
 		}
+		if (styleRange.length == 0)
+			return;
 		if (setting != null) {
 			setStyleRangeProperties(scope, setting, styleRange);
 			addStyleRangeWithoutOverlaps(styleRanges, styleRange);
@@ -335,7 +337,7 @@ public class SwtColourer implements Colourer {
 		int childStart  = styleRange.start;
 		int childEnd    = styleRange.start + styleRange.length;
 		
-		// System.out.printf("parent %d-%d, child: %d-%d\n", parentStart, parentEnd, childStart, childEnd);
+		//System.out.printf("parent %d-%d, child: %d-%d\n", parentStart, parentEnd, childStart, childEnd);
 		
 		// *-----*
 		// *-----*
