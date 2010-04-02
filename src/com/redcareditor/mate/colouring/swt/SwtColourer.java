@@ -84,23 +84,27 @@ public class SwtColourer implements Colourer {
 				lineToUpdate = -1;
 			}
 		});
-
+		
 		control.addVerifyListener(new VerifyListener() {
 			public void verifyText(VerifyEvent e) {
 				inModification = true;
 			}
 		});
-
 	}
 
 	private void updateHighlightedLine(int line) {
 		if (caretLineHasChanged(line)) {
-			int maxLineIx = control.getLineCount() - 1;
-			if (line <= maxLineIx)
-				control.setLineBackground(line, 1, ColourUtil.getColour(globalLineBackground()));
-			if (highlightedLine <= maxLineIx)
-				control.setLineBackground(highlightedLine, 1, ColourUtil.getColour(globalBackground()));
-			highlightedLine = line;
+			try {
+				int maxLineIx = control.getLineCount() - 1;
+				if (line <= maxLineIx)
+					control.setLineBackground(line, 1, ColourUtil.getColour(globalLineBackground()));
+				if (highlightedLine <= maxLineIx)
+					control.setLineBackground(highlightedLine, 1, ColourUtil.getColour(globalBackground()));
+				highlightedLine = line;
+			}
+			catch(java.lang.ArrayIndexOutOfBoundsException e) {
+				
+			}
 		}
 	}
 
