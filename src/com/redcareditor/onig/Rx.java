@@ -2,14 +2,18 @@ package com.redcareditor.onig;
 
 import java.io.UnsupportedEncodingException;
 
+import org.jcodings.Encoding;
 import org.jcodings.specific.UTF8Encoding;
-import org.jcodings.specific.UTF16BEEncoding;	
+import org.jcodings.specific.UTF16BEEncoding;
 import org.joni.Matcher;
 import org.joni.Option;
 import org.joni.Regex;
 import org.joni.Region;
 import org.joni.Syntax;
 import org.joni.WarnCallback;
+
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 
 /**
  * wrapper class around the Joni Regex library which is a optimized port of
@@ -43,6 +47,10 @@ public class Rx {
 		if (!pattern.equals("")) {
 			matchesStartOfLine = pattern.charAt(0) == '^';
 		}
+	}
+
+	public boolean usable() {
+		return (regex != null);
 	}
 
 	public Match search(String target, int start, int end) {
@@ -95,4 +103,65 @@ public class Rx {
 	public String toString() {
 		return pattern;
 	}
+	
+    
+	public static String escape(String aRegexFragment){
+		final StringBuilder result = new StringBuilder();
+		
+		final StringCharacterIterator iterator = new StringCharacterIterator(aRegexFragment);
+		char character =  iterator.current();
+		while (character != CharacterIterator.DONE ){
+			if (character == '.') {
+				result.append("\\.");
+			}
+			else if (character == '\\') {
+				result.append("\\\\");
+			}
+			else if (character == '?') {
+				result.append("\\?");
+			}
+			else if (character == '*') {
+				result.append("\\*");
+			}
+			else if (character == '+') {
+				result.append("\\+");
+			}
+			else if (character == '&') {
+				result.append("\\&");
+			}
+			else if (character == ':') {
+				result.append("\\:");
+			}
+			else if (character == '{') {
+				result.append("\\{");
+			}
+			else if (character == '}') {
+				result.append("\\}");
+			}
+			else if (character == '[') {
+				result.append("\\[");
+			}
+			else if (character == ']') {
+				result.append("\\]");
+			}
+			else if (character == '(') {
+				result.append("\\(");
+			}
+			else if (character == ')') {
+				result.append("\\)");
+			}
+			else if (character == '^') {
+				result.append("\\^");
+			}
+			else if (character == '$') {
+				result.append("\\$");
+			}
+			else {
+				result.append(character);
+			}
+			character = iterator.next();
+		}
+		return result.toString();
+	}
+  
 }

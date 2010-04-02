@@ -98,7 +98,7 @@ public class Scanner implements Iterable<Marker> {
 //		}
 //		assert(cachedMarkers.size() == 0);
 		Rx closingRegex = currentScope.closingRegex;
-		if (closingRegex != null) {
+		if (closingRegex != null && closingRegex.usable()) {
 			//logger.info(String.format("closing regex: '%s'", closingRegex.pattern));
 			Match match = closingRegex.search(this.line, this.position, this.lineLength);
 			if (match != null && 

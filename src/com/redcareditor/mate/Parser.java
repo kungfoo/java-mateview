@@ -642,13 +642,9 @@ public class Parser {
 	}
 
 	public Rx makeClosingRegex(String line, Scope scope, Marker m) {
-		// System.out.printf("make_closing_regex\n");
-		// new_end = pattern.end.gsub(/\\([0-9]+)/) do
-		// 	md.captures.send(:[], $1.to_i-1)
-		// end
 		if (m.pattern instanceof DoublePattern && !m.isCloseScope) {
 			DoublePattern dp = (DoublePattern) m.pattern;
-			//stdout.printf("making closing regex: %s (%d)\n", dp.end_string, (int) dp.end_string.length);
+			// System.out.printf("making closing regex: %s\n", dp.endString);
 			Rx rx = Rx.createRx("\\\\(\\d+)");
 			Match match;
 			int pos = 0;
@@ -661,7 +657,7 @@ public class Parser {
 				int num = Integer.parseInt(numstr);
 				// System.out.printf("capture found: %d\n", num);
 				String capstr = line.substring(m.match.getCapture(num).start, m.match.getCapture(num).end);
-				src.append(capstr);
+				src.append(Rx.escape(capstr));
 				pos = match.getCapture(1).end;
 			}
 			if (found)
