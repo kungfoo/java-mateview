@@ -91,10 +91,6 @@ public class Pattern {
 					patterns.remove(i);
 					patterns.addAll(i, ng.patterns);
 					i--;
-				} else {
-					if (!p.name.startsWith("#")) {
-						System.out.printf("unknown include pattern: %s\n", p.name);
-					}
 				}
 			}
 			i++;

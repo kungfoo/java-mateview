@@ -79,7 +79,7 @@ public class Rx {
 
 	class Warnings implements WarnCallback {
 		public void warn(String message) {
-			System.out.printf("got warning from regex: %s\n", message);
+			// System.out.printf("got warning from regex: %s\n", message);
 		}
 	}
 
@@ -93,7 +93,7 @@ public class Rx {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (org.joni.exception.SyntaxException e) {
-			System.out.printf("** WARNING: SyntaxException when compiling '%s': %s\n", pattern, e.getMessage());
+			//System.out.printf("** WARNING: SyntaxException when compiling '%s': %s\n", pattern, e.getMessage());
 			//e.printStackTrace();
 		}
 		return null;

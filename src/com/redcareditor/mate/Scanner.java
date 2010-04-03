@@ -67,8 +67,8 @@ public class Scanner implements Iterable<Marker> {
 	}
 
 	public Match scanForMatch(int from, Pattern p) {
-		if (p.name != null && (p.name.startsWith("#") || p.name.startsWith("$")))
-			System.out.printf("*** WARNING trying to scan for pattern called %s\n", p.name);
+		// if (p.name != null && (p.name.startsWith("#") || p.name.startsWith("$")))
+		//	System.out.printf("*** WARNING trying to scan for pattern called %s\n", p.name);
 		
 		Match match = null;
 		if (p instanceof SinglePattern) {
