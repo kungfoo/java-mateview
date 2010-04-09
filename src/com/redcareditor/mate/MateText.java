@@ -198,7 +198,6 @@ public class MateText {
 				if (re instanceof NullRx) {
 				} else {
 					if (re.search(firstLine, 0, (int) firstLine.length()) != null) {
-						System.out.printf("matched: %s '%s' %s\n", grammar.name, firstLine, re.pattern);
 						setGrammarByName(grammar.name);
 						return grammar.name;
 					}
