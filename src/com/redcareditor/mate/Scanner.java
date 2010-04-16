@@ -119,7 +119,10 @@ public class Scanner implements Iterable<Marker> {
 			}
 		}
 		//logger.info(String.format("  scanning for %d patterns", ((DoublePattern) currentScope.pattern).patterns.size()));
-		for (Pattern p : ((DoublePattern) currentScope.pattern).patterns) {
+		if (currentScope.pattern instanceof SinglePattern)
+			return null;
+		DoublePattern dp = (DoublePattern) (currentScope.pattern);
+		for (Pattern p : dp.patterns) {
 			// System.out.printf("     scanning for %s (%s)\n", p.name, p.disabled);
 			if (p.disabled)
 				continue;
