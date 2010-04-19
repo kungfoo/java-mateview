@@ -86,11 +86,11 @@ public class Pattern {
 						patterns.addAll(i, grammar.patterns);
 						i--;
 					}
-				} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
-					ng.initForUse();
-					patterns.remove(i);
-					patterns.addAll(i, ng.patterns);
-					i--;
+				//} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
+				//	ng.initForUse();
+				//	patterns.remove(i);
+				//	patterns.addAll(i, ng.patterns);
+				//	i--;
 				}
 			}
 			i++;

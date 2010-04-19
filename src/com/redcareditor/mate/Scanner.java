@@ -85,6 +85,7 @@ public class Scanner implements Iterable<Marker> {
 		return match;
 	}
 	
+	
 	public Marker findNextMarker() {
 		//logger.info(String.format("scanning: '%s' from %d to %d (current_scope is %s)", this.line.replaceAll("\n", ""), this.position, this.lineLength, currentScope.name));
 		Marker bestMarker = null;
@@ -122,6 +123,7 @@ public class Scanner implements Iterable<Marker> {
 		if (currentScope.pattern instanceof SinglePattern)
 			return null;
 		DoublePattern dp = (DoublePattern) (currentScope.pattern);
+		dp.replaceGrammarIncludes();
 		for (Pattern p : dp.patterns) {
 			// System.out.printf("     scanning for %s (%s)\n", p.name, p.disabled);
 			if (p.disabled)
