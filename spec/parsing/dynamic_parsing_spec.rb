@@ -49,15 +49,13 @@ describe JavaMateView, "when reparsing after changes" do
     it "reparses lines with only whitespace changes, even when they have scope openers" do
       @st.text = strip(<<-END)
       puts "hello"
-      foo=<<HI
+      foo=<<HI 
         Here.foo
         Here.foo
       HI
       puts "hello"
       END
-      puts @mt.parser.root.pretty(0)
-      5.times { @mt.type(1, 8, " ") }
-      puts @mt.parser.root.pretty(0)
+      5.times { @mt.type(1, 9, " ") }
       it_should_match_clean_reparse
     end
     
@@ -149,9 +147,7 @@ describe JavaMateView, "when reparsing after changes" do
     
     it "should handle multibyte characters with aplomb" do
       @st.text = "\"as\"as"
-      puts "TYPEING:"
-      @mt.type(0, 1, "†")
-      puts "REPARSE:"
+      @mt.type(0, 2, "†")
       it_should_match_clean_reparse
     end
   end
