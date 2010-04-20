@@ -20,7 +20,6 @@ import com.redcareditor.mate.ParserScheduler;
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.mate.document.MateTextLocation;
 import com.redcareditor.mate.document.swt.SwtMateDocument;
-import com.redcareditor.mate.document.swt.SwtMateTextLocation;
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Rx;
 
@@ -34,9 +33,6 @@ public class Parser {
 	public StyledText styledText;
 	public MateDocument mateDocument;
 	
-	public int parsed_upto;	
-	public SwtMateTextLocation parsedUpto;
-	
 	public Scope root;
 	public ParserScheduler parserScheduler;
 	
@@ -48,7 +44,6 @@ public class Parser {
 		makeRoot();
 		mateDocument = m.getMateDocument();
 		document     = (Document) m.getDocument();
-		setParsedUpto(0);
 		parserScheduler = new ParserScheduler(this);
 		logger = Logger.getLogger("JMV.Parser ");
 		logger.setUseParentHandlers(false);
@@ -57,19 +52,6 @@ public class Parser {
 		}
 		logger.addHandler(MateText.consoleHandler());
 		logger.setLevel(Level.INFO);
-	}
-	
-	public void setParsedUpto(int line_ix) {
-		if (parsedUpto == null) {
-			parsedUpto = (SwtMateTextLocation) mateDocument.getTextLocation(0, 0);
-			mateDocument.addTextLocation("lefts", parsedUpto);
-		}
-		parsedUpto.offset = getOffsetAtLine(line_ix);
-	}
-	
-	public int getParsedUpto() {
-		// System.out.printf("parsedUpto %d,%d (/%d)\n", parsedUpto.getOffset(), parsedUpto.getLength(), getCharCount());
-		return getLineAtOffset(parsedUpto.getOffset());
 	}
 	
 	public void close() {
@@ -174,8 +156,8 @@ public class Parser {
 		String line = getLine(lineIx) + "\n";
 		int length = line.length();
 		//logger.info(String.format("parseLine(%d) '%s'", lineIx, line));
-		if (lineIx > getParsedUpto())
-			this.setParsedUpto(lineIx);
+		if (lineIx > parserScheduler.getParsedUpto())
+			parserScheduler.setParsedUpto(lineIx);
 		//System.out.printf("getParsedUpto: %d\n", getParsedUpto());
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
 		Scope endScope1  = scopeAfterEndOfLine(lineIx, length);

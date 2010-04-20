@@ -12,6 +12,7 @@ import org.eclipse.jface.text.IViewportListener;
 import org.eclipse.jface.text.JFaceTextUtil;
 import org.eclipse.jface.text.DocumentEvent;
 
+import com.redcareditor.mate.document.swt.SwtMateTextLocation;
 import com.redcareditor.onig.Range;
 
 public class ParserScheduler {
@@ -29,7 +30,11 @@ public class ParserScheduler {
 	public ParseThunk thunk;
 	public Parser parser;
 
+	public int parsed_upto;	
+	public SwtMateTextLocation parsedUpto;
+
 	public ParserScheduler(Parser parser) {
+		this.parser = parser;
 		lookAhead = LOOK_AHEAD;
 		lastVisibleLine = 0;
 		changes = new RangeSet();
@@ -37,7 +42,7 @@ public class ParserScheduler {
 		alwaysParseAll = false;
 		modifyStart = -1;
 		enabled = true;
-		this.parser = parser;
+		setParsedUpto(0);
 		attachListeners();
 	}
 	
@@ -150,7 +155,7 @@ public class ParserScheduler {
 			scopeChanged = parser.parseLine(lineIx);
 			if (scopeChanged) {
 				scopeEverChanged = true;
-				parser.setParsedUpto(lineIx);
+				setParsedUpto(lineIx);
 			}
 			lineIx++;
 		}
@@ -178,7 +183,7 @@ public class ParserScheduler {
 		int lastLine = Math.min(lastVisibleLine + 100, lineCount - 1);
 		while (lineIx <= lastLine) {
 			parser.parseLine(lineIx);
-			parser.setParsedUpto(lineIx);
+			setParsedUpto(lineIx);
 			parser.redrawLine(lineIx);
 			lineIx++;
 		}
@@ -188,10 +193,23 @@ public class ParserScheduler {
 		//System.out.printf("lastVisibleLineChanged(%d)\n", newLastVisibleLine);
 		this.lastVisibleLine = newLastVisibleLine;
 		// System.out.printf("lastVisibleLine: %d, lookAhead: %d, getParsedUpto: %d\n", lastVisibleLine, lookAhead, getParsedUpto());
-		if (lastVisibleLine + lookAhead >= parser.getParsedUpto()) {
+		if (lastVisibleLine + lookAhead >= getParsedUpto()) {
 			int endRange = Math.min(parser.getLineCount() - 1, lastVisibleLine + lookAhead);
-			parseRange(parser.getParsedUpto(), endRange);
+			parseRange(getParsedUpto(), endRange);
 		}
+	}
+	
+	public void setParsedUpto(int line_ix) {
+		if (parsedUpto == null) {
+			parsedUpto = (SwtMateTextLocation) parser.mateDocument.getTextLocation(0, 0);
+			parser.mateDocument.addTextLocation("lefts", parsedUpto);
+		}
+		parsedUpto.offset = parser.getOffsetAtLine(line_ix);
+	}
+	
+	public int getParsedUpto() {
+		// System.out.printf("parsedUpto %d,%d (/%d)\n", parsedUpto.getOffset(), parsedUpto.getLength(), parser.getCharCount());
+		return parser.getLineAtOffset(parsedUpto.getOffset());
 	}
 	
 }
