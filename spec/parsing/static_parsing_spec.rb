@@ -284,18 +284,23 @@ class ClassName extends AnotherClass
     end
   end
 
-  describe "long lines" do
+  describe "performance" do
     before do
       @mt.set_grammar_by_name("Ruby")
     end
     
-    it "should not care about a long line" do
-      p :starting
+    it "should parse a long line in a reasonable time" do
       s = Time.now
       @st.text = "() "*500
       e = Time.now
-      puts "took #{e - s}s"
-      (e - s).should < 1
+      (e - s).should < 2
+    end
+    
+    it "should parse a big file in a reasonable time" do
+      s = Time.now
+      @st.text = File.read("/Users/danlucraft/Redcar/redcar/plugins/redcar/redcar.rb")
+      e = Time.now
+      (e - s).should < 2
     end
   end
 

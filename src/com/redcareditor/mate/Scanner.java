@@ -11,6 +11,7 @@ import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Rx;
 
 public class Scanner implements Iterable<Marker> {
+	public static int MAX_LINE_LENGTH = 500;
 	private Scope currentScope;
 	public int position;
 	public String line;
@@ -42,19 +43,17 @@ public class Scanner implements Iterable<Marker> {
 
 
 	public Match scanForMatch(int from, Pattern p) {
-		// if (p.name != null && (p.name.startsWith("#") || p.name.startsWith("$")))
-		//	System.out.printf("*** WARNING trying to scan for pattern called %s\n", p.name);
-		
+		int maxLength = Math.min(MAX_LINE_LENGTH, this.lineLength);		
 		Match match = null;
 		if (p instanceof SinglePattern) {
 			SinglePattern sp = (SinglePattern) p;
 			if (sp.match.regex != null) {
-				match = sp.match.search(line, from, this.lineLength);
+				match = sp.match.search(line, from, maxLength);
 			}
 		}
 		else if (p instanceof DoublePattern) {
 			if (((DoublePattern) p).begin.regex != null) {
-				match = ((DoublePattern) p).begin.search(this.line, from, this.lineLength);
+				match = ((DoublePattern) p).begin.search(this.line, from, maxLength);
 			}
 		}
 		return match;
@@ -63,6 +62,8 @@ public class Scanner implements Iterable<Marker> {
 	
 	public Marker findNextMarker() {
 		//logger.info(String.format("scanning: '%s' from %d to %d (current_scope is %s)", this.line.replaceAll("\n", ""), this.position, this.lineLength, currentScope.name));
+		if (position > MAX_LINE_LENGTH)
+			return null;
 		Marker bestMarker = null;
 		int newLength;
 		boolean isCloseMatch = false;
