@@ -30,4 +30,4 @@ class JavaMateView::MateText
   end
 end
 
-JavaMateView::Parser.synchronousParsing = true
+JavaMateView::ParserScheduler.synchronousParsing = true

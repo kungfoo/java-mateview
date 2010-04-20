@@ -60,9 +60,9 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	public void reparseAll() {
 		SwtMateTextLocation startLocation = new SwtMateTextLocation(0, this);
 		SwtMateTextLocation endLocation = new SwtMateTextLocation(0 + document.getLength(), this);
-		if (this.mateText.parser.enabled) {
-			this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
-			this.mateText.parser.processChanges();
+		if (this.mateText.parser.parserScheduler.enabled) {
+			this.mateText.parser.parserScheduler.changes.add(startLocation.getLine(), endLocation.getLine());
+			this.mateText.parser.parserScheduler.processChanges();
 		}
 	}
 
@@ -71,8 +71,8 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 			this.mateText.getDocument().replace(start, length, text);
 			SwtMateTextLocation startLocation = new SwtMateTextLocation(start, this);
 			SwtMateTextLocation endLocation = new SwtMateTextLocation(start + length, this);
-			this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
-			this.mateText.parser.processChanges();
+			this.mateText.parser.parserScheduler.changes.add(startLocation.getLine(), endLocation.getLine());
+			this.mateText.parser.parserScheduler.processChanges();
 		} catch (BadLocationException e) {
 			// TODO: SwtMateDocument should throw it's own Exception here
 		}

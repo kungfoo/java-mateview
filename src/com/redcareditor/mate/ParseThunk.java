@@ -47,7 +47,7 @@ public class ParseThunk implements Runnable {
 	}
 	
 	public void execute() {
-		parser.thunk = null;
-		parser.parseOnwards(parseFrom);
+		parser.parserScheduler.thunk = null;
+		parser.parserScheduler.parseOnwards(parseFrom);
 	}
 }
