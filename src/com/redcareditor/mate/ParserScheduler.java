@@ -142,6 +142,20 @@ public class ParserScheduler {
 		changes.ranges.clear();
 	}
 
+	public void thunkFrom(int lineIx) {
+		if (thunk != null) {
+			thunk.delayAndUpdate(lineIx);
+		}
+		else {
+			if (lineIx <= parser.getLineCount() - 1) {
+				thunk = new ParseThunk(parser, lineIx);
+				if (ParserScheduler.synchronousParsing) {
+					thunk.execute();
+				}
+			}
+		}
+	}
+
 	// Parse from from_line to *at least* to_line. Will parse
 	// more if necessary. Returns the index of the last line
 	// parsed.
@@ -159,16 +173,8 @@ public class ParserScheduler {
 			}
 			lineIx++;
 		}
-		if (thunk != null) {
-			thunk.delayAndUpdate(lineIx);
-		}
-		else {
-			if (scopeEverChanged && lineIx <= parser.getLineCount() - 1) {
-				thunk = new ParseThunk(parser, lineIx);
-				if (ParserScheduler.synchronousParsing) {
-					thunk.execute();
-				}
-			}
+		if (scopeEverChanged) {
+			thunkFrom(lineIx);
 		}
 
 		return toLine;
@@ -190,12 +196,14 @@ public class ParserScheduler {
 	}
 	
 	public void lastVisibleLineChanged(int newLastVisibleLine) {
+		int oldLastVisibleLine = lastVisibleLine;
 		//System.out.printf("lastVisibleLineChanged(%d)\n", newLastVisibleLine);
 		this.lastVisibleLine = newLastVisibleLine;
 		// System.out.printf("lastVisibleLine: %d, lookAhead: %d, getParsedUpto: %d\n", lastVisibleLine, lookAhead, getParsedUpto());
 		if (lastVisibleLine + lookAhead >= getParsedUpto()) {
 			int endRange = Math.min(parser.getLineCount() - 1, lastVisibleLine + lookAhead);
-			parseRange(getParsedUpto(), endRange);
+			thunkFrom(oldLastVisibleLine);
+			//parseRange(getParsedUpto(), endRange);
 		}
 	}
 	
