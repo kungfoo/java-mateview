@@ -284,6 +284,20 @@ class ClassName extends AnotherClass
     end
   end
 
+  describe "long lines" do
+    before do
+      @mt.set_grammar_by_name("Ruby")
+    end
+    
+    it "should not care about a long line" do
+      p :starting
+      s = Time.now
+      @st.text = "() "*500
+      e = Time.now
+      puts "took #{e - s}s"
+      (e - s).should < 1
+    end
+  end
 
   describe "when parsing Perl from scratch" do
     before(:each) do

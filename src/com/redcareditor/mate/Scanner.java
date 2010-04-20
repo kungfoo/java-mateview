@@ -16,12 +16,10 @@ public class Scanner implements Iterable<Marker> {
 	public String line;
 	public int lineLength;
 	public int lineIx;
-	public ArrayList<Marker> cachedMarkers;
 	public Logger logger;
 
 	public void setCurrentScope(Scope scope) {
 		this.currentScope = scope;
-		cachedMarkers.clear();
 	}
 	
 	public Scope getCurrentScope() {
@@ -34,7 +32,6 @@ public class Scanner implements Iterable<Marker> {
 		this.lineIx = lineIx;
 		this.lineLength = line.getBytes().length;
 		this.position = 0;
-		this.cachedMarkers = new ArrayList<Marker>();
 		logger = Logger.getLogger("JMV.Scanner");
 		logger.setUseParentHandlers(false);
 		for (Handler h : logger.getHandlers()) {
@@ -43,28 +40,6 @@ public class Scanner implements Iterable<Marker> {
 		logger.addHandler(MateText.consoleHandler());
 	}
 
-	// if we have already scanned this line for this scope then
-	// simply return the next cached marker (choosing the longest
-	// match in case of a tie).
-	public Marker getCachedMarker() {
-		Marker m = null;
-		int newLength;
-		for (Marker newMarker : cachedMarkers) {
-			m = newMarker.bestOf(m);
-		}
-		return m;
-	}
-	
-	public void removePrecedingCachedMarkers(Marker m) {
-		int ix = 0;
-		int len = cachedMarkers.size();
-		for(int i = 0; i < len; i++, ix++) {
-			if (cachedMarkers.get(ix).from < m.match.getCapture(0).end) {
-				cachedMarkers.remove(ix);
-				ix--;
-			}
-		}
-	}
 
 	public Match scanForMatch(int from, Pattern p) {
 		// if (p.name != null && (p.name.startsWith("#") || p.name.startsWith("$")))
@@ -91,13 +66,6 @@ public class Scanner implements Iterable<Marker> {
 		Marker bestMarker = null;
 		int newLength;
 		boolean isCloseMatch = false;
-//		if ((bestMarker = getCachedMarker()) != null) {
-//			logger.info("  got cached marker\n");
-//			this.cachedMarkers.remove(bestMarker);
-//			removePrecedingCachedMarkers(bestMarker);
-//			return bestMarker;
-//		}
-//		assert(cachedMarkers.size() == 0);
 		Rx closingRegex = currentScope.closingRegex;
 		if (closingRegex != null && closingRegex.usable()) {
 			//logger.info(String.format("closing regex: '%s'", closingRegex.pattern));
@@ -112,7 +80,6 @@ public class Scanner implements Iterable<Marker> {
 				newMarker.match = match;
 				newMarker.from = match.getCapture(0).start;
 				newMarker.isCloseScope = true;
-				this.cachedMarkers.add(newMarker);
 				bestMarker = newMarker;
 				isCloseMatch = true;
 			} else {
@@ -148,14 +115,9 @@ public class Scanner implements Iterable<Marker> {
 					continue;
 				}
 				newMarker.isCloseScope = false;
-				this.cachedMarkers.add(newMarker);
 				bestMarker = newMarker.bestOf(bestMarker);
 				positionNow = match.getByteCapture(0).end;
 			}
-		}
-		if (bestMarker != null) {
-			this.cachedMarkers.remove(bestMarker);
-			this.removePrecedingCachedMarkers(bestMarker);
 		}
 		return bestMarker;
 	}
