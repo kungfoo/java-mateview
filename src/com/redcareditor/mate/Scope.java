@@ -23,6 +23,7 @@ public class Scope implements Comparable<Scope>{
 	
 	public boolean isOpen;
 	public boolean isCapture;
+	public boolean isCloseCapture;
 	
 	public Match openMatch;
 	public Match closeMatch;

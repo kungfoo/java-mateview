@@ -151,13 +151,19 @@ describe JavaMateView, "when reparsing after changes" do
       it_should_match_clean_reparse
     end
     
-    it "should " do
+    it "scopes should have left gravity" do
       @st.text = "def foo"
-      p :START
       @mt.type(0, 7, "(")
       @mt.type(0, 8, "a")
       @mt.type(0, 9, ")")
-      p :END
+      it_should_match_clean_reparse
+    end
+    
+    it "should reparse closing captures without adding duplicates" do
+      @st.text = "def foo"
+      @mt.type(0, 7, "(")
+      @mt.type(0, 8, ")")
+      @mt.type(0, 8, "a")
       it_should_match_clean_reparse
     end
   end

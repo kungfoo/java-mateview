@@ -351,7 +351,7 @@ public class Parser {
 		Parser.linesParsed++;
 		String line = getLine(lineIx) + "\n";
 		int length = line.length();
-		logger.info(String.format("parseLine(%d)", lineIx));
+		//logger.info(String.format("parseLine(%d) '%s'", lineIx, line));
 		if (lineIx > getParsedUpto())
 			this.setParsedUpto(lineIx);
 		//System.out.printf("getParsedUpto: %d\n", getParsedUpto());
@@ -368,29 +368,29 @@ public class Parser {
 		//logger.info(String.format("start pretty:\n%s", root.pretty(2)));
 		for (Marker m : scanner) {
 			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, length, scanner.position);
-			if (expectedScope != null)
-				logger.info(String.format("expectedScope: %s (%d, %d)", expectedScope.name, expectedScope.getStart().getLine(), 
-					           expectedScope.getStart().getLineOffset()));
-			else
-				logger.info("no expected scope");
-			logger.info(String.format("  scope: %s %d-%d (line length: %d)", 
-							m.pattern.name, m.from, m.match.getCapture(0).end, length));
+			// if (expectedScope != null)
+			// 	logger.info(String.format("expectedScope: %s (%d, %d)", expectedScope.name, expectedScope.getStart().getLine(), 
+			// 		           expectedScope.getStart().getLineOffset()));
+			// else
+			// 	logger.info("no expected scope");
+			// logger.info(String.format("  scope: %s %d-%d (line length: %d)", 
+			//				m.pattern.name, m.from, m.match.getCapture(0).end, length));
 			if (m.isCloseScope) {
-				logger.info("     (closing)");
+				//logger.info("     (closing)");
 				closeScope(scanner, expectedScope, lineIx, line, length, m, 
 							allScopes, closedScopes, removedScopes);
 			}
 			else if (m.pattern instanceof DoublePattern) {
-				logger.info("     (opening)");
+				//logger.info("     (opening)");
 				openScope(scanner, expectedScope, lineIx, line, length, m, 
 						   allScopes, closedScopes, removedScopes);
 			}
 			else {
-				logger.info("     (single)");
+				//logger.info("     (single)");
 				singleScope(scanner, expectedScope, lineIx, line, length, m, 
 							 allScopes, closedScopes, removedScopes);
 			}
-			System.out.printf("pretty:\n%s\n", root.pretty(2));
+			//System.out.printf("pretty:\n%s\n", root.pretty(2));
 			scanner.position = m.match.getByteCapture(0).end;
 		}
 		clearLine(lineIx, startScope, allScopes, closedScopes, removedScopes);
@@ -444,6 +444,7 @@ public class Parser {
 		}
 		
 		if (is_ended && equal_ends && equal_inner_ends && equal_match_strings) {
+			// System.out.printf("closing scope matches expected\n");
 			// we have already parsed this line and this scope ends here
 
 			// Re-add the captures from the end of the current scope to the 
@@ -457,9 +458,9 @@ public class Parser {
 						allScopes.add(child);
 				}
 			}
-			// stdout.printf("closing scope matches expected\n");
 		}
 		else {
+			// System.out.printf("closing scope does not match expected\n");
 			// stdout.printf("closing scope at %d\n", m.from);
 //			if (colourer != null) {
 //				colourer.uncolourScope(scanner.getCurrentScope(), false);
@@ -469,13 +470,14 @@ public class Parser {
 			scanner.getCurrentScope().isOpen = false;
 			scanner.getCurrentScope().endMatchString = endMatchString;
 			//stdout.printf("end_match_string: '%s'\n", scanner.current_scope.end_match_string);
-			handleCaptures(lineIx, length, line, scanner.getCurrentScope(), m, allScopes, closedScopes);
 			if (expectedScope != null) {
 				scanner.getCurrentScope().removeChild(expectedScope);
 				removedScopes.add(expectedScope);
 				// @removed_scopes << expected_scope
 			}
 		}
+		removeCloseCaptures(scanner.getCurrentScope());
+		handleCaptures(lineIx, length, line, scanner.getCurrentScope(), m, allScopes, closedScopes);
 		removedScopes.add(scanner.getCurrentScope()); // so it gets uncoloured
 		closedScopes.add(scanner.getCurrentScope());
 		scanner.setCurrentScope(scanner.getCurrentScope().parent);
@@ -669,16 +671,31 @@ public class Parser {
 		}
 		return null;
 	}
+	
+	public void removeCloseCaptures(Scope scope) {
+		int i = 0;
+		ArrayList<Scope> children = scope.children;
+		while (i < children.size()) {
+			Scope childScope = children.get(i);
+			if (childScope.isCloseCapture) {
+				children.remove(i);
+				i--;
+			}
+			i++;
+		}
+	}
 
 	public void collectChildCaptures(int lineIx, int length, Scope scope, 
 			Marker m, ArrayList<Scope> allScopes, ArrayList<Scope> closedScopes) {
 		Scope s;
 		Map<Integer, String> captures;
+		boolean isCloseCaptures = false;
 		if (m.pattern instanceof SinglePattern) {
 			captures = ((SinglePattern) m.pattern).captures;
 		}
 		else {
 			if (m.isCloseScope) {
+				isCloseCaptures = true;
 				captures = ((DoublePattern) m.pattern).endCaptures;
 			}
 			else {
@@ -700,6 +717,7 @@ public class Parser {
 					setEndPosSafely(s, m, lineIx, length, cap);
 					s.isOpen = false;
 					s.isCapture = true;
+					s.isCloseCapture = isCloseCaptures;
 					s.parent = scope;
 					captureScopes.add(s);
 					allScopes.add(s);
