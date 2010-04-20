@@ -29,7 +29,7 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 			document.removePositionUpdater(u);
 		}
 		document.addPositionCategory("scopes");
-		document.addPositionUpdater(new SwtScopePositionUpdater("scopes", SwtScopePositionUpdater.RIGHT_GRAVITY));
+		document.addPositionUpdater(new SwtScopePositionUpdater("scopes", SwtScopePositionUpdater.LEFT_GRAVITY));
 		document.addPositionCategory("lefts");
 		document.addPositionUpdater(new SwtScopePositionUpdater("lefts", SwtScopePositionUpdater.LEFT_GRAVITY));
 		document.addPositionCategory("rights");

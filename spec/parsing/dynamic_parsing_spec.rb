@@ -150,6 +150,16 @@ describe JavaMateView, "when reparsing after changes" do
       @mt.type(0, 2, "†")
       it_should_match_clean_reparse
     end
+    
+    it "should " do
+      @st.text = "def foo"
+      p :START
+      @mt.type(0, 7, "(")
+      @mt.type(0, 8, "a")
+      @mt.type(0, 9, ")")
+      p :END
+      it_should_match_clean_reparse
+    end
   end
 end
 

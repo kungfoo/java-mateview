@@ -351,7 +351,7 @@ public class Parser {
 		Parser.linesParsed++;
 		String line = getLine(lineIx) + "\n";
 		int length = line.length();
-		//logger.info(String.format("parseLine(%d)", lineIx));
+		logger.info(String.format("parseLine(%d)", lineIx));
 		if (lineIx > getParsedUpto())
 			this.setParsedUpto(lineIx);
 		//System.out.printf("getParsedUpto: %d\n", getParsedUpto());
@@ -368,29 +368,29 @@ public class Parser {
 		//logger.info(String.format("start pretty:\n%s", root.pretty(2)));
 		for (Marker m : scanner) {
 			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, length, scanner.position);
-			// if (expectedScope != null)
-			// 	logger.info(String.format("expectedScope: %s (%d, %d)", expectedScope.name, expectedScope.getStart().getLine(), 
-			// 		           expectedScope.getStart().getLineOffset()));
-			// else
-			// 	logger.info("no expected scope");
-			//logger.info(String.format("  scope: %s %d-%d (line length: %d)", 
-			//					m.pattern.name, m.from, m.match.getCapture(0).end, length));
+			if (expectedScope != null)
+				logger.info(String.format("expectedScope: %s (%d, %d)", expectedScope.name, expectedScope.getStart().getLine(), 
+					           expectedScope.getStart().getLineOffset()));
+			else
+				logger.info("no expected scope");
+			logger.info(String.format("  scope: %s %d-%d (line length: %d)", 
+							m.pattern.name, m.from, m.match.getCapture(0).end, length));
 			if (m.isCloseScope) {
-				//logger.info("     (closing)");
+				logger.info("     (closing)");
 				closeScope(scanner, expectedScope, lineIx, line, length, m, 
 							allScopes, closedScopes, removedScopes);
 			}
 			else if (m.pattern instanceof DoublePattern) {
-				//logger.info("     (opening)");
+				logger.info("     (opening)");
 				openScope(scanner, expectedScope, lineIx, line, length, m, 
 						   allScopes, closedScopes, removedScopes);
 			}
 			else {
-				// logger.info("     (single)");
+				logger.info("     (single)");
 				singleScope(scanner, expectedScope, lineIx, line, length, m, 
 							 allScopes, closedScopes, removedScopes);
 			}
-			// System.out.printf("pretty:\n%s\n", root.pretty(2));
+			System.out.printf("pretty:\n%s\n", root.pretty(2));
 			scanner.position = m.match.getByteCapture(0).end;
 		}
 		clearLine(lineIx, startScope, allScopes, closedScopes, removedScopes);
