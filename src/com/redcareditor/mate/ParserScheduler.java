@@ -173,8 +173,10 @@ public class ParserScheduler {
 		while (lineIx <= toLine) {
 			scopeChanged = parser.parseLine(lineIx);
 			if (scopeChanged) {
-				scopeEverChanged = true;
+				if (scopeEverChanged == false && getParsedUpto() > lineIx)
+					parser.clearFrom(parser.getOffsetAtLine(lineIx));
 				setParsedUpto(lineIx);
+				scopeEverChanged = true;
 			}
 			lineIx++;
 		}
@@ -191,8 +193,8 @@ public class ParserScheduler {
 			return -1;
 		int lineIx = fromLine;
 		int lineCount = parser.getLineCount();
-		int lastLine = Math.min(lastVisibleLine + 100, lineCount - 1);
-		int toLine = Math.min(fromLine + 100, lastLine);
+		int lastLine = Math.min(lastVisibleLine + 200, lineCount - 1);
+		int toLine = Math.min(fromLine + 200, lastLine);
 		while (lineIx <= toLine) {
 			parser.parseLine(lineIx);
 			setParsedUpto(lineIx);

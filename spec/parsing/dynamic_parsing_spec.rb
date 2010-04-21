@@ -83,7 +83,8 @@ describe JavaMateView, "when reparsing after changes" do
       @mt.type(1, 0, "\n")
       it_should_match_clean_reparse
     end
-
+    # 0, 13, 22, 33, 44, 47
+# HI end is 46
     it "reparses lines with only whitespace changes, even when they have closing scopes" do
       @st.text = strip(<<-END)
       puts "hello"
@@ -93,7 +94,9 @@ describe JavaMateView, "when reparsing after changes" do
       HI
       puts "hello"
       END
+      p :START
       1.times { @mt.type(4, 2, " ") }
+      p :END
       it_should_match_clean_reparse
     end
 

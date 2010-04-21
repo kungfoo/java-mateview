@@ -151,6 +151,10 @@ public class Parser {
 		return endScope;
 	}
 	
+	public void clearFrom(int offset) {
+		root.clearFrom(offset);
+	}
+	
 	public boolean parseLine(int lineIx) {
 		Parser.linesParsed++;
 		String line = getLine(lineIx) + "\n";

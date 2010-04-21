@@ -1,10 +1,12 @@
 
 package com.redcareditor.mate;
 
+import java.util.List;
 import java.util.ArrayList;
 
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.mate.document.MateTextLocation;
+import com.redcareditor.mate.document.swt.SwtMateTextLocation;
 import com.redcareditor.mate.document.MateTextRange;
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Rx;
@@ -65,22 +67,98 @@ public class Scope implements Comparable<Scope>{
 			child.setMateText(mateText);
 	}
 	
+	static public Scope findContainingScopeOld(ArrayList<Scope> scopes, MateTextLocation location) {
+		for (Scope child : scopes) {
+			if (child.contains(location)) {
+				return child;
+			}
+		}
+		return null;
+	}
+	
+	static int indexOfLatestBefore(ArrayList<Scope> scopes, int offset) {
+		int high = scopes.size(), low = -1, probe;
+		if (high == 0)
+			return -1;
+		int bestProbe = high - 1;
+		int probeStart;
+		int bestStart = ((SwtMateTextLocation) scopes.get(high - 1).getStart()).offset;
+		Scope scope;
+		while (high - low > 1)
+		{
+			probe = (low + high) >>> 1;
+			scope = scopes.get(probe);
+			probeStart = ((SwtMateTextLocation) scope.getStart()).offset;
+			//System.out.printf("low: %d high: %d diff: %d probe: %d value: %d\n", low, high, high - low, probe, probeStart);
+			if (probeStart <= offset) {
+				low = probe;
+				bestStart = probeStart;
+				bestProbe = probe;
+			}
+			else {
+				high = probe;
+			}
+		}
+		if (bestStart <= offset)
+			return bestProbe;
+		else
+			return -1;
+	}
+	
+	static public Scope findContainingScopeNew(ArrayList<Scope> scopes, int offset) {
+		//System.out.printf("findContainingScopeNew(offset: %d)\n", offset);
+		int ix = indexOfLatestBefore(scopes, offset);
+		if (ix == -1)
+			return null;
+		Scope scope = scopes.get(ix);
+		int scopeStart = ((SwtMateTextLocation) scope.getStart()).offset;
+		if (scopeStart <= offset) {
+			int scopeEnd = ((SwtMateTextLocation) scope.getEnd()).offset;
+			if (scopeEnd > offset) {
+				return scope;
+			}
+		}
+		return null;
+	}
+
 	public Scope scopeAt(int line, int lineOffset) {
 		MateTextLocation location = document.getTextLocation(line, lineOffset);
-		
+		Scope r = null;		
 		if (getStart().compareTo(location) <= 0 || parent == null) {
 			if (isOpen || getEnd().compareTo(location) >= 0) {
-				for (Scope child : children) {
-					if (child.contains(location)) {
-						return child.scopeAt(line, lineOffset);
-					}
-				}
-				return this;
+				Scope containingChildNew = Scope.findContainingScopeNew(children, ((SwtMateTextLocation) location).offset);
+				//Scope containingChildOld = Scope.findContainingScopeOld(children, location);
+				//if (containingChildNew != containingChildOld) {
+				//	System.out.printf("scopeAt(%d, %d)\n", line, lineOffset);
+				//	System.out.printf("containingChild differs %s -> %s\n", 
+				//		(containingChildOld == null ? "none" : containingChildOld.name),
+				//		(containingChildNew == null ? "none" : containingChildNew.name)
+				//	);
+				//	System.out.printf(pretty(2));
+				//}
+				if (containingChildNew != null)
+					r = containingChildNew.scopeAt(line, lineOffset);
+				else
+					r = this;
 			}
-			
 		}
-
-		return null;
+		return r;
+	}
+	
+	public void clearFrom(int offset) {
+		int ix = indexOfLatestBefore(children, offset);
+		if (ix == -1)
+			return;
+		Scope scope = children.get(ix);
+		int scopeStart = ((SwtMateTextLocation) scope.getStart()).offset;
+		if (scopeStart < offset) {
+			ix = ix + 1;
+			int scopeEnd = ((SwtMateTextLocation) scope.getEnd()).offset;
+			if (scopeEnd > offset)
+				scope.clearFrom(offset);
+		}
+		if (ix <= children.size() - 1)
+			((List<Scope>) children).subList(ix, children.size() - 1).clear();
 	}
 	
 	public int compareTo(Scope o) {
