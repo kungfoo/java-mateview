@@ -210,8 +210,8 @@ public class ParserScheduler {
 		// System.out.printf("lastVisibleLine: %d, lookAhead: %d, getParsedUpto: %d\n", lastVisibleLine, lookAhead, getParsedUpto());
 		if (lastVisibleLine + lookAhead >= getParsedUpto()) {
 			int endRange = Math.min(parser.getLineCount() - 1, lastVisibleLine + lookAhead);
-			//thunkFrom(oldLastVisibleLine);
-			parseRange(getParsedUpto(), endRange);
+			thunkFrom(oldLastVisibleLine);
+			//parseRange(getParsedUpto(), endRange);
 		}
 	}
 	
