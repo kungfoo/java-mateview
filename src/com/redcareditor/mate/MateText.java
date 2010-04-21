@@ -75,6 +75,7 @@ public class MateText {
 			viewer = new SourceViewer(parent, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		}
 		viewer.setDocument(document);
+		viewer.addPainter(new org.eclipse.jface.text.WhitespaceCharacterPainter(viewer));
 		colourer = new SwtColourer(this);
 		mateDocument = new SwtMateDocument(this);
 		grammarListeners = new ArrayList<IGrammarListener>();
