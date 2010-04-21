@@ -77,15 +77,15 @@ public class Scope implements Comparable<Scope>{
 	}
 	
 	static int indexOfLatestBefore(ArrayList<Scope> scopes, int offset) {
-		int high = scopes.size(), low = -1, probe;
+		int high = scopes.size(), low = -1, probe, probeStart;
 		if (high == 0)
 			return -1;
-		int bestProbe = high - 1;
-		int probeStart;
-		int bestStart = ((SwtMateTextLocation) scopes.get(high - 1).getStart()).offset;
+		int bestProbe = 0;
+		int bestStart = ((SwtMateTextLocation) scopes.get(0).getStart()).offset;
+		if (bestStart > offset)
+			return -1;
 		Scope scope;
-		while (high - low > 1)
-		{
+		while (high - low > 1) {
 			probe = (low + high) >>> 1;
 			scope = scopes.get(probe);
 			probeStart = ((SwtMateTextLocation) scope.getStart()).offset;
@@ -146,19 +146,28 @@ public class Scope implements Comparable<Scope>{
 	}
 	
 	public void clearFrom(int offset) {
+		//System.out.printf("clearFrom(%d) children: %d\n", offset, children.size());
 		int ix = indexOfLatestBefore(children, offset);
+		//System.out.printf("  ix: %d\n", ix);
 		if (ix == -1)
 			return;
 		Scope scope = children.get(ix);
-		int scopeStart = ((SwtMateTextLocation) scope.getStart()).offset;
+		int scopeStart = scope.getStart().getOffset();
+		//System.out.printf("  scopeStart: %d\n", scopeStart);
 		if (scopeStart < offset) {
 			ix = ix + 1;
-			int scopeEnd = ((SwtMateTextLocation) scope.getEnd()).offset;
+			int scopeEnd = scope.getEnd().getOffset();
 			if (scopeEnd > offset)
 				scope.clearFrom(offset);
 		}
-		if (ix <= children.size() - 1)
-			((List<Scope>) children).subList(ix, children.size() - 1).clear();
+		if (ix <= children.size() - 1) {
+			//System.out.printf("  range: %d - %d\n", ix, children.size());
+			((List<Scope>) children).subList(ix, children.size()).clear();
+		}
+		if (getEnd().getOffset() > offset) {
+			removeEnd();
+			isOpen = true;
+		}
 	}
 	
 	public int compareTo(Scope o) {
@@ -245,22 +254,30 @@ public class Scope implements Comparable<Scope>{
 			children.add(newChild);
 			return;
 		}
+		
+		int newChildStartOffset = newChild.getStart().getOffset();
 
-		if (children.get(0).getStart().getOffset() > newChild.getStart().getOffset()){
+		if (children.get(0).getStart().getOffset() > newChildStartOffset){
 			children.add(0, newChild);
 			return;
 		}
 
 		int insertIx = 0;
 		int ix = 1;
-		for (Scope child : children) {
-			if (child.getStart().getOffset() <= newChild.getStart().getOffset()) {
-				insertIx = ix;
+		Scope lastChild = children.get(children.size() - 1);
+		
+		if (lastChild.getStart().getOffset() <= newChildStartOffset) {
+			insertIx = children.size();
+		}
+		else {
+			for (Scope child : children) {
+				if (child.getStart().getOffset() <= newChildStartOffset) {
+					insertIx = ix;
+				}
+				ix++;
 			}
-			ix++;
 		}
 		children.add(insertIx, newChild);
-//		children.add(newChild);
 	}
 	
 	public void removeChild(Scope child) {

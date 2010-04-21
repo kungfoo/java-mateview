@@ -137,6 +137,7 @@ public class ParserScheduler {
 				} else {
 					rangeEnd = Math.min(lastVisibleLine + lookAhead, range.end);
 				}
+				//System.out.printf("parseRange from processChanges\n");
 				thisParsedUpto = parseRange(range.start, rangeEnd);
 			}
 			int startOffset = parser.getOffsetAtLine(range.start);
@@ -165,7 +166,7 @@ public class ParserScheduler {
 	// more if necessary. Returns the index of the last line
 	// parsed.
 	public int parseRange(int fromLine, int toLine) {
-		// System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
+		//System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
 
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
@@ -173,8 +174,12 @@ public class ParserScheduler {
 		while (lineIx <= toLine) {
 			scopeChanged = parser.parseLine(lineIx);
 			if (scopeChanged) {
-				if (scopeEverChanged == false && getParsedUpto() > lineIx)
-					parser.clearFrom(parser.getOffsetAtLine(lineIx));
+				if (scopeEverChanged == false && getParsedUpto() > lineIx) {
+					//System.out.printf(parser.root.pretty(4));
+					//System.out.printf("-- clearFrom(%d) --\n", lineIx);
+					parser.clearFrom(parser.getOffsetAtLine(lineIx + 1));
+					//System.out.printf(parser.root.pretty(4));
+				}
 				setParsedUpto(lineIx);
 				scopeEverChanged = true;
 			}

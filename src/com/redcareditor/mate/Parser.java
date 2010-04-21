@@ -159,21 +159,24 @@ public class Parser {
 		Parser.linesParsed++;
 		String line = getLine(lineIx) + "\n";
 		int length = line.length();
-		//logger.info(String.format("parseLine(%d)", lineIx));
+		//if (length > 1)
+		//	logger.info(String.format("parseLine(%d) \"%s\"", lineIx, line.substring(0, line.length() - 1)));
+		//else
+		//	logger.info(String.format("parseLine(%d)", lineIx));
 		if (lineIx > parserScheduler.getParsedUpto())
 			parserScheduler.setParsedUpto(lineIx);
 		//System.out.printf("getParsedUpto: %d\n", getParsedUpto());
 		Scope startScope = scopeBeforeStartOfLine(lineIx);
 		Scope endScope1  = scopeAfterEndOfLine(lineIx, length);
-		// logger.info(String.format("startScope is: %s", startScope.name));
-		// logger.info(String.format("endScope1: %s", endScope1.name));
+		//logger.info(String.format("  startScope is: %s", startScope.name));
+		//logger.info(String.format("  endScope1: %s", endScope1.name));
 		Scanner scanner = new Scanner(startScope, line, lineIx);
 		ArrayList<Scope> allScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
 		ArrayList<Scope> closedScopes = new ArrayList<Scope>();
 		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
 		allScopes.add(startScope);
-		//logger.info(String.format("start pretty:\n%s", root.pretty(2)));
+		//logger.info(String.format("start pretty:\n%s", root.pretty(4)));
 		for (Marker m : scanner) {
 			Scope expectedScope = getExpectedScope(scanner.getCurrentScope(), lineIx, length, scanner.position);
 			// if (expectedScope != null)
@@ -203,8 +206,8 @@ public class Parser {
 		}
 		clearLine(lineIx, startScope, allScopes, closedScopes, removedScopes);
 		Scope endScope2 = scopeAfterEndOfLine(lineIx, length);
-//		System.out.printf("end_scope2: %s\n", endScope2.name);
-		// System.out.printf("end pretty: %s\n", this.root.pretty(2));
+		//logger.info(String.format("  end_scope2: %s\n", endScope2.name));
+		//System.out.printf("end pretty: %s\n", this.root.pretty(4));
 //		if (colourer != null) {
 //			// System.out.printf("before_uncolour_scopes\n");
 //			colourer.uncolourScopes(removedScopes);
