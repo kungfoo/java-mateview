@@ -86,7 +86,19 @@ class MateExample < Jface::ApplicationWindow
     set_block_selection.text = "Set Not Block Selection"
     file_menu.add set_block_selection
     
+    always_parse_all = AlwaysParseAll.new
+    always_parse_all.window = self
+    always_parse_all.text = "Always Parse All"
+    file_menu.add always_parse_all
     return main_menu
+  end
+  
+  class AlwaysParseAll < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.parser.parserScheduler.alwaysParseAll = true;
+    end
   end
   
   class SetBlockSelection < Jface::Action
@@ -149,7 +161,11 @@ class MateExample < Jface::ApplicationWindow
     attr_accessor :window
 
     def run
-      @window.mate_text.getMateDocument.set(source*50)
+      s = Time.now
+      ##until Time.now - s > 120
+      @window.mate_text.getMateDocument.set(File.read(File.dirname(__FILE__) + "/test_big_ruby_file.rb")*3)
+      #end
+      puts "parse took #{Time.now - s}s"
     end
     
     def source

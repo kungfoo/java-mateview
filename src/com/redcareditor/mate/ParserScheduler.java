@@ -131,7 +131,12 @@ public class ParserScheduler {
 		// System.out.printf("process_changes (lastVisibleLine: %d) (charCount = %d)\n", lastVisibleLine, document.getLength());
 		for (Range range : changes) {
 			if (range.end > thisParsedUpto && range.start <= lastVisibleLine + lookAhead) {
-				int rangeEnd = Math.min(lastVisibleLine + lookAhead, range.end);
+				int rangeEnd;
+				if (alwaysParseAll) {
+					rangeEnd = parser.getLineCount() - 1;
+				} else {
+					rangeEnd = Math.min(lastVisibleLine + lookAhead, range.end);
+				}
 				thisParsedUpto = parseRange(range.start, rangeEnd);
 			}
 			int startOffset = parser.getOffsetAtLine(range.start);
@@ -180,19 +185,22 @@ public class ParserScheduler {
 		return toLine;
 	}
 	
-	public void parseOnwards(int fromLine) {
+	public int parseOnwards(int fromLine) {
 		// The widget can be disposed between the Thunk being created and being executed.
 		if (parser.styledText.isDisposed())
-			return;
+			return -1;
 		int lineIx = fromLine;
 		int lineCount = parser.getLineCount();
 		int lastLine = Math.min(lastVisibleLine + 100, lineCount - 1);
-		while (lineIx <= lastLine) {
+		int toLine = Math.min(fromLine + 100, lastLine);
+		while (lineIx <= toLine) {
 			parser.parseLine(lineIx);
 			setParsedUpto(lineIx);
 			parser.redrawLine(lineIx);
 			lineIx++;
 		}
+		
+		return lineIx;
 	}
 	
 	public void lastVisibleLineChanged(int newLastVisibleLine) {
@@ -202,8 +210,8 @@ public class ParserScheduler {
 		// System.out.printf("lastVisibleLine: %d, lookAhead: %d, getParsedUpto: %d\n", lastVisibleLine, lookAhead, getParsedUpto());
 		if (lastVisibleLine + lookAhead >= getParsedUpto()) {
 			int endRange = Math.min(parser.getLineCount() - 1, lastVisibleLine + lookAhead);
-			thunkFrom(oldLastVisibleLine);
-			//parseRange(getParsedUpto(), endRange);
+			//thunkFrom(oldLastVisibleLine);
+			parseRange(getParsedUpto(), endRange);
 		}
 	}
 	

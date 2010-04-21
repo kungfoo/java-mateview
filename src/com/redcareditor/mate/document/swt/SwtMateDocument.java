@@ -38,7 +38,7 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 
 	public void set(String text) {
 		this.mateText.getDocument().set(text);
-		reparseAll();
+		//reparseAll();
 	}
 	
 	public IDocument getJFaceDocument() {

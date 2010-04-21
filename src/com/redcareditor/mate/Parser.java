@@ -155,7 +155,7 @@ public class Parser {
 		Parser.linesParsed++;
 		String line = getLine(lineIx) + "\n";
 		int length = line.length();
-		//logger.info(String.format("parseLine(%d) '%s'", lineIx, line));
+		//logger.info(String.format("parseLine(%d)", lineIx));
 		if (lineIx > parserScheduler.getParsedUpto())
 			parserScheduler.setParsedUpto(lineIx);
 		//System.out.printf("getParsedUpto: %d\n", getParsedUpto());

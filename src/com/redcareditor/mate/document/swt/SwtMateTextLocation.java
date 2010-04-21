@@ -53,8 +53,8 @@ public class SwtMateTextLocation extends Position implements MateTextLocation {
 		}
 	}
 
-	public int compareTo(MateTextLocation o) {
-		return comperator.compare(this, o);
+	public int compareTo(MateTextLocation other) {
+		return this.offset - ((SwtMateTextLocation)other).offset;
 	}
 	
 	//@Override

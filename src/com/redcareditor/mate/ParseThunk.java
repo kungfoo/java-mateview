@@ -10,6 +10,7 @@ public class ParseThunk implements Runnable {
 	public long lastModificationTime;
 	public int parseFrom;
 	public boolean closed;
+	public int wait = WAIT;
 	
 	private Parser parser;
 	
@@ -19,7 +20,11 @@ public class ParseThunk implements Runnable {
 		this.lastModificationTime = System.currentTimeMillis();
 		this.parseFrom            = parseFrom;
 		// System.out.printf("New thunk. parseFrom:%d time: %d\n", parseFrom, timeCreated);
-		Display.getCurrent().timerExec(WAIT, this);
+		enqueue();
+	}
+	
+	public void enqueue() {
+		Display.getCurrent().timerExec(wait, this);
 	}
 	
 	public void stop() {
@@ -32,7 +37,7 @@ public class ParseThunk implements Runnable {
 		// System.out.printf("Run thunk. time: %s\n", System.currentTimeMillis());
 		if (lastModificationTime > System.currentTimeMillis() - DELAY_IF_MODIFIED_WITHIN) {
 			// System.out.printf("  Postponing thunk.\n", parseFrom);
-			Display.getCurrent().timerExec(WAIT, this);
+			Display.getCurrent().timerExec(wait, this);
 		}
 		else {
 			// System.out.printf("  Once, after 0.5 seconds, parse from %d.\n", parseFrom);
@@ -48,6 +53,19 @@ public class ParseThunk implements Runnable {
 	
 	public void execute() {
 		parser.parserScheduler.thunk = null;
-		parser.parserScheduler.parseOnwards(parseFrom);
+		System.out.printf("Thunk: parseOnwards(%d)\n", parseFrom);
+		parseFrom = parser.parserScheduler.parseOnwards(parseFrom);
+		if (parseFrom == -1)
+			return;
+		if (parseFrom >= parser.getLineCount() - 1)
+			return;
+		if (parseFrom >= parser.parserScheduler.lastVisibleLine + 95) {
+			return;
+		}
+		if (parseFrom <= parser.getLineCount() - 1) {
+			wait = 50;
+			enqueue();
+		}
 	}
 }
+
