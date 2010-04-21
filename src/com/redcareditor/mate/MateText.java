@@ -28,6 +28,7 @@ import com.redcareditor.mate.document.swt.SwtMateTextLocation;
 import com.redcareditor.mate.document.swt.SwtMateDocument;
 import com.redcareditor.mate.undo.MateTextUndoManager;
 import com.redcareditor.mate.undo.swt.SwtMateTextUndoManager;
+import com.redcareditor.mate.WhitespaceCharacterPainter;
 import com.redcareditor.onig.NullRx;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.theme.Theme;
@@ -75,7 +76,7 @@ public class MateText {
 			viewer = new SourceViewer(parent, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		}
 		viewer.setDocument(document);
-		viewer.addPainter(new org.eclipse.jface.text.WhitespaceCharacterPainter(viewer));
+		viewer.addPainter(new WhitespaceCharacterPainter(viewer));
 		colourer = new SwtColourer(this);
 		mateDocument = new SwtMateDocument(this);
 		grammarListeners = new ArrayList<IGrammarListener>();
