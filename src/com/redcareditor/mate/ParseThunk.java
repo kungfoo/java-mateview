@@ -59,7 +59,7 @@ public class ParseThunk implements Runnable {
 			return;
 		if (parseFrom >= parser.getLineCount() - 1)
 			return;
-		if (parseFrom >= parser.parserScheduler.lastVisibleLine + 195) {
+		if (parseFrom >= parser.parserScheduler.lastVisibleLine + 395) {
 			return;
 		}
 		if (parseFrom <= parser.getLineCount() - 1) {
