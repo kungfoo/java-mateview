@@ -60,10 +60,12 @@ public class MateText {
 	private List<IGrammarListener> grammarListeners;
 	
 	private boolean singleLine;
+	private WhitespaceCharacterPainter whitespaceCharacterPainter;
+	private boolean showingInvisibles;
 
-        public MateText(Composite parent) {
-                this(parent, false);
-        }
+	public MateText(Composite parent) {
+		this(parent, false);
+	}
 
 	public MateText(Composite parent, boolean thisSingleLine) {
 		singleLine = thisSingleLine;
@@ -76,7 +78,10 @@ public class MateText {
 			viewer = new SourceViewer(parent, gutter, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		}
 		viewer.setDocument(document);
-		viewer.addPainter(new WhitespaceCharacterPainter(viewer));
+		
+		whitespaceCharacterPainter = new WhitespaceCharacterPainter(viewer);
+		showingInvisibles = false;
+		
 		colourer = new SwtColourer(this);
 		mateDocument = new SwtMateDocument(this);
 		grammarListeners = new ArrayList<IGrammarListener>();
@@ -94,7 +99,21 @@ public class MateText {
 	public boolean isSingleLine() {
 	  return singleLine;
 	}
-
+	
+	public void showInvisibles(boolean should) {
+		if (should) {
+			showingInvisibles = true;
+			viewer.addPainter(whitespaceCharacterPainter);
+		} else {
+			showingInvisibles = false;
+			viewer.removePainter(whitespaceCharacterPainter);
+		}
+	}
+	
+	public boolean isShowingInvisibles() {
+		return showingInvisibles;
+	}
+	
 	private CompositeRuler constructRuler() {
 		CompositeRuler ruler = new CompositeRuler(0);
 		lineNumbers = new LineNumberRulerColumn();

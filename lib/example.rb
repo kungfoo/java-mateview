@@ -90,9 +90,23 @@ class MateExample < Jface::ApplicationWindow
     always_parse_all.window = self
     always_parse_all.text = "Always Parse All"
     file_menu.add always_parse_all
+    
+    toggle_invisibles = ToggleInvisibles.new
+    toggle_invisibles.window = self
+    toggle_invisibles.text = "Show/Hide Invisibles"
+    file_menu.add toggle_invisibles
+    
     return main_menu
   end
   
+  class ToggleInvisibles < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.showInvisibles(!@window.mate_text.showing_invisibles)
+    end
+  end
+
   class AlwaysParseAll < Jface::Action
     attr_accessor :window
     
