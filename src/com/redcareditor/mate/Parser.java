@@ -576,6 +576,16 @@ public class Parser {
 		}
 	}
 
+	private ArrayList<Scope> deleteAnyOnLineNotIn(Scope cs, int lineIx, ArrayList<Scope> allScopes) {
+		int startOffset = getOffsetAtLine(lineIx);
+		int endOffset;
+		if (lineIx == getLineCount() - 1)
+			endOffset = getCharCount();
+		else
+			endOffset = getOffsetAtLine(lineIx + 1);
+		return cs.deleteAnyBetweenNotIn(startOffset, endOffset, allScopes);
+	}
+
 	private void clearLine(int lineIx, Scope startScope, ArrayList<Scope> allScopes, 
 							ArrayList<Scope> closedScopes, ArrayList<Scope> removedScopes) {
 		// If we are reparsing, we might find that some scopes have disappeared,
@@ -583,7 +593,7 @@ public class Parser {
 		Scope cs = startScope;
 		while (cs != null) {
 			// stdout.printf("  removing_scopes from: %s\n", cs.name);
-			ArrayList<Scope> newRemovedScopes = cs.deleteAnyOnLineNotIn(lineIx, allScopes);
+			ArrayList<Scope> newRemovedScopes = deleteAnyOnLineNotIn(cs, lineIx, allScopes);
 			removedScopes.addAll(newRemovedScopes);
 			cs = cs.parent;
 		}

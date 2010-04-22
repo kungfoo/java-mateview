@@ -178,8 +178,10 @@ class MateExample < Jface::ApplicationWindow
       s = Time.now
       ##until Time.now - s > 120
       @window.mate_text.getMateDocument.set(File.read(File.dirname(__FILE__) + "/test_big_ruby_file.rb")*3)
+      #@window.mate_text.getMateDocument.set("def foo")
       #end
       puts "parse took #{Time.now - s}s"
+      puts "num scopes: #{@window.mate_text.parser.root.count_descendants}"
     end
     
     def source

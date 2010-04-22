@@ -198,8 +198,8 @@ public class ParserScheduler {
 			return -1;
 		int lineIx = fromLine;
 		int lineCount = parser.getLineCount();
-		int lastLine = Math.min(lastVisibleLine + 200, lineCount - 1);
-		int toLine = Math.min(fromLine + 200, lastLine);
+		int lastLine = Math.min(lastVisibleLine + 400, lineCount - 1);
+		int toLine = Math.min(fromLine + 400, lastLine);
 		while (lineIx <= toLine) {
 			parser.parseLine(lineIx);
 			setParsedUpto(lineIx);

@@ -76,6 +76,20 @@ public class Scope implements Comparable<Scope>{
 		return null;
 	}
 	
+	static int indexOfEarliestAfter(ArrayList<Scope> scopes, int offset) {
+		if (offset == 0) {
+			if (scopes.size() > 0)
+				return 0;
+			else
+				return -1;
+		}
+		int ix = indexOfLatestBefore(scopes, offset - 1);
+		int c = ix + 1;
+		if (c == scopes.size())
+			return -1;
+		return c;
+	}
+	
 	static int indexOfLatestBefore(ArrayList<Scope> scopes, int offset) {
 		int high = scopes.size(), low = -1, probe, probeStart;
 		if (high == 0)
@@ -283,26 +297,57 @@ public class Scope implements Comparable<Scope>{
 	public void removeChild(Scope child) {
 		children.remove(child);
 	}
-
+	
 	public Scope firstChildAfter(MateTextLocation location) {
-		for (Scope child : children) {
-			if (child.getStart().compareTo(location) >= 0) {
-				return child;
-			}
+		if (children.size() == 0)
+			return null;
+			
+		int offset = location.getOffset();
+		int ix = indexOfEarliestAfter(children, offset);
+		Scope r = null;
+		if (ix == -1) {
+			return null;
 		}
-		return null;
+		else {
+			return children.get(ix);
+		}
 	}
 	
-	public ArrayList<Scope> deleteAnyOnLineNotIn(int lineIx, ArrayList<Scope> scopes) {
+	public void printScopeRanges(String title, ArrayList<Scope> scopes) {
+		System.out.printf("%s: ", title);
+		for (Scope s : scopes) {
+			System.out.printf("%d-%d, ", s.getStart().getOffset(), s.getEnd().getOffset());
+		}
+		System.out.printf("\n");
+	}
+	
+	public ArrayList<Scope> deleteAnyBetweenNotIn(int startOffset, int endOffset, ArrayList<Scope> scopes) {
+		//System.out.printf("deleteAnyBetweenNotIn(%d, %d)\n", startOffset, endOffset);
+		//printScopeRanges("  children", children);
+		//printScopeRanges("  safe", scopes);
 		ArrayList<Scope> removedScopes = new ArrayList<Scope>();
-		for (Scope child : children) {
-			int childStartLine = child.getStart().getLine();
-			if (childStartLine == lineIx && !scopes.contains(child)) {
-				// System.out.printf("deleteAnyOnLineNotIn removing: %s\n", child.pattern.name);
+		int ix, childStart;
+		
+		int ixEnd   = indexOfLatestBefore(children, endOffset);
+		if (ixEnd == -1)
+			return removedScopes;
+		int ixStart = indexOfEarliestAfter(children, startOffset);
+		if (ixStart == -1)
+			ix = 0;
+		else
+			ix = ixStart;
+		//System.out.printf("  start: %d, end: %d\n", ixStart, ixEnd);
+		while (ix <= ixEnd) {
+			Scope child = children.get(ix);
+			childStart = child.getStart().getOffset();
+			//System.out.printf("    checking: %d-%d\n", child.getStart().getOffset(), child.getEnd().getOffset());
+			if (childStart >= startOffset && childStart < endOffset && !scopes.contains(child)) {
 				removedScopes.add(child);
 			}
+			ix++;
 		}
 		children.removeAll(removedScopes);
+		//printScopeRanges("  removedScopes", removedScopes);
 		return removedScopes;
 	}
 	
@@ -458,4 +503,15 @@ public class Scope implements Comparable<Scope>{
 		}
 		return null;
 	}
+	
+	public int countDescendants() {
+		int i = children.size();
+		for (Scope child : children) {
+			i += child.countDescendants();
+		}
+		return i;
+	}
 }
+
+
+
