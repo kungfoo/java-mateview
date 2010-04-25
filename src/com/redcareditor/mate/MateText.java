@@ -62,7 +62,7 @@ public class MateText {
 	private boolean singleLine;
 	private WhitespaceCharacterPainter whitespaceCharacterPainter;
 	private boolean showingInvisibles;
-
+	
 	public MateText(Composite parent) {
 		this(parent, false);
 	}
