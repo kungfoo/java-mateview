@@ -5,6 +5,7 @@ import org.eclipse.swt.widgets.Display;
 public class ParseThunk implements Runnable {
 	int WAIT                     = 500;
 	int DELAY_IF_MODIFIED_WITHIN = 400;
+	int DELAY_FOR_USER_INPUT     = 10;
 	
 	public long timeCreated;
 	public long lastModificationTime;
@@ -53,17 +54,16 @@ public class ParseThunk implements Runnable {
 	
 	public void execute() {
 		parser.parserScheduler.thunk = null;
-		System.out.printf("Thunk: parseOnwards(%d)\n", parseFrom);
+		//System.out.printf("Thunk: parseOnwards(%d)\n", parseFrom);
 		parseFrom = parser.parserScheduler.parseOnwards(parseFrom);
 		if (parseFrom == -1)
 			return;
 		if (parseFrom >= parser.getLineCount() - 1)
 			return;
-		if (parseFrom >= parser.parserScheduler.lastVisibleLine + 395) {
+		if (parseFrom >= parser.parserScheduler.lastVisibleLine + ParserScheduler.LOOK_AHEAD - 5)
 			return;
-		}
 		if (parseFrom <= parser.getLineCount() - 1) {
-			wait = 50;
+			wait = DELAY_FOR_USER_INPUT;
 			enqueue();
 		}
 	}

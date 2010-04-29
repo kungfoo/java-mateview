@@ -16,7 +16,7 @@ import com.redcareditor.mate.document.swt.SwtMateTextLocation;
 import com.redcareditor.onig.Range;
 
 public class ParserScheduler {
-	int LOOK_AHEAD = 100;
+	public static int LOOK_AHEAD = 600;
 	public static boolean synchronousParsing = false;
 	public int lookAhead;
 	public int lastVisibleLine;
@@ -198,8 +198,8 @@ public class ParserScheduler {
 			return -1;
 		int lineIx = fromLine;
 		int lineCount = parser.getLineCount();
-		int lastLine = Math.min(lastVisibleLine + 400, lineCount - 1);
-		int toLine = Math.min(fromLine + 400, lastLine);
+		int lastLine = Math.min(lastVisibleLine + LOOK_AHEAD, lineCount - 1);
+		int toLine = Math.min(fromLine + LOOK_AHEAD, lastLine);
 		while (lineIx <= toLine) {
 			parser.parseLine(lineIx);
 			setParsedUpto(lineIx);
@@ -217,8 +217,7 @@ public class ParserScheduler {
 		//System.out.printf("lastVisibleLine: %d, lookAhead: %d, getParsedUpto: %d\n", lastVisibleLine, lookAhead, getParsedUpto());
 		if (lastVisibleLine + lookAhead >= getParsedUpto() && getParsedUpto() < parser.getLineCount() - 1) {
 			int endRange = Math.min(parser.getLineCount() - 1, lastVisibleLine + lookAhead);
-			thunkFrom(oldLastVisibleLine);
-			//parseRange(getParsedUpto(), endRange);
+			thunkFrom(getParsedUpto());
 		}
 	}
 	
