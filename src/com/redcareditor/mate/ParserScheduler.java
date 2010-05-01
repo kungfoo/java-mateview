@@ -16,7 +16,7 @@ import com.redcareditor.mate.document.swt.SwtMateTextLocation;
 import com.redcareditor.onig.Range;
 
 public class ParserScheduler {
-	public static int LOOK_AHEAD = 600;
+	public static int LOOK_AHEAD = 300;
 	public static boolean synchronousParsing = false;
 	public int lookAhead;
 	public int lastVisibleLine;
