@@ -10,7 +10,6 @@ import java.util.logging.Level;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.CompositeRuler;
-import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -29,6 +28,7 @@ import com.redcareditor.mate.document.swt.SwtMateDocument;
 import com.redcareditor.mate.undo.MateTextUndoManager;
 import com.redcareditor.mate.undo.swt.SwtMateTextUndoManager;
 import com.redcareditor.mate.WhitespaceCharacterPainter;
+import com.redcareditor.mate.LineNumberRulerColumn;
 import com.redcareditor.onig.NullRx;
 import com.redcareditor.onig.Rx;
 import com.redcareditor.theme.Theme;
@@ -61,7 +61,7 @@ public class MateText {
 	
 	private boolean singleLine;
 	private WhitespaceCharacterPainter whitespaceCharacterPainter;
-	private boolean showingInvisibles;
+    private boolean showingInvisibles;
 	
 	public MateText(Composite parent) {
 		this(parent, false);
@@ -94,7 +94,7 @@ public class MateText {
 		}
 		logger.addHandler(MateText.consoleHandler());
 		logger.info("Created MateText");
-	}
+    }
 
 	public boolean isSingleLine() {
 	  return singleLine;
@@ -124,8 +124,16 @@ public class MateText {
 	public void attachUpdater() {
 
 	}
+    
+    public boolean getWordWrap() {
+        return getTextWidget().getWordWrap();
+    }
 	
-	public String grammarName() {
+    public void setWordWrap(boolean val) {
+        getTextWidget().setWordWrap(val);
+    }
+
+    public String grammarName() {
 		return parser.grammar.name;
 	}
 
