@@ -424,8 +424,7 @@ public class LineNumberRulerColumn implements IVerticalRulerColumn {
 	 * Constructs a new vertical ruler column.
 	 */
 	public LineNumberRulerColumn() {
-        System.out.printf("init LineNumberRulerColumn\n");
-	}
+    }
 
 	/**
 	 * Sets the foreground color of this column.
