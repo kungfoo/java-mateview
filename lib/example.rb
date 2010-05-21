@@ -96,6 +96,11 @@ class MateExample < Jface::ApplicationWindow
     toggle_invisibles.text = "Show/Hide Invisibles"
     file_menu.add toggle_invisibles
     
+    toggle_word_wrap = ToggleWordWrap.new
+    toggle_word_wrap.window = self
+    toggle_word_wrap.text = "Toggle Word Wrap"
+    file_menu.add toggle_word_wrap
+    
     remove_annotations = RemoveAnnotations.new
     remove_annotations.window = self
     remove_annotations.text = "Remove Annotations"
@@ -148,6 +153,15 @@ class MateExample < Jface::ApplicationWindow
     
     def run
       @window.mate_text.annotations.each {|a| @window.mate_text.removeAnnotation(a) }
+    end
+  end
+
+  class ToggleWordWrap < Jface::Action
+    attr_accessor :window
+    
+    def run
+      mt = @window.mate_text
+      mt.set_word_wrap(!mt.get_word_wrap)
     end
   end
 
