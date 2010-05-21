@@ -96,9 +96,22 @@ class MateExample < Jface::ApplicationWindow
     toggle_invisibles.text = "Show/Hide Invisibles"
     file_menu.add toggle_invisibles
     
+    remove_annotations = RemoveAnnotations.new
+    remove_annotations.window = self
+    remove_annotations.text = "Remove Annotations"
+    file_menu.add remove_annotations
+    
     return main_menu
   end
   
+  class RemoveAnnotations < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.annotations.each {|a| @window.mate_text.removeAnnotation(a) }
+    end
+  end
+
   class ToggleInvisibles < Jface::Action
     attr_accessor :window
     

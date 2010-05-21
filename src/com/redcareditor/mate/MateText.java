@@ -1,6 +1,7 @@
 package com.redcareditor.mate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -58,7 +59,6 @@ public class MateText {
 	public SourceViewer viewer;
 	private IDocument document;
 	private CompositeRuler compositeRuler;
-	private OverviewRuler overviewRuler;
     private AnnotationRulerColumn annotationRuler;
 	private LineNumberRulerColumn lineNumbers;
 	private SwtMateDocument mateDocument;
@@ -70,13 +70,13 @@ public class MateText {
 	private WhitespaceCharacterPainter whitespaceCharacterPainter;
     private boolean showingInvisibles;
     
-    public static String ERROR_TYPE = "error.type";
-    public static Image ERROR_IMAGE;
-    public static final RGB ERROR_RGB = new RGB(255, 0, 0);
+    private static HashMap<String, Image> annotationImages = new HashMap<String, Image>();
+    // private static HashMap<String, RGB> annotationRGB = new HashMap<string, RGB>();
 
     // annotation model
     private AnnotationModel fAnnotationModel = new AnnotationModel();
     private IAnnotationAccess fAnnotationAccess;
+    private AnnotationPainter annotationPainter;
     private ColorCache cc;
     
 	public MateText(Composite parent) {
@@ -114,27 +114,16 @@ public class MateText {
 	}
 	
 	private void createSourceViewer(Composite parent) {
-		ERROR_IMAGE = new Image(Display.getDefault(), "/Users/danlucraft/Desktop/little-star.png");
-
-		fAnnotationAccess = new AnnotationMarkerAccess();
+        fAnnotationAccess = new AnnotationMarkerAccess();
 
 		cc = new ColorCache();
 
 		compositeRuler = new CompositeRuler();
-		overviewRuler = new OverviewRuler(fAnnotationAccess, 12, cc);
 		annotationRuler = new AnnotationRulerColumn(fAnnotationModel, 16, fAnnotationAccess);
 		compositeRuler.setModel(fAnnotationModel);
-		overviewRuler.setModel(fAnnotationModel);
-
+        
 		// add what types are show on the different rulers
-		annotationRuler.addAnnotationType(ERROR_TYPE);
-		overviewRuler.addAnnotationType(ERROR_TYPE);
-		overviewRuler.addHeaderAnnotationType(ERROR_TYPE);
-		// set what layer this type is on
-		overviewRuler.setAnnotationTypeLayer(ERROR_TYPE, 3);
-		// set what color is used on the overview ruler for the type
-		overviewRuler.setAnnotationTypeColor(ERROR_TYPE, new Color(Display.getDefault(), ERROR_RGB));
-
+        
 		lineNumbers = new LineNumberRulerColumn();
 		compositeRuler.addDecorator(0, lineNumbers);
 		compositeRuler.addDecorator(0, annotationRuler);
@@ -149,24 +138,59 @@ public class MateText {
 		fAnnotationHoverManager.install(annotationRuler.getControl());
 
 		// to paint the annotations
-		AnnotationPainter ap = new AnnotationPainter(viewer, fAnnotationAccess);
-		ap.addAnnotationType(ERROR_TYPE);
-		ap.setAnnotationTypeColor(ERROR_TYPE, new Color(Display.getDefault(), ERROR_RGB));
-
+		annotationPainter = new AnnotationPainter(viewer, fAnnotationAccess);
+        
 		// this will draw the squigglies under the text
-		viewer.addPainter(ap);
+		viewer.addPainter(annotationPainter);
 
 		viewer.configure(new CodeViewerConfiguration(cc));
 
 		// some misspelled text
-		document.set("Here's some texst so that we have somewhere to show an error");
+		document.set("Here's some texst so that we have \nsomewhere to show an error");
 
 		// add an annotation
-		ErrorAnnotation errorAnnotation = new ErrorAnnotation(1, "Learn how to spell \"text!\"");
-
-	// lets underline the word "texst"
-		fAnnotationModel.addAnnotation(errorAnnotation, new Position(12, 5));
-	}
+        addAnnotationType(
+            "error.type", 
+            new Image(Display.getDefault(), "/Users/danlucraft/Desktop/little-star.png"),
+            new RGB(200, 0, 0));
+        addAnnotationType(
+            "happy.type", 
+            new Image(Display.getDefault(), "/Users/danlucraft/Desktop/little-smiley.png"),
+            new RGB(0, 0, 200));
+        addAnnotation("error.type", 1, "Learn how to spell \"text!\"", 12, 5);
+        addAnnotation("happy.type", 2, "Learn how to spell \"text!\"", 50, 9);
+    }
+    
+    public void addAnnotationType(String type, Image image, RGB rgb) {
+        annotationRuler.addAnnotationType(type);
+        annotationPainter.addAnnotationType(type);
+		annotationPainter.setAnnotationTypeColor(type, new Color(Display.getDefault(), rgb));
+        MateText.annotationImages.put(type, image);
+    }
+    
+    public MateAnnotation addAnnotation(String type, int line, String text, int start, int length) {
+        MateAnnotation mateAnnotation = new MateAnnotation(type, line, text);
+		fAnnotationModel.addAnnotation(mateAnnotation, new Position(start, length));
+        return mateAnnotation;
+    }
+    
+    public ArrayList<MateAnnotation> annotations() {
+        ArrayList<MateAnnotation> result = new ArrayList<MateAnnotation>();
+        Iterator i = fAnnotationModel.getAnnotationIterator();
+        while (i.hasNext()) {
+            MateAnnotation next = (MateAnnotation) i.next();
+            result.add(next);
+        }
+        return result;
+    }
+    
+    public void removeAnnotation(MateAnnotation ann) {
+        fAnnotationModel.removeAnnotation(ann);
+    }
+    
+    public void removeAllAnnotations() {
+        fAnnotationModel.removeAllAnnotations();
+    }
 
 	public boolean isSingleLine() {
 		return singleLine;
@@ -370,26 +394,26 @@ public class MateText {
 		}
 
 		public String getTypeLabel(Annotation annotation) {
-			if (annotation instanceof ErrorAnnotation)
+			if (annotation instanceof MateAnnotation)
 				return "Errors";
 
 			return null;
 		}
 
 		public int getLayer(Annotation annotation) {
-			if (annotation instanceof ErrorAnnotation)
-				return ((ErrorAnnotation)annotation).getLayer();
+			if (annotation instanceof MateAnnotation)
+				return ((MateAnnotation)annotation).getLayer();
 
 			return 0;
         }
 
 		public void paint(Annotation annotation, GC gc, Canvas canvas, Rectangle bounds) {
-			ImageUtilities.drawImage(((ErrorAnnotation)annotation).getImage(), gc, canvas, bounds, SWT.CENTER, SWT.TOP);
+			ImageUtilities.drawImage(((MateAnnotation)annotation).getImage(), gc, canvas, bounds, SWT.CENTER, SWT.TOP);
 		}
 
 		public boolean isPaintable(Annotation annotation) {
-			if (annotation instanceof ErrorAnnotation)
-				return ((ErrorAnnotation)annotation).getImage() != null;
+			if (annotation instanceof MateAnnotation)
+				return ((MateAnnotation)annotation).getImage() != null;
 
 			return false;
 		}
@@ -434,8 +458,8 @@ public class MateText {
 			
 			while (ite.hasNext()) {
 				Annotation a = (Annotation) ite.next();
-				if (a instanceof ErrorAnnotation) {
-					all.add(((ErrorAnnotation)a).getText());
+				if (a instanceof MateAnnotation) {
+					all.add(((MateAnnotation)a).getText());
 				}
 			}
 			
@@ -457,22 +481,23 @@ public class MateText {
 		}
 	}
 
-	// one error annotation
-	class ErrorAnnotation extends Annotation {
+    class MateAnnotation extends Annotation {
 		private IMarker marker;
 		private String text;
 		private int line;
 		private Position position;
-		
-		public ErrorAnnotation(IMarker marker) {
+        private String type;
+        
+		public MateAnnotation(IMarker marker) {
 			this.marker = marker;
 		}
 		
-		public ErrorAnnotation(int line, String text) {
-			super(ERROR_TYPE, true, null);
+		public MateAnnotation(String type, int line, String text) {
+			super(type, true, null);
 			this.marker = null;
 			this.line = line;
 			this.text = text;
+            this.type = type;
 		}
 		
 		public IMarker getMarker() {
@@ -488,7 +513,7 @@ public class MateText {
 		}
 		
 		public Image getImage() {
-			return ERROR_IMAGE;
+			return MateText.annotationImages.get(this.type);
 		}
 		
 		public int getLayer() {
@@ -496,7 +521,7 @@ public class MateText {
 		}
 		
 		public String getType() {
-			return ERROR_TYPE;
+			return type;
 		}
 		
 		public Position getPosition() {

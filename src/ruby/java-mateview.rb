@@ -35,6 +35,7 @@ require 'org.eclipse.osgi'
 require 'org.eclipse.text_3.5.0.v20090513-2000'
 require 'org.eclipse.core.jobs_3.4.100.v20090429-1800'
 require 'org.eclipse.core.runtime_3.5.0.v20090525'
+require 'org.eclipse.core.resources'
 
 require 'swt_wrapper'
 
