@@ -13,6 +13,7 @@ import org.eclipse.jface.text.*;
 import org.eclipse.jface.text.source.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.Shell;
@@ -59,7 +60,7 @@ public class MateText {
 	public SourceViewer viewer;
 	private IDocument document;
 	private CompositeRuler compositeRuler;
-    private AnnotationRulerColumn annotationRuler;
+    public AnnotationRulerColumn annotationRuler;
 	private LineNumberRulerColumn lineNumbers;
 	private SwtMateDocument mateDocument;
 
@@ -145,12 +146,12 @@ public class MateText {
 		viewer.configure(new CodeViewerConfiguration(cc));
     }
     
-    public void addAnnotationType(String type, String imagePath, int red, int green, int blue) {
+    public void addAnnotationType(String type, String imagePath, RGB rgb) {
         if (singleLine) return;
         
         annotationRuler.addAnnotationType(type);
         annotationPainter.addAnnotationType(type);
-		annotationPainter.setAnnotationTypeColor(type, new Color(Display.getDefault(), new RGB(red, green, blue)));
+		annotationPainter.setAnnotationTypeColor(type, new Color(Display.getDefault(), rgb));
         MateText.annotationImages.put(type, new Image(Display.getDefault(), imagePath));
     }
     
@@ -173,12 +174,35 @@ public class MateText {
         return result;
     }
     
+    public ArrayList<MateAnnotation> annotationsOnLine(int line) {
+        ArrayList<MateAnnotation> result = new ArrayList<MateAnnotation>();
+        
+        StyledText text = getTextWidget();
+        int startOffset = text.getOffsetAtLine(line);
+        int endOffset;
+        if (line == text.getLineCount() - 1)
+            endOffset = text.getCharCount();
+        else
+            endOffset = text.getOffsetAtLine(line + 1);
+
+        Iterator i = fAnnotationModel.getAnnotationIterator(startOffset, endOffset - startOffset, false, true);
+        while (i.hasNext()) {
+            MateAnnotation next = (MateAnnotation) i.next();
+            result.add(next);
+        }
+        return result;
+    }
+    
     public void removeAnnotation(MateAnnotation ann) {
         fAnnotationModel.removeAnnotation(ann);
     }
     
     public void removeAllAnnotations() {
         fAnnotationModel.removeAllAnnotations();
+    }
+    
+    public void addAnnotationListener(MouseListener listener) {
+        annotationRuler.getControl().addMouseListener(listener);
     }
 
 	public boolean isSingleLine() {
@@ -469,6 +493,15 @@ public class MateText {
 			return null;
 		}
 	}
+    
+    //class MateAnnotationRulerColumn extends AnnotationRulerColumn {
+    //    protected void mouseDoubleClicked(int rulerLine) {
+        //    }
+        //    
+    //    protected void mouseClicked(int rulerLine) {
+        //    }
+        
+        //}
 
     class MateAnnotation extends Annotation {
 		private IMarker marker;

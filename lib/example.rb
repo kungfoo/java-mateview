@@ -112,18 +112,34 @@ class MateExample < Jface::ApplicationWindow
   class AddAnnotations < Jface::Action
     attr_accessor :window
     
+    class AnnotationListener
+      def initialize(mt)
+        @mt = mt
+      end
+      
+      def method_missing(event, *args)
+        p [event, args]
+      end
+    end
+    
     def run
       mt = @window.mate_text
       mt.add_annotation_type(
           "error.type", 
           File.dirname(__FILE__) + "/example/little-star.png",
-          200, 0, 0);
+          Swt::Graphics::RGB.new(200, 0, 0));
       mt.add_annotation_type(
           "happy.type", 
           File.dirname(__FILE__) + "/example/little-smiley.png",
-          0, 0, 200);
-      mt.add_annotation("error.type", 1, "Learn how to spell \"text!\"", 12, 5);
-      mt.add_annotation("happy.type", 2, "Learn how to spell \"text!\"", 50, 9);
+          Swt::Graphics::RGB.new(0, 0, 200));
+      mt.add_annotation("error.type", 1, "Learn how to spell \"text!\"", 5, 5);
+      mt.add_annotation("happy.type", 1, "Learn how to spell \"text!\"", 50, 5);
+      mt.add_annotation_listener(AnnotationListener.new(@window.mate_text))
+      p [:online, 0, mt.annotations_on_line(0).to_a]
+      p [:online, 1, mt.annotations_on_line(1).to_a]
+      p [:online, 2, mt.annotations_on_line(2).to_a]
+      p [:online, 3, mt.annotations_on_line(3).to_a]
+      p [:online, 4, mt.annotations_on_line(4).to_a]
     end
   end
 
