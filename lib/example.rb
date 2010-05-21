@@ -101,9 +101,32 @@ class MateExample < Jface::ApplicationWindow
     remove_annotations.text = "Remove Annotations"
     file_menu.add remove_annotations
     
+    add_annotations = AddAnnotations.new
+    add_annotations.window = self
+    add_annotations.text = "Add Annotations"
+    file_menu.add add_annotations
+
     return main_menu
   end
   
+  class AddAnnotations < Jface::Action
+    attr_accessor :window
+    
+    def run
+      mt = @window.mate_text
+      mt.add_annotation_type(
+          "error.type", 
+          File.dirname(__FILE__) + "/example/little-star.png",
+          200, 0, 0);
+      mt.add_annotation_type(
+          "happy.type", 
+          File.dirname(__FILE__) + "/example/little-smiley.png",
+          0, 0, 200);
+      mt.add_annotation("error.type", 1, "Learn how to spell \"text!\"", 12, 5);
+      mt.add_annotation("happy.type", 2, "Learn how to spell \"text!\"", 50, 9);
+    end
+  end
+
   class RemoveAnnotations < Jface::Action
     attr_accessor :window
     

@@ -71,8 +71,7 @@ public class MateText {
     private boolean showingInvisibles;
     
     private static HashMap<String, Image> annotationImages = new HashMap<String, Image>();
-    // private static HashMap<String, RGB> annotationRGB = new HashMap<string, RGB>();
-
+    
     // annotation model
     private AnnotationModel fAnnotationModel = new AnnotationModel();
     private IAnnotationAccess fAnnotationAccess;
@@ -144,31 +143,20 @@ public class MateText {
 		viewer.addPainter(annotationPainter);
 
 		viewer.configure(new CodeViewerConfiguration(cc));
-
-		// some misspelled text
-		document.set("Here's some texst so that we have \nsomewhere to show an error");
-
-		// add an annotation
-        addAnnotationType(
-            "error.type", 
-            new Image(Display.getDefault(), "/Users/danlucraft/Desktop/little-star.png"),
-            new RGB(200, 0, 0));
-        addAnnotationType(
-            "happy.type", 
-            new Image(Display.getDefault(), "/Users/danlucraft/Desktop/little-smiley.png"),
-            new RGB(0, 0, 200));
-        addAnnotation("error.type", 1, "Learn how to spell \"text!\"", 12, 5);
-        addAnnotation("happy.type", 2, "Learn how to spell \"text!\"", 50, 9);
     }
     
-    public void addAnnotationType(String type, Image image, RGB rgb) {
+    public void addAnnotationType(String type, String imagePath, int red, int green, int blue) {
+        if (singleLine) return;
+        
         annotationRuler.addAnnotationType(type);
         annotationPainter.addAnnotationType(type);
-		annotationPainter.setAnnotationTypeColor(type, new Color(Display.getDefault(), rgb));
-        MateText.annotationImages.put(type, image);
+		annotationPainter.setAnnotationTypeColor(type, new Color(Display.getDefault(), new RGB(red, green, blue)));
+        MateText.annotationImages.put(type, new Image(Display.getDefault(), imagePath));
     }
     
     public MateAnnotation addAnnotation(String type, int line, String text, int start, int length) {
+        if (singleLine) return null;
+        
         MateAnnotation mateAnnotation = new MateAnnotation(type, line, text);
 		fAnnotationModel.addAnnotation(mateAnnotation, new Position(start, length));
         return mateAnnotation;
@@ -176,6 +164,7 @@ public class MateText {
     
     public ArrayList<MateAnnotation> annotations() {
         ArrayList<MateAnnotation> result = new ArrayList<MateAnnotation>();
+        
         Iterator i = fAnnotationModel.getAnnotationIterator();
         while (i.hasNext()) {
             MateAnnotation next = (MateAnnotation) i.next();
