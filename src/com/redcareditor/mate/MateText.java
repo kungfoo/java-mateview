@@ -243,6 +243,40 @@ public class MateText {
         annotationListeners.remove(listener);
     }
 
+    public void setLineNumbersVisible(boolean val) {
+        redrawRuler(val, getAnnotationsVisible());
+    }
+    
+    public void setAnnotationsVisible(boolean val) {
+        redrawRuler(getLineNumbersVisible(), val);
+    }
+
+    public boolean getLineNumbersVisible() {
+        Iterator iterator = compositeRuler.getDecoratorIterator();
+        while (iterator.hasNext())
+            if (((IVerticalRulerColumn) iterator.next()) == lineNumbers) 
+                return true;
+        return false;        
+    }
+    
+    public boolean getAnnotationsVisible() {
+        Iterator iterator = compositeRuler.getDecoratorIterator();
+        while (iterator.hasNext())
+            if (((IVerticalRulerColumn) iterator.next()) == annotationRuler) 
+                return true;
+        return false;        
+    }
+
+    private void redrawRuler(boolean showLineNumbers, boolean showAnnotations) {
+        compositeRuler.removeDecorator(lineNumbers);
+        compositeRuler.removeDecorator(annotationRuler);
+        if (showLineNumbers)
+            compositeRuler.addDecorator(0, (IVerticalRulerColumn) lineNumbers);
+        if (showAnnotations)
+            compositeRuler.addDecorator(0, (IVerticalRulerColumn) annotationRuler);
+        compositeRuler.relayout();
+    }
+    
 	public boolean isSingleLine() {
 		return singleLine;
 	}
