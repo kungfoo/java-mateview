@@ -131,24 +131,21 @@ public class MateText {
 
 		viewer = new SourceViewer(parent, compositeRuler, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		viewer.setDocument(document, fAnnotationModel);
-        viewer.setTextDoubleClickStrategy(null, IDocument.DEFAULT_CONTENT_TYPE);
-		
+        
 		// hover manager that shows text when we hover
 		AnnotationHover ah = new AnnotationHover();
 		AnnotationConfiguration ac = new AnnotationConfiguration();
 		AnnotationBarHoverManager fAnnotationHoverManager = new AnnotationBarHoverManager(compositeRuler, viewer, ah, ac);
 		fAnnotationHoverManager.install(annotationRuler.getControl());
-
+        
 		// to paint the annotations
 		annotationPainter = new AnnotationPainter(viewer, fAnnotationAccess);
         
 		// this will draw the squigglies under the text
 		viewer.addPainter(annotationPainter);
-
-		viewer.configure(new CodeViewerConfiguration(cc));
+        
         createAnnotationMouseListener();
     }
-    
     
     private void createAnnotationMouseListener() {
 		annotationMouseListener = new MouseListener() {
@@ -392,15 +389,18 @@ public class MateText {
 	public void setFont(String name, int size) {
 		Font font = new Font(Display.getCurrent(), name, size, 0);
 		viewer.getTextWidget().setFont(font);
-		lineNumbers.setFont(font);
+        if (!singleLine)
+    		lineNumbers.setFont(font);
 	}
 
 	@SuppressWarnings("unchecked")
 	public void setGutterBackground(Color color) {
+        if (singleLine) return;
 		lineNumbers.setBackground(color);
 	}
 
 	public void setGutterForeground(Color color) {
+        if (singleLine) return;
 		lineNumbers.setForeground(color);
 	}
 	
@@ -485,24 +485,6 @@ public class MateText {
 		}
 	}
 
-	// source viewer configuration
-	class CodeViewerConfiguration extends SourceViewerConfiguration {
-		private ColorCache manager;
-		
-		public CodeViewerConfiguration(ColorCache manager) {
-			this.manager = manager;
-		}
-		
-		public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
-			PresentationReconciler reconciler = new PresentationReconciler();
-			return reconciler;
-		}
-		
-		public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
-			return new AnnotationHover();
-		}
-	}
-
     // annotation hover manager
 	class AnnotationHover implements IAnnotationHover, ITextHover {
 		public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
@@ -535,15 +517,6 @@ public class MateText {
 		}
 	}
     
-    //class MateAnnotationRulerColumn extends AnnotationRulerColumn {
-    //    protected void mouseDoubleClicked(int rulerLine) {
-        //    }
-        //    
-    //    protected void mouseClicked(int rulerLine) {
-        //    }
-        
-        //}
-
     class MateAnnotation extends Annotation {
 		private IMarker marker;
 		private String text;
