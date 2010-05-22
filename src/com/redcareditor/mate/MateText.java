@@ -77,6 +77,7 @@ public class MateText {
     private AnnotationModel fAnnotationModel = new AnnotationModel();
     private IAnnotationAccess fAnnotationAccess;
     private AnnotationPainter annotationPainter;
+    private MouseListener annotationMouseListener;
     private ColorCache cc;
     
 	public MateText(Composite parent) {
@@ -130,6 +131,7 @@ public class MateText {
 
 		viewer = new SourceViewer(parent, compositeRuler, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		viewer.setDocument(document, fAnnotationModel);
+        viewer.setTextDoubleClickStrategy(null, IDocument.DEFAULT_CONTENT_TYPE);
 		
 		// hover manager that shows text when we hover
 		AnnotationHover ah = new AnnotationHover();
@@ -144,6 +146,34 @@ public class MateText {
 		viewer.addPainter(annotationPainter);
 
 		viewer.configure(new CodeViewerConfiguration(cc));
+        createAnnotationMouseListener();
+    }
+    
+    
+    private void createAnnotationMouseListener() {
+		annotationMouseListener = new MouseListener() {
+			public void mouseUp(MouseEvent event) {
+				int lineNumber = annotationRuler.toDocumentLineNumber(event.y);
+                for (IAnnotationAreaListener l : annotationListeners) {
+                    l.mouseClick(lineNumber);
+                }
+            }
+
+			public void mouseDown(MouseEvent event) {
+				int lineNumber = annotationRuler.toDocumentLineNumber(event.y);
+                System.out.printf("mouseDown line: %d\n", lineNumber);
+            }
+
+			public void mouseDoubleClick(MouseEvent event) {
+				int lineNumber = annotationRuler.toDocumentLineNumber(event.y);
+                System.out.printf("doubleClick line: %d\n", lineNumber);
+                for (IAnnotationAreaListener l : annotationListeners) {
+                    l.mouseDoubleClick(lineNumber);
+                }
+            }
+		};
+		annotationRuler.getControl().addMouseListener(annotationMouseListener);
+
     }
     
     public void addAnnotationType(String type, String imagePath, RGB rgb) {
@@ -201,8 +231,19 @@ public class MateText {
         fAnnotationModel.removeAllAnnotations();
     }
     
-    public void addAnnotationListener(MouseListener listener) {
-        annotationRuler.getControl().addMouseListener(listener);
+    private ArrayList<IAnnotationAreaListener> annotationListeners = 
+        new ArrayList<IAnnotationAreaListener>();
+    
+    public void addAnnotationListener(IAnnotationAreaListener listener) {
+        annotationListeners.add(listener);
+    }
+    
+    public ArrayList<IAnnotationAreaListener> getAnnotationListeners() {
+        return annotationListeners;
+    }
+    
+    public void removeAnnotationListener(IAnnotationAreaListener listener) {
+        annotationListeners.remove(listener);
     }
 
 	public boolean isSingleLine() {
