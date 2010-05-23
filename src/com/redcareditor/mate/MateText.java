@@ -242,16 +242,18 @@ public class MateText {
     public void removeAnnotationListener(IAnnotationAreaListener listener) {
         annotationListeners.remove(listener);
     }
-
     public void setLineNumbersVisible(boolean val) {
+        if (isSingleLine()) return;
         redrawRuler(val, getAnnotationsVisible());
     }
-    
+     
     public void setAnnotationsVisible(boolean val) {
+        if (isSingleLine()) return;
         redrawRuler(getLineNumbersVisible(), val);
     }
-
+ 
     public boolean getLineNumbersVisible() {
+        if (isSingleLine()) return false;
         Iterator iterator = compositeRuler.getDecoratorIterator();
         while (iterator.hasNext())
             if (((IVerticalRulerColumn) iterator.next()) == lineNumbers) 
