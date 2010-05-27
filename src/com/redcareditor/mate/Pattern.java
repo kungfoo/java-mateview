@@ -86,15 +86,11 @@ public class Pattern {
 						patterns.addAll(i, grammar.patterns);
 						i--;
 					}
-				} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
-					ng.initForUse();
-					patterns.remove(i);
-					patterns.addAll(i, ng.patterns);
-					i--;
-				} else {
-					if (!p.name.startsWith("#")) {
-						System.out.printf("unknown include pattern: %s\n", p.name);
-					}
+				//} else if ((ng = Grammar.findByScopeName(p.name)) != null) {
+				//	ng.initForUse();
+				//	patterns.remove(i);
+				//	patterns.addAll(i, ng.patterns);
+				//	i--;
 				}
 			}
 			i++;

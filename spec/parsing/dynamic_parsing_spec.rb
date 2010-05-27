@@ -5,7 +5,7 @@ describe JavaMateView, "when reparsing after changes" do
   before(:each) do
     $display ||= Swt::Widgets::Display.new
     @shell = Swt::Widgets::Shell.new($display)
-    @mt = JavaMateView::MateText.new(@shell)
+    @mt = JavaMateView::MateText.new(@shell, false)
     @st = @mt.get_text_widget
   end
   
@@ -49,15 +49,13 @@ describe JavaMateView, "when reparsing after changes" do
     it "reparses lines with only whitespace changes, even when they have scope openers" do
       @st.text = strip(<<-END)
       puts "hello"
-      foo=<<HI
+      foo=<<HI 
         Here.foo
         Here.foo
       HI
       puts "hello"
       END
-      puts @mt.parser.root.pretty(0)
-      5.times { @mt.type(1, 8, " ") }
-      puts @mt.parser.root.pretty(0)
+      5.times { @mt.type(1, 9, " ") }
       it_should_match_clean_reparse
     end
     
@@ -85,7 +83,8 @@ describe JavaMateView, "when reparsing after changes" do
       @mt.type(1, 0, "\n")
       it_should_match_clean_reparse
     end
-
+    # 0, 13, 22, 33, 44, 47
+# HI end is 46
     it "reparses lines with only whitespace changes, even when they have closing scopes" do
       @st.text = strip(<<-END)
       puts "hello"
@@ -95,7 +94,9 @@ describe JavaMateView, "when reparsing after changes" do
       HI
       puts "hello"
       END
+      p :START
       1.times { @mt.type(4, 2, " ") }
+      p :END
       it_should_match_clean_reparse
     end
 
@@ -116,7 +117,7 @@ describe JavaMateView, "when reparsing after changes" do
       HTML
       p :asdf
       END
-      4.times { |i| @mt.backspace(4, 10-i)}
+      1.times { |i| @mt.backspace(4, 10-i)}
       it_should_match_clean_reparse
     end
 
@@ -149,9 +150,23 @@ describe JavaMateView, "when reparsing after changes" do
     
     it "should handle multibyte characters with aplomb" do
       @st.text = "\"as\"as"
-      puts "TYPEING:"
-      @mt.type(0, 1, "†")
-      puts "REPARSE:"
+      @mt.type(0, 2, "†")
+      it_should_match_clean_reparse
+    end
+    
+    it "scopes should have left gravity" do
+      @st.text = "def foo"
+      @mt.type(0, 7, "(")
+      @mt.type(0, 8, "a")
+      @mt.type(0, 9, ")")
+      it_should_match_clean_reparse
+    end
+    
+    it "should reparse closing captures without adding duplicates" do
+      @st.text = "def foo"
+      @mt.type(0, 7, "(")
+      @mt.type(0, 8, ")")
+      @mt.type(0, 8, "a")
       it_should_match_clean_reparse
     end
   end

@@ -25,13 +25,20 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	public SwtMateDocument(MateText mateText) {
 		this.mateText = mateText;
 		this.document = (Document) mateText.getDocument();
+		for (IPositionUpdater u : document.getPositionUpdaters()) {
+			document.removePositionUpdater(u);
+		}
 		document.addPositionCategory("scopes");
-		document.addPositionUpdater(new SwtScopePositionUpdater("scopes"));
+		document.addPositionUpdater(new SwtScopePositionUpdater("scopes", SwtScopePositionUpdater.LEFT_GRAVITY));
+		document.addPositionCategory("lefts");
+		document.addPositionUpdater(new SwtScopePositionUpdater("lefts", SwtScopePositionUpdater.LEFT_GRAVITY));
+		document.addPositionCategory("rights");
+		document.addPositionUpdater(new SwtScopePositionUpdater("rights", SwtScopePositionUpdater.RIGHT_GRAVITY));
 	}
 
 	public void set(String text) {
 		this.mateText.getDocument().set(text);
-		reparseAll();
+		//reparseAll();
 	}
 	
 	public IDocument getJFaceDocument() {
@@ -53,9 +60,9 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	public void reparseAll() {
 		SwtMateTextLocation startLocation = new SwtMateTextLocation(0, this);
 		SwtMateTextLocation endLocation = new SwtMateTextLocation(0 + document.getLength(), this);
-		if (this.mateText.parser.enabled) {
-			this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
-			this.mateText.parser.processChanges();
+		if (this.mateText.parser.parserScheduler.enabled) {
+			this.mateText.parser.parserScheduler.changes.add(startLocation.getLine(), endLocation.getLine());
+			this.mateText.parser.parserScheduler.processChanges();
 		}
 	}
 
@@ -64,8 +71,8 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 			this.mateText.getDocument().replace(start, length, text);
 			SwtMateTextLocation startLocation = new SwtMateTextLocation(start, this);
 			SwtMateTextLocation endLocation = new SwtMateTextLocation(start + length, this);
-			this.mateText.parser.changes.add(startLocation.getLine(), endLocation.getLine());
-			this.mateText.parser.processChanges();
+			this.mateText.parser.parserScheduler.changes.add(startLocation.getLine(), endLocation.getLine());
+			this.mateText.parser.parserScheduler.processChanges();
 		} catch (BadLocationException e) {
 			// TODO: SwtMateDocument should throw it's own Exception here
 		}
@@ -86,6 +93,16 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 			e.printStackTrace();
 		}
 
+		return false;
+	}
+	
+	public boolean removeTextLocation(String category, MateTextLocation location) {
+		try {
+			mateText.getDocument().removePosition(category, (SwtMateTextLocation) location);
+			return true;
+		} catch (BadPositionCategoryException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
 

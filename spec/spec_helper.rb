@@ -18,7 +18,7 @@ class JavaMateView::MateText
       
   def clean_reparse
     shell = Swt::Widgets::Shell.new($display)
-    mt = JavaMateView::MateText.new(shell)
+    mt = JavaMateView::MateText.new(shell, false)
     mt.set_grammar_by_name(self.parser.grammar.name)
     st = mt.get_text_widget
     st.text = get_text_widget.getText
@@ -30,4 +30,4 @@ class JavaMateView::MateText
   end
 end
 
-JavaMateView::Parser.synchronousParsing = true
+JavaMateView::ParserScheduler.synchronousParsing = true

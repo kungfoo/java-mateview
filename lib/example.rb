@@ -20,7 +20,7 @@ class MateExample < Jface::ApplicationWindow
   def createContents(parent)
     @contents = Swt::Widgets::Composite.new(parent, Swt::SWT::NONE)
     @contents.layout = Swt::Layout::FillLayout.new
-    @mate_text = JavaMateView::MateText.new(@contents)
+    @mate_text = JavaMateView::MateText.new(@contents, false)
     
     @mate_text.add_grammar_listener do |new_name|
       puts "listened for #{new_name} in #{self}"
@@ -86,7 +86,99 @@ class MateExample < Jface::ApplicationWindow
     set_block_selection.text = "Set Not Block Selection"
     file_menu.add set_block_selection
     
+    always_parse_all = AlwaysParseAll.new
+    always_parse_all.window = self
+    always_parse_all.text = "Always Parse All"
+    file_menu.add always_parse_all
+    
+    toggle_invisibles = ToggleInvisibles.new
+    toggle_invisibles.window = self
+    toggle_invisibles.text = "Show/Hide Invisibles"
+    file_menu.add toggle_invisibles
+    
+    toggle_word_wrap = ToggleWordWrap.new
+    toggle_word_wrap.window = self
+    toggle_word_wrap.text = "Toggle Word Wrap"
+    file_menu.add toggle_word_wrap
+    
+    remove_annotations = RemoveAnnotations.new
+    remove_annotations.window = self
+    remove_annotations.text = "Remove Annotations"
+    file_menu.add remove_annotations
+    
+    add_annotations = AddAnnotations.new
+    add_annotations.window = self
+    add_annotations.text = "Add Annotations"
+    file_menu.add add_annotations
+
     return main_menu
+  end
+  
+  class AddAnnotations < Jface::Action
+    attr_accessor :window
+    
+    class AnnotationListener
+      def initialize(mt)
+        @mt = mt
+      end
+      
+      def method_missing(event, *args)
+        p [event, args]
+      end
+    end
+    
+    def run
+      mt = @window.mate_text
+      mt.add_annotation_type(
+          "error.type", 
+          File.dirname(__FILE__) + "/example/little-star.png",
+          Swt::Graphics::RGB.new(200, 0, 0));
+      mt.add_annotation_type(
+          "happy.type", 
+          File.dirname(__FILE__) + "/example/little-smiley.png",
+          Swt::Graphics::RGB.new(0, 0, 200));
+      mt.add_annotation("error.type", 1, "Learn how to spell \"text!\"", 5, 5);
+      mt.add_annotation("happy.type", 1, "Learn how to spell \"text!\"", 50, 5);
+      mt.add_annotation_listener(AnnotationListener.new(@window.mate_text))
+      p [:online, 0, mt.annotations_on_line(0).to_a]
+      p [:online, 1, mt.annotations_on_line(1).to_a]
+      p [:online, 2, mt.annotations_on_line(2).to_a]
+      p [:online, 3, mt.annotations_on_line(3).to_a]
+      p [:online, 4, mt.annotations_on_line(4).to_a]
+    end
+  end
+
+  class RemoveAnnotations < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.annotations.each {|a| @window.mate_text.removeAnnotation(a) }
+    end
+  end
+
+  class ToggleWordWrap < Jface::Action
+    attr_accessor :window
+    
+    def run
+      mt = @window.mate_text
+      mt.set_word_wrap(!mt.get_word_wrap)
+    end
+  end
+
+  class ToggleInvisibles < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.showInvisibles(!@window.mate_text.showing_invisibles)
+    end
+  end
+
+  class AlwaysParseAll < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.parser.parserScheduler.alwaysParseAll = true;
+    end
   end
   
   class SetBlockSelection < Jface::Action
@@ -149,7 +241,13 @@ class MateExample < Jface::ApplicationWindow
     attr_accessor :window
 
     def run
-      @window.mate_text.getMateDocument.set(source*50)
+      s = Time.now
+      ##until Time.now - s > 120
+      @window.mate_text.getMateDocument.set(File.read(File.dirname(__FILE__) + "/test_big_ruby_file.rb")*3)
+      #@window.mate_text.getMateDocument.set("def foo")
+      #end
+      puts "parse took #{Time.now - s}s"
+      puts "num scopes: #{@window.mate_text.parser.root.count_descendants}"
     end
     
     def source

@@ -20,7 +20,8 @@ public class DoublePattern extends Pattern {
 	public Map<Integer, String> endCaptures;
 	public Map<Integer, String> bothCaptures;
 	public List<Pattern> patterns;
-
+	public boolean hasReplacedGrammarIncludes = false;
+	
 	public DoublePattern() {}
 	
 	public DoublePattern(List<Pattern> grammarPatterns, Dict dict) {
@@ -64,4 +65,25 @@ public class DoublePattern extends Pattern {
 			endCaptures = Pattern.makeCapturesFromPlist(dict.getDictionary("endCaptures"));
 		}
 	}
+	
+	public void replaceGrammarIncludes() {
+		if (hasReplacedGrammarIncludes)
+			return;
+		Grammar ng;
+		int i = 0;
+		while (i < patterns.size()) {
+			Pattern p = patterns.get(i);
+			if (p instanceof IncludePattern) {
+				if ((ng = Grammar.findByScopeName(p.name)) != null) {
+					ng.initForUse();
+					patterns.remove(i);
+					patterns.addAll(i, ng.patterns);
+					i--;
+				}
+			}
+			i++;
+		}
+		hasReplacedGrammarIncludes = true;
+	}
+
 }

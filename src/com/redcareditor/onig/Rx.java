@@ -2,14 +2,18 @@ package com.redcareditor.onig;
 
 import java.io.UnsupportedEncodingException;
 
+import org.jcodings.Encoding;
 import org.jcodings.specific.UTF8Encoding;
-import org.jcodings.specific.UTF16BEEncoding;	
+import org.jcodings.specific.UTF16BEEncoding;
 import org.joni.Matcher;
 import org.joni.Option;
 import org.joni.Regex;
 import org.joni.Region;
 import org.joni.Syntax;
 import org.joni.WarnCallback;
+
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 
 /**
  * wrapper class around the Joni Regex library which is a optimized port of
@@ -45,6 +49,10 @@ public class Rx {
 		}
 	}
 
+	public boolean usable() {
+		return (regex != null);
+	}
+
 	public Match search(String target, int start, int end) {
 		byte[] bytes;
 		try {
@@ -71,7 +79,7 @@ public class Rx {
 
 	class Warnings implements WarnCallback {
 		public void warn(String message) {
-			System.out.printf("got warning from regex: %s\n", message);
+			// System.out.printf("got warning from regex: %s\n", message);
 		}
 	}
 
@@ -85,7 +93,7 @@ public class Rx {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (org.joni.exception.SyntaxException e) {
-			System.out.printf("** WARNING: SyntaxException when compiling '%s': %s\n", pattern, e.getMessage());
+			//System.out.printf("** WARNING: SyntaxException when compiling '%s': %s\n", pattern, e.getMessage());
 			//e.printStackTrace();
 		}
 		return null;
@@ -95,4 +103,65 @@ public class Rx {
 	public String toString() {
 		return pattern;
 	}
+	
+    
+	public static String escape(String aRegexFragment){
+		final StringBuilder result = new StringBuilder();
+		
+		final StringCharacterIterator iterator = new StringCharacterIterator(aRegexFragment);
+		char character =  iterator.current();
+		while (character != CharacterIterator.DONE ){
+			if (character == '.') {
+				result.append("\\.");
+			}
+			else if (character == '\\') {
+				result.append("\\\\");
+			}
+			else if (character == '?') {
+				result.append("\\?");
+			}
+			else if (character == '*') {
+				result.append("\\*");
+			}
+			else if (character == '+') {
+				result.append("\\+");
+			}
+			else if (character == '&') {
+				result.append("\\&");
+			}
+			else if (character == ':') {
+				result.append("\\:");
+			}
+			else if (character == '{') {
+				result.append("\\{");
+			}
+			else if (character == '}') {
+				result.append("\\}");
+			}
+			else if (character == '[') {
+				result.append("\\[");
+			}
+			else if (character == ']') {
+				result.append("\\]");
+			}
+			else if (character == '(') {
+				result.append("\\(");
+			}
+			else if (character == ')') {
+				result.append("\\)");
+			}
+			else if (character == '^') {
+				result.append("\\^");
+			}
+			else if (character == '$') {
+				result.append("\\$");
+			}
+			else {
+				result.append(character);
+			}
+			character = iterator.next();
+		}
+		return result.toString();
+	}
+  
 }

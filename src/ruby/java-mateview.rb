@@ -15,7 +15,11 @@ swt_lib = case Config::CONFIG["host_os"]
       'osx/swt'
     end
   when /linux/i
-    'linux/swt'
+    if %w(amd64 x84_64).include? Config::CONFIG["host_cpu"]
+      'linux64/swt'
+    else
+      'linux/swt'
+    end
   when /windows/i
     'windows/swt'
 end
@@ -29,6 +33,9 @@ require 'org.eclipse.jface'
 require 'org.eclipse.jface.text_3.5.0'
 require 'org.eclipse.osgi'
 require 'org.eclipse.text_3.5.0.v20090513-2000'
+require 'org.eclipse.core.jobs_3.4.100.v20090429-1800'
+require 'org.eclipse.core.runtime_3.5.0.v20090525'
+require 'org.eclipse.core.resources'
 
 require 'swt_wrapper'
 
@@ -39,6 +46,7 @@ unless defined?(JavaMateView)
     import com.redcareditor.mate.Grammar
     import com.redcareditor.mate.Bundle
     import com.redcareditor.mate.Parser
+    import com.redcareditor.mate.ParserScheduler
     import com.redcareditor.theme.Theme
     import com.redcareditor.theme.ThemeManager
   end

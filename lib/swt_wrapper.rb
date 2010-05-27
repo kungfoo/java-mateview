@@ -18,6 +18,7 @@ module Swt
   module Graphics
     import org.eclipse.swt.graphics.Font
     import org.eclipse.swt.graphics.Point
+    import org.eclipse.swt.graphics.RGB
   end
 end
 

@@ -5,7 +5,7 @@ describe JavaMateView do
   before(:each) do
     $display ||= Swt::Widgets::Display.new
     @shell = Swt::Widgets::Shell.new(@display)
-    @mt = JavaMateView::MateText.new(@shell)
+    @mt = JavaMateView::MateText.new(@shell, false)
     @st = @mt.get_text_widget
   end
   
@@ -209,7 +209,7 @@ END
   + keyword.operator.assignment.ruby (0,3)-(0,4) closed
   + string.unquoted.embedded.html.ruby text.html.embedded.ruby (0,4)-(6,4) closed
     c punctuation.definition.string.begin.ruby (0,4)-(0,11) closed
-    + source.css.embedded.html (1,0)-(6,0) closed
+    + source.css.embedded.html (1,0)-(5,8) closed
       c punctuation.definition.tag.html (1,0)-(1,1) closed
       c entity.name.tag.style.html (1,1)-(1,6) closed
       + [noname] (1,6)-(5,0) closed
@@ -284,6 +284,25 @@ class ClassName extends AnotherClass
     end
   end
 
+  describe "performance" do
+    before do
+      @mt.set_grammar_by_name("Ruby")
+    end
+    
+    it "should parse a long line in a reasonable time" do
+      s = Time.now
+      @st.text = "() "*500
+      e = Time.now
+      (e - s).should < 2
+    end
+    
+    it "should parse a big file in a reasonable time" do
+      s = Time.now
+      @st.text = File.read("/Users/danlucraft/Redcar/redcar/plugins/redcar/redcar.rb")
+      e = Time.now
+      (e - s).should < 2
+    end
+  end
 
   describe "when parsing Perl from scratch" do
     before(:each) do
@@ -297,8 +316,8 @@ Perl
       @st.text = source
       @mt.parser.root.pretty(0).should == (t=<<END)
 + source.perl (0,0)-(1,0) open
-  + meta.comment.full-line.perl (0,0)-(1,0) closed
-    c comment.line.number-sign.perl (0,0)-(1,0) closed
+  + meta.comment.full-line.perl (0,0)-(0,25) closed
+    c comment.line.number-sign.perl (0,0)-(0,25) closed
       c punctuation.definition.comment.perl (0,0)-(0,1) closed
 END
     end
@@ -431,8 +450,8 @@ JAVA
         + meta.method.identifier.java (1,12)-(1,18) closed
           c entity.name.function.java (1,12)-(1,16) closed
         + meta.method.body.java (1,19)-(3,1) closed
-          + [noname] (2,0)-(3,0) closed
-            c comment.line.double-slash.java (2,0)-(3,0) closed
+          + [noname] (2,0)-(2,5) closed
+            c comment.line.double-slash.java (2,0)-(2,5) closed
               c punctuation.definition.comment.java (2,0)-(2,2) closed
     c punctuation.section.class.end.java (4,0)-(4,1) closed
 END
